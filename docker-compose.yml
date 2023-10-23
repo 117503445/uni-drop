@@ -1,0 +1,26 @@
+version: '3.9'
+services:
+  # bittorrent-tracker-dev:
+  #   build:
+  #     context: ./bittorrent-tracker
+  #     dockerfile: Dockerfile_dev
+
+  #   container_name: bittorrent-tracker-dev
+  #   # restart: unless-stopped
+  #   volumes:
+  #       - './bittorrent-tracker:/workspace/bittorrent-tracker'
+  #       - './vsc_extensions/bittorrent-tracker:/root/.vscode-server/extensions'
+  #   stdin_open: true
+  #   tty: true
+  web-drop-dev:
+    build:
+      context: ./web-drop
+      dockerfile: Dockerfile_dev
+
+    container_name: web-drop-dev
+    # restart: unless-stopped
+    volumes:
+        - './web-drop:/workspace/web-drop'
+        - './vsc_extensions/web-drop:/root/.vscode-server/extensions'
+    stdin_open: true
+    tty: true
