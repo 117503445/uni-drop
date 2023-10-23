@@ -21,6 +21,6 @@ services:
     # restart: unless-stopped
     volumes:
         - './web-drop:/workspace/web-drop'
-        - './vsc_extensions/web-drop:/root/.vscode-server/extensions'
+        - './dev-data/web-drop/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
