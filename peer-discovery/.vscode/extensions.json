@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "rust-lang.rust-analyzer",
-        "github.copilot"
+        "github.copilot",
+        "humao.rest-client"
     ]
 }

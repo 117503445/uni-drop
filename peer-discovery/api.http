@@ -1,0 +1,14 @@
+GET http://localhost:8080
+
+###
+
+POST http://localhost:8080/api/heartbeat
+
+{
+    "ip": "127.0.0.1",
+    "peerID": "peer0"
+}
+
+###
+
+GET http://localhost:8080/api/peers?ip=127.0.0.1
