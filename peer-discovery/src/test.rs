@@ -3,51 +3,60 @@ use actix_web::{
     web::Bytes,
 };
 use mongodb::Client;
+use peer_discovery::get_timestamp;
 
 use super::*;
 
 #[actix_web::test]
 // #[ignore = "requires MongoDB instance running"]
 async fn test() {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://root:E8kHTYJca96gEC@mongo:27017".into());
+    let client = get_mongo_client("mongodb://root:E8kHTYJca96gEC@mongo:27017").await;
+    let record_service = RecordService::new(client, "peer_discovery_test", COLL_NAME);
 
-    let client = Client::with_uri_str(uri).await.expect("failed to connect");
-
-    // Clear any data currently in the users collection.
-    client
-        .database(DB_NAME)
-        .collection::<User>(COLL_NAME)
-        .drop(None)
+    record_service
+        .create_peerid_index()
         .await
-        .expect("drop collection should succeed");
+        .expect("failed to create index");
 
-    let app = init_service(
-        App::new()
-            .app_data(web::Data::new(client))
-            .service(add_user)
-            .service(get_user),
-    )
-    .await;
+    record_service
+        .upsert(
+            "peer0",
+            "127.0.0.1",
+            "fe80::1",
+            Some(get_timestamp(SystemTime::now() - Duration::from_secs(50))),
+        )
+        .await
+        .expect("failed to insert record"); // expired
 
-    let user = User {
-        first_name: "Jane".into(),
-        last_name: "Doe".into(),
-        username: "janedoe".into(),
-        email: "example@example.com".into(),
-    };
+    record_service
+        .upsert("peer1", "127.0.0.1", "fe80::1", None)
+        .await
+        .expect("failed to insert record");
+    record_service
+        .upsert("peer2", "127.0.0.2", "fe80::1", None)
+        .await
+        .expect("failed to insert record");
 
-    let req = TestRequest::post()
-        .uri("/add_user")
-        .set_form(&user)
-        .to_request();
+    let peer_ids = record_service
+        .get_peers_by_ip("127.0.0.1", "fe80::1")
+        .await
+        .unwrap();
+    assert_eq!(peer_ids, vec!["peer0", "peer1", "peer2"]);
 
-    let response = call_and_read_body(&app, req).await;
-    assert_eq!(response, Bytes::from_static(b"user added"));
+    record_service
+        .remove_expired(30)
+        .await
+        .expect("failed to remove expired records");
 
-    let req = TestRequest::get()
-        .uri(&format!("/get_user/{}", &user.username))
-        .to_request();
+    let peer_ids = record_service
+        .get_peers_by_ip("127.0.0.1", "fe80::1")
+        .await
+        .unwrap();
 
-    let response: User = call_and_read_body_json(&app, req).await;
-    assert_eq!(response, user);
+    assert_eq!(peer_ids, vec!["peer1", "peer2"]);
+
+    record_service
+        .remove_all()
+        .await
+        .expect("failed to remove all records");
 }
