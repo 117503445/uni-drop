@@ -5,11 +5,84 @@ mod model;
 mod test;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer};
-use model::User;
-use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
+use model::{Record, User};
+use mongodb::{
+    bson::doc,
+    options::{FindOneAndUpdateOptions, IndexOptions},
+    Client, Collection, IndexModel,
+};
+use serde::{Deserialize, Serialize};
+const DB_NAME: &str = "peer_discovery";
+const COLL_NAME: &str = "records";
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-const DB_NAME: &str = "myApp";
-const COLL_NAME: &str = "users";
+fn get_timestamp(start: SystemTime) -> i64 {
+    let since_the_epoch = start
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards");
+    since_the_epoch.as_millis() as i64
+}
+
+#[derive(Serialize)]
+struct CommonResponse<T> {
+    code: i32,
+    msg: String,
+    data: T,
+}
+
+#[get("/")]
+async fn index() -> HttpResponse {
+    HttpResponse::Ok().json(CommonResponse {
+        code: 0,
+        msg: "".to_string(),
+        data: "",
+    })
+}
+
+#[derive(Deserialize)]
+struct HeartbeatRequest {
+    #[serde(rename = "peerID")]
+    pub peer_id: String,
+    pub ipv4: String,
+    pub ipv6: String,
+}
+
+#[post("/api/heartbeat")]
+async fn heartbeat(
+    client: web::Data<Client>,
+    req_body: web::Json<HeartbeatRequest>,
+) -> HttpResponse {
+    let collection = client.database(DB_NAME).collection::<Record>(COLL_NAME);
+
+    let options = FindOneAndUpdateOptions::builder()
+        .upsert(Some(true))
+        .build();
+
+    let result = collection
+        .find_one_and_update(
+            doc! { "peer_id": &req_body.peer_id },
+            doc! { "$set": {
+                "ipv4": &req_body.ipv4,
+                "ipv6": &req_body.ipv6,
+                "last_seen": get_timestamp(SystemTime::now()),
+            }},
+            options,
+        )
+        .await;
+
+    match result {
+        Ok(_) => HttpResponse::Ok().json(CommonResponse {
+            code: 0,
+            msg: "".to_string(),
+            data: "",
+        }),
+        Err(err) => HttpResponse::InternalServerError().json(CommonResponse {
+            code: 1,
+            msg: "MongoDB insert failed".to_string(),
+            data: err.to_string(),
+        }),
+    }
+}
 
 /// Adds a new user to the "users" collection in the database.
 #[post("/add_user")]
@@ -54,20 +127,41 @@ async fn create_username_index(client: &Client) {
         .expect("creating an index should succeed");
 }
 
+async fn create_peerid_index(client: &Client) {
+    let options = IndexOptions::builder().unique(true).build();
+    let model = IndexModel::builder()
+        .keys(doc! { "peer_id": 1 })
+        .options(options)
+        .build();
+    client
+        .database(DB_NAME)
+        .collection::<Record>(COLL_NAME)
+        .create_index(model, None)
+        .await
+        .expect("creating an index should succeed");
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".into());
+    let uri = std::env::var("MONGODB_URI")
+        .unwrap_or_else(|_| "mongodb://root:E8kHTYJca96gEC@mongo:27017".into());
+
+    // let client = Client::with_uri_str(uri).await.expect("failed to connect");
+    // create_username_index(&client).await;
 
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
-    create_username_index(&client).await;
+    create_peerid_index(&client).await;
 
+    let port = 8080;
+    println!("Starting server on port {}", port);
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(client.clone()))
             .service(add_user)
             .service(get_user)
+            .service(heartbeat)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }

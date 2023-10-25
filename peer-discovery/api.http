@@ -3,9 +3,11 @@ GET http://localhost:8080
 ###
 
 POST http://localhost:8080/api/heartbeat
+Content-Type: application/json
 
 {
-    "ip": "127.0.0.1",
+    "ipv4": "127.0.0.1",
+    "ipv6": "fe80::1",
     "peerID": "peer0"
 }
 
