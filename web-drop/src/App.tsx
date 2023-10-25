@@ -1,17 +1,31 @@
 import { useState, useEffect } from 'react'
-
+import './App.css'
 import { DataConnection, Peer } from "peerjs";
-
+import { publicIp, publicIpv4, publicIpv6 } from 'public-ip';
 function App() {
   const [peer, setPeer] = useState<Peer | null>(null);
   const [peerID, setpeerID] = useState('');
   const [anotherPeerID, setAnotherPeerID] = useState('');
+  const [DiscoveredPeerIDs, setDiscoveredPeerIDs] = useState<string[]>([]);
 
   const [connection, setConnection] = useState<DataConnection | any>(null);
 
   const [message, setMessage] = useState('');
 
   const [messages, setMessages] = useState<string[]>([]);
+
+  useEffect(() => {
+    const ip_fetcher = async () => {
+      // http://localhost:8080
+      // const data = await fetch("http://4.ipw.cn").then((res) => res.text());
+      // console.log(data);
+      // console.log(await publicIpv4());
+      // console.log(await publicIpv6());
+      //=> 'fe80::200:f8ff:fe21:67cf'
+
+    }
+    ip_fetcher();
+  });
 
   useEffect(() => {
     console.log("useEffect");
@@ -42,6 +56,65 @@ function App() {
     <>
       <p>
         peer ID {peerID}
+      </p>
+
+      <button onClick={async () => {
+
+        let ipv4 = "";
+        let ipv6 = "";
+        // TODO parallel
+        try {
+          ipv4 = await publicIpv4(
+            {
+              timeout: 1000,
+            }
+          );
+        } catch (e) {
+          console.log(e);
+        }
+
+        try {
+          ipv6 = await publicIpv6(
+            {
+              timeout: 1000,
+            }
+          );
+        } catch (e) {
+          console.log(e);
+        }
+
+        console.log(ipv4, ipv6);
+
+        let res = await fetch("http://localhost:8080/api/heartbeat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            "ipv4": ipv4,
+            "ipv6": ipv6,
+            "peerID": peerID
+          })
+        });
+
+        let data = await res.json();
+        setDiscoveredPeerIDs(data["data"]["peerIDs"]);
+      }} className='border-2 border-gray-500 rounded-md block' disabled={peerID == ""}>
+        Discover Peers
+      </button>
+
+      <p className='border-2 border-gray-500 rounded-md max-w-[500px] min-h-[50px] mb-10'>
+        {
+          // DiscoveredPeerIDs
+          DiscoveredPeerIDs.map((peerID, index) => {
+            return (
+              <span key={index}>
+                {peerID}
+                <br />
+              </span>
+            )
+          })
+        }
       </p>
 
       <input
@@ -86,7 +159,7 @@ function App() {
         Send
       </button>
 
-      <p>
+      <p className='border-2 border-gray-500 rounded-md max-w-[500px] min-h-[50px] mt-10'>
         {
           // messages
           messages.map((message, index) => {

@@ -4,8 +4,8 @@ mod model;
 #[cfg(test)]
 mod test;
 
+use actix_cors::Cors;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer};
-
 use mongodb::{bson::doc, options::ClientOptions, Client};
 use peer_discovery::RecordService;
 use serde::{Deserialize, Serialize};
@@ -116,9 +116,18 @@ async fn main() -> std::io::Result<()> {
     let port = 8080;
     println!("Starting server on port {}", port);
     HttpServer::new(move || {
+
+        // TODO
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header();
+
         App::new()
+            .wrap(cors)
             .app_data(web::Data::new(record_service.clone()))
             .service(heartbeat)
+            .service(index)
     })
     .bind(("0.0.0.0", port))?
     .run()
