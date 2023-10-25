@@ -1,17 +1,12 @@
 mod model;
 
-use actix_web::{get, post, web, App, HttpResponse, HttpServer};
-use futures::{
-    future::ok,
-    stream::{StreamExt, TryStreamExt},
-};
-use model::{Record, User};
+use futures::stream::StreamExt;
+use model::Record;
 use mongodb::{
-    bson::{de, doc},
-    options::{ClientOptions, FindOneAndUpdateOptions, IndexOptions},
-    Client, Collection, IndexModel,
+    bson:: doc,
+    options::{ FindOneAndUpdateOptions, IndexOptions},
+    IndexModel,
 };
-use serde::{Deserialize, Serialize};
 use std::{
     error::Error,
     time::{Duration, SystemTime, UNIX_EPOCH},
@@ -26,7 +21,6 @@ pub fn get_timestamp(start: SystemTime) -> i64 {
 
 #[derive(Clone)]
 pub struct RecordService {
-    client: mongodb::Client,
     collection: mongodb::Collection<Record>,
 }
 
@@ -38,7 +32,6 @@ impl RecordService {
     ) -> Self {
         let collection = client.database(db_name).collection::<Record>(coll_name);
         Self {
-            client,
             collection,
         }
     }
