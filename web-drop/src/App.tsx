@@ -9,18 +9,24 @@ function App() {
 
   const [connection, setConnection] = useState<DataConnection | any>(null);
 
+  const [message, setMessage] = useState('');
+
+  // const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState('');
+
   // let peer: Peer;
   useEffect(() => {
     console.log("useEffect");
     const peerInstance = new Peer();
     peerInstance.on("connection", (conn) => {
-      conn.on("data", (data) => {
-        // Will print 'hi!'
-        console.log(data);
-      });
       conn.on("open", () => {
-        // conn.send("hello!");
+        console.log("conn open with", conn.peer)
         setConnection(conn);
+      });
+      conn.on("data", (data) => {
+        console.log("recv data", data);
+
+        setMessages(messages + `${data}`)
       });
     });;
     peerInstance.on("open", (id) => {
@@ -34,22 +40,6 @@ function App() {
 
   return (
     <>
-      {/* <h1 className="text-3xl font-bold">
-        Hello world!
-      </h1>
-      <input
-        value={peerID}
-        onChange={e => setpeerID(e.target.value)}
-        className='border-2 border-gray-500 rounded-md'
-      />
-
-      <button onClick={() => {
-        console.log("init")
-
-      }} className='border-2 border-gray-500 rounded-md'>
-        Init
-      </button> */}
-
       <p>
         peer ID {peerID}
       </p>
@@ -61,17 +51,52 @@ function App() {
       />
 
       <button onClick={() => {
-        console.log("Connect", peer)
         if (peer != null) {
           const conn = peer.connect(anotherPeerID);
           conn.on("open", () => {
+            console.log("conn open with", conn.peer)
             setConnection(conn);
-            conn.send("hi!");
+          });
+          conn.on("data", (data) => {
+            console.log("recv data", data);
+            // setMessages([...messages, `${data}`]);
+            setMessages(messages + `${data}`)
           });
         }
       }} className='border-2 border-gray-500 rounded-md'>
         Connect
       </button>
+      <br />
+
+      <p>
+        connect status: {connection?.open ? "open" : "close"}
+      </p>
+
+      <input value={message} onChange={e => setMessage(e.target.value)} className='border-2 border-gray-500 rounded-md'></input>
+
+      <button onClick={() => {
+        if (connection != null) {
+          connection.send(message);
+          // setMessages([...messages, `> ${message}`]);
+          setMessages(messages + `${message}`)
+        }
+      }} className='border-2 border-gray-500 rounded-md' disabled={connection == null}>
+        Send
+      </button>
+
+      <p>
+        {
+          messages
+          // messages.map((message, index) => {
+          //   return (
+          //     <span key={index}>
+          //       {message}
+          //       <br />
+          //     </span>
+          //   )
+          // })
+        }
+      </p>
     </>
   )
 }
