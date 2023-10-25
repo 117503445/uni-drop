@@ -3,18 +3,18 @@
 mod model;
 #[cfg(test)]
 mod test;
-
 use actix_web::{get, post, web, App, HttpResponse, HttpServer};
+use futures::stream::{StreamExt, TryStreamExt};
 use model::{Record, User};
 use mongodb::{
     bson::{de, doc},
-    options::{FindOneAndUpdateOptions, IndexOptions, ClientOptions},
+    options::{ClientOptions, FindOneAndUpdateOptions, IndexOptions},
     Client, Collection, IndexModel,
 };
 use serde::{Deserialize, Serialize};
 const DB_NAME: &str = "peer_discovery";
 const COLL_NAME: &str = "records";
-const PEER_TIMEOUT_MINUTES: i64 = 5;
+const PEER_TIMEOUT_MINUTES: u64 = 5;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 fn get_timestamp(start: SystemTime) -> i64 {
@@ -65,7 +65,7 @@ async fn heartbeat(
         .upsert(Some(true))
         .build();
 
-    if let Err(reason) = collection
+    if let Err(err) = collection
         .find_one_and_update(
             doc! { "peer_id": &req_body.peer_id },
             doc! { "$set": {
@@ -79,15 +79,61 @@ async fn heartbeat(
     {
         return HttpResponse::InternalServerError().json(CommonResponse {
             code: 1,
-            msg: "MongoDB insert failed".to_string(),
-            data: reason.to_string(),
+            msg: "MongoDB insert record failed".to_string(),
+            data: err.to_string(),
         });
+    }
+
+    // delete timeout peers
+    let result = collection
+        .delete_many(doc! { "last_seen": { "$lt": get_timestamp(SystemTime::now() - Duration::from_secs(PEER_TIMEOUT_MINUTES)) } }, None)
+        .await;
+    if let Err(err) = result {
+        return HttpResponse::InternalServerError().json(CommonResponse {
+            code: 1,
+            msg: "MongoDB delete timeout record failed".to_string(),
+            data: err.to_string(),
+        });
+    }
+
+    // return peers with same ipv4 or ipv6
+    let mut peer_ids: Vec<String> = Vec::new();
+    let result = collection
+        .find(
+            doc! { "$or": [
+                { "ipv4": &req_body.ipv4 },
+                { "ipv6": &req_body.ipv6 },
+            ] },
+            None,
+        )
+        .await;
+    if let Err(err) = result {
+        return HttpResponse::InternalServerError().json(CommonResponse {
+            code: 1,
+            msg: "MongoDB query failed".to_string(),
+            data: err.to_string(),
+        });
+    }
+    let mut cursor = result.unwrap();
+    while let Some(result) = cursor.next().await {
+        match result {
+            Ok(record) => {
+                peer_ids.push(record.peer_id);
+            }
+            Err(err) => {
+                return HttpResponse::InternalServerError().json(CommonResponse {
+                    code: 1,
+                    msg: "MongoDB query failed".to_string(),
+                    data: err.to_string(),
+                });
+            }
+        }
     }
 
     HttpResponse::Ok().json(CommonResponse {
         code: 0,
         msg: "".to_string(),
-        data: "",
+        data: HeartbeatResponse { peer_ids },
     })
 }
 
@@ -156,7 +202,9 @@ async fn main() -> std::io::Result<()> {
     // let client = Client::with_uri_str(uri).await.expect("failed to connect");
     // create_username_index(&client).await;
 
-    let mut client_options = ClientOptions::parse(uri).await.expect("failed to parse options");
+    let mut client_options = ClientOptions::parse(uri)
+        .await
+        .expect("failed to parse options");
     client_options.connect_timeout = Some(Duration::from_secs(1));
     client_options.server_selection_timeout = Some(Duration::from_secs(1));
 
