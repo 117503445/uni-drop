@@ -10,7 +10,3 @@ Content-Type: application/json
     "ipv6": "fe80::1",
     "peerID": "peer0"
 }
-
-###
-
-GET http://localhost:8080/api/peers?ip=127.0.0.1

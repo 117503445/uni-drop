@@ -7,13 +7,14 @@ mod test;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer};
 use model::{Record, User};
 use mongodb::{
-    bson::doc,
-    options::{FindOneAndUpdateOptions, IndexOptions},
+    bson::{de, doc},
+    options::{FindOneAndUpdateOptions, IndexOptions, ClientOptions},
     Client, Collection, IndexModel,
 };
 use serde::{Deserialize, Serialize};
 const DB_NAME: &str = "peer_discovery";
 const COLL_NAME: &str = "records";
+const PEER_TIMEOUT_MINUTES: i64 = 5;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 fn get_timestamp(start: SystemTime) -> i64 {
@@ -47,6 +48,12 @@ struct HeartbeatRequest {
     pub ipv6: String,
 }
 
+#[derive(Serialize)]
+struct HeartbeatResponse {
+    #[serde(rename = "peerIDs")]
+    pub peer_ids: Vec<String>,
+}
+
 #[post("/api/heartbeat")]
 async fn heartbeat(
     client: web::Data<Client>,
@@ -58,7 +65,7 @@ async fn heartbeat(
         .upsert(Some(true))
         .build();
 
-    let result = collection
+    if let Err(reason) = collection
         .find_one_and_update(
             doc! { "peer_id": &req_body.peer_id },
             doc! { "$set": {
@@ -68,20 +75,20 @@ async fn heartbeat(
             }},
             options,
         )
-        .await;
-
-    match result {
-        Ok(_) => HttpResponse::Ok().json(CommonResponse {
-            code: 0,
-            msg: "".to_string(),
-            data: "",
-        }),
-        Err(err) => HttpResponse::InternalServerError().json(CommonResponse {
+        .await
+    {
+        return HttpResponse::InternalServerError().json(CommonResponse {
             code: 1,
             msg: "MongoDB insert failed".to_string(),
-            data: err.to_string(),
-        }),
+            data: reason.to_string(),
+        });
     }
+
+    HttpResponse::Ok().json(CommonResponse {
+        code: 0,
+        msg: "".to_string(),
+        data: "",
+    })
 }
 
 /// Adds a new user to the "users" collection in the database.
@@ -149,7 +156,11 @@ async fn main() -> std::io::Result<()> {
     // let client = Client::with_uri_str(uri).await.expect("failed to connect");
     // create_username_index(&client).await;
 
-    let client = Client::with_uri_str(uri).await.expect("failed to connect");
+    let mut client_options = ClientOptions::parse(uri).await.expect("failed to parse options");
+    client_options.connect_timeout = Some(Duration::from_secs(1));
+    client_options.server_selection_timeout = Some(Duration::from_secs(1));
+
+    let client = Client::with_options(client_options).expect("failed to connect");
     create_peerid_index(&client).await;
 
     let port = 8080;
