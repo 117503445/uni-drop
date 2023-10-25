@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import { DataConnection, Peer } from "peerjs";
-import { publicIp, publicIpv4, publicIpv6 } from 'public-ip';
+import { publicIpv4, publicIpv6 } from 'public-ip';
 function App() {
   const [peer, setPeer] = useState<Peer | null>(null);
   const [peerID, setpeerID] = useState('');
@@ -85,7 +85,9 @@ function App() {
 
         console.log(ipv4, ipv6);
 
-        let res = await fetch("http://localhost:8080/api/heartbeat", {
+        const host = import.meta.env.VITE_BE_HOST;
+        console.log("host", host);
+        let res = await fetch(`${host}/api/heartbeat`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
