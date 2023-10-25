@@ -1,0 +1,3 @@
+FROM 117503445/dev-rust
+
+WORKDIR /workspace/peer-discovery

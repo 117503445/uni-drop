@@ -18,9 +18,29 @@ services:
       dockerfile: Dockerfile_dev
 
     container_name: web-drop-dev
-    # restart: unless-stopped
     volumes:
         - './web-drop:/workspace/web-drop'
         - './dev-data/web-drop/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
+
+    
+  peer-discovery-dev:
+    build:
+      context: ./peer-discovery
+      dockerfile: Dockerfile_dev
+    container_name: peer-discovery-dev
+    volumes:
+        - './peer-discovery:/workspace/peer-discovery'
+        - './dev-data/peer-discovery/vsc_extensions:/root/.vscode-server/extensions'
+    stdin_open: true
+    tty: true
+  mongo:
+    image: mongo
+    # ports:
+    #   - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: E8kHTYJca96gEC
+    volumes:
+      - ./dev-data/db:/data/db
