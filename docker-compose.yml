@@ -19,7 +19,7 @@ services:
 
     container_name: web-drop-dev
     volumes:
-        - './web-drop:/workspace/web-drop'
+        - './src/web-drop:/workspace/web-drop'
         - './dev-data/web-drop/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
@@ -31,7 +31,7 @@ services:
       dockerfile: Dockerfile_dev
     container_name: peer-discovery-dev
     volumes:
-        - './peer-discovery:/workspace/peer-discovery'
+        - './src/peer-discovery:/workspace/peer-discovery'
         - './dev-data/peer-discovery/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true

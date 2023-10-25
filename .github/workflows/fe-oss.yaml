@@ -1,0 +1,41 @@
+name: fe-oss
+
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # https://github.com/actions/setup-node
+      - name: install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      # https://github.com/pnpm/action-setup
+      - name: install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.1
+
+      - name: build dist
+        run: |
+          cd ./src/web-drop
+          pnpm install
+          pnpm build
+
+      - name: upload files to OSS
+        uses: fangbinwei/aliyun-oss-website-action@v1
+        with:
+          accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
+          accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
+          bucket: web-drop
+          endpoint: https://oss-cn-hangzhou.aliyuncs.com
+          folder: ./src/web-drop/dist
