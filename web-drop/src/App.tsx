@@ -11,10 +11,8 @@ function App() {
 
   const [message, setMessage] = useState('');
 
-  // const [messages, setMessages] = useState<string[]>([]);
-  const [messages, setMessages] = useState('');
+  const [messages, setMessages] = useState<string[]>([]);
 
-  // let peer: Peer;
   useEffect(() => {
     console.log("useEffect");
     const peerInstance = new Peer();
@@ -24,9 +22,11 @@ function App() {
         setConnection(conn);
       });
       conn.on("data", (data) => {
-        console.log("recv data", data);
-
-        setMessages(messages + `${data}`)
+        if (typeof data === 'string') {
+          setMessages((m) => [...m, data])
+        } else {
+          alert("data is not string")
+        }
       });
     });;
     peerInstance.on("open", (id) => {
@@ -58,9 +58,11 @@ function App() {
             setConnection(conn);
           });
           conn.on("data", (data) => {
-            console.log("recv data", data);
-            // setMessages([...messages, `${data}`]);
-            setMessages(messages + `${data}`)
+            if (typeof data === 'string') {
+              setMessages((m) => [...m, data])
+            } else {
+              alert("data is not string")
+            }
           });
         }
       }} className='border-2 border-gray-500 rounded-md'>
@@ -77,8 +79,8 @@ function App() {
       <button onClick={() => {
         if (connection != null) {
           connection.send(message);
-          // setMessages([...messages, `> ${message}`]);
-          setMessages(messages + `${message}`)
+          setMessages((m) => [...m, `> ${message}`])
+          setMessage('');
         }
       }} className='border-2 border-gray-500 rounded-md' disabled={connection == null}>
         Send
@@ -86,15 +88,15 @@ function App() {
 
       <p>
         {
-          messages
-          // messages.map((message, index) => {
-          //   return (
-          //     <span key={index}>
-          //       {message}
-          //       <br />
-          //     </span>
-          //   )
-          // })
+          // messages
+          messages.map((message, index) => {
+            return (
+              <span key={index}>
+                {message}
+                <br />
+              </span>
+            )
+          })
         }
       </p>
     </>
