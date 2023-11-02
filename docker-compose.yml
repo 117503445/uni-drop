@@ -12,15 +12,15 @@ services:
   #       - './vsc_extensions/bittorrent-tracker:/root/.vscode-server/extensions'
   #   stdin_open: true
   #   tty: true
-  web-drop-dev:
+  uni-drop-dev:
     build:
-      context: ./web-drop
+      context: ./uni-drop
       dockerfile: Dockerfile_dev
 
-    container_name: web-drop-dev
+    container_name: uni-drop-dev
     volumes:
-        - './src/web-drop:/workspace/web-drop'
-        - './dev-data/web-drop/vsc_extensions:/root/.vscode-server/extensions'
+        - './src/uni-drop:/workspace/uni-drop'
+        - './dev-data/uni-drop/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
 
