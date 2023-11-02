@@ -14,7 +14,7 @@ services:
   #   tty: true
   uni-drop-dev:
     build:
-      context: ./uni-drop
+      context: ./src/uni-drop
       dockerfile: Dockerfile_dev
 
     container_name: uni-drop-dev
@@ -27,7 +27,7 @@ services:
     
   peer-discovery-dev:
     build:
-      context: ./peer-discovery
+      context: ./src/peer-discovery
       dockerfile: Dockerfile_dev
     container_name: peer-discovery-dev
     volumes:
