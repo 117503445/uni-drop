@@ -1,0 +1,102 @@
+
+function Main() {
+    return (
+        <div className="bg-white flex flex-row justify-center w-full">
+            <div className="bg-white w-[2402px] h-[1638px] relative">
+                <div className="h-[277px] top-[1361px] absolute w-[1802px] left-[600px]">
+                    <div className="absolute w-[1718px] h-[155px] top-[90px] left-[48px] bg-white rounded-[16px] overflow-hidden border-2 border-solid border-[#1d93ab] shadow-[2px_2px_4px_#00000040]">
+                        <div className="relative w-[125px] h-[70px] top-[43px] left-[1541px] bg-[#1d93ab] shadow-[2px_2px_4px_#00000040] rounded-[16px] overflow-hidden border border-solid border-neutral-200">
+                            <div className="absolute top-[18px] left-[34px] [font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-white text-[24px] tracking-[0] leading-[normal]">
+                                Send
+                            </div>
+                        </div>
+                    </div>
+                    <img className="absolute w-[83px] h-[63px] top-[9px] left-[149px]" alt="Iamge" src="iamge.svg" />
+                    <img className="absolute w-[83px] h-[63px] top-[9px] left-[46px]" alt="File" src="file.svg" />
+                </div>
+                <div className="h-[1230px] top-[131px] border-b [border-bottom-style:solid] border-neutral-200 absolute w-[1802px] left-[600px]">
+                    <div className="absolute w-[786px] h-[450px] top-[406px] left-[101px] bg-[#ff9d0014] rounded-[16px] overflow-hidden border border-solid border-neutral-200">
+                        <img
+                            className="absolute w-[748px] h-[409px] top-[23px] left-[22px] object-cover"
+                            alt="Image"
+                            src="image-1.png"
+                        />
+                    </div>
+                    <div className="absolute w-[695px] h-[285px] top-[71px] left-[1037px] bg-[#e7f8ff] rounded-[16px] overflow-hidden border border-solid border-neutral-200">
+                        <div className="absolute w-[654px] top-[15px] left-[21px] [font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-black text-[28px] tracking-[0] leading-[normal]">
+                            你说的对，但是《原神》是由米哈游自主研发的一款全新开放世界冒险游戏。游戏发生在一个被称作「提瓦特」的幻想世界，在这里，被神选中的人将被授予「神之眼」，导引元素之力。你将扮演一位名为「旅行者」的神秘角色在自由的旅行中邂逅性格各异、能力独特的同伴们，和他们一起击败强敌，找回失散的亲人——同时，逐步发掘「原神」的真相。
+                        </div>
+                    </div>
+                </div>
+                <div className="h-[140px] top-[-9px] border-b [border-bottom-style:solid] border-neutral-200 absolute w-[1802px] left-[600px]">
+                    <div className="absolute top-[48px] left-[613px] [font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-black text-[32px] tracking-[0] leading-[normal]">
+                        Hunter Clara [Windows, Chrome]
+                    </div>
+                </div>
+                <div className="absolute w-[600px] h-[1640px] top-[-2px] left-0 bg-[#e7f8ff] border-r [border-right-style:solid] border-[#dcecf3]">
+                    <div className="absolute w-[180px] h-[75px] top-[1522px] left-[384px] bg-white rounded-[16px] overflow-hidden shadow-[2px_2px_4px_#00000040]">
+                        <div className="absolute top-[21px] left-[61px] [font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-black text-[24px] tracking-[0] leading-[normal]">
+                            Refresh
+                        </div>
+                        <img className="absolute w-[32px] h-[32px] top-[22px] left-[16px]" alt="Logo" src="logo.svg" />
+                    </div>
+                    <img className="absolute w-[83px] h-[83px] top-[1520px] left-[154px]" alt="Git hub" src="git-hub.svg" />
+                    <img className="absolute w-[83px] h-[83px] top-[1520px] left-[41px]" alt="Settings" src="settings.svg" />
+                    <div className="absolute w-[500px] h-[125px] top-[746px] left-[45px] bg-white rounded-[16px] overflow-hidden shadow-[0px_2px_4px_#00000040]">
+                        <div className="top-[41px] left-[152px] absolute [font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-black text-[32px] tracking-[0] leading-[normal]">
+                            Alan Madge
+                        </div>
+                        <img className="absolute w-[48px] h-[48px] top-[39px] left-[37px]" alt="Element" src="1.svg" />
+                    </div>
+                    <div className="absolute w-[500px] h-[125px] top-[581px] left-[43px] bg-white rounded-[16px] overflow-hidden border-4 border-solid border-[#1d93ab] shadow-[0px_2px_4px_#00000040]">
+                        <img className="absolute w-[64px] h-[64px] top-[31px] left-[35px]" alt="Chrome" src="image.svg" />
+                        <div className="top-[38px] left-[152px] absolute [font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-black text-[32px] tracking-[0] leading-[normal]">
+                            Hunter Clara
+                        </div>
+                    </div>
+                    <div className="absolute w-[500px] h-[125px] top-[416px] left-[43px] bg-white rounded-[16px] overflow-hidden shadow-[0px_2px_4px_#00000040]">
+                        <img className="absolute w-[64px] h-[64px] top-[31px] left-[35px]" alt="Chrome" src="chrome-1.svg" />
+                        <div className="top-[41px] left-[152px] absolute [font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-black text-[32px] tracking-[0] leading-[normal]">
+                            Myrna Stevenson
+                        </div>
+                    </div>
+                    <div className="absolute w-[500px] h-[176px] top-[184px] left-[43px] bg-white rounded-[16px] overflow-hidden shadow-[2px_2px_4px_#00000040]">
+                        <p className="top-[63px] left-[162px] absolute [font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-black text-[32px] tracking-[0] leading-[normal]">
+                            <span className="[font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-black text-[32px] tracking-[0]">
+                                Don Smith (
+                            </span>
+                            <span className="[font-family:'JetBrains_Mono-Bold',Helvetica] font-bold">Me</span>
+                            <span className="[font-family:'JetBrains_Mono-Regular',Helvetica] font-normal text-black text-[32px] tracking-[0]">
+                                )
+                            </span>
+                        </p>
+                        <img
+                            className="absolute w-[64px] h-[64px] top-[56px] left-[38px]"
+                            alt="Qrcode line"
+                            src="qrcode-line-1.svg"
+                        />
+                    </div>
+                    <p className="absolute top-[110px] left-[73px] [font-family:'JetBrains_Mono-Bold',Helvetica] font-normal text-[#000000c9] text-[20px] tracking-[0] leading-[normal]">
+                        <span className="font-bold">Uni</span>
+                        <span className="[font-family:'JetBrains_Mono-Regular',Helvetica]">versal Air</span>
+                        <span className="font-bold">Drop</span>
+                        <span className="[font-family:'JetBrains_Mono-Regular',Helvetica]">.</span>
+                    </p>
+                    <div className="absolute top-[62px] left-[71px] [font-family:'JetBrains_Mono-Bold',Helvetica] font-bold text-black text-[36px] tracking-[0] leading-[normal]">
+                        UniDrop
+                    </div>
+                </div>
+            </div>
+            {/* button to nagivate to demo page, always in left bottom */}
+            <button onClick={() => {
+                window.location.hash = "/demo"
+            }} className='border-2 border-gray-500 rounded-md fixed bottom-5 left-5'>
+                Demo
+            </button>
+        </div>
+
+
+    )
+}
+
+// export default App
