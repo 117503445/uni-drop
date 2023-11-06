@@ -16,11 +16,18 @@ function App() {
       <div className="h-screen w-screen flex justify-center items-center">
         <div className="rounded-[1rem] w-[calc(100%-5rem)] max-w-[75rem] h-[calc(100%-5rem)] border-2 shadow-md flex overflow-hidden">
           {/* left side */}
-          <div className="w-[18.75rem] h-full bg-[#DCECF3] shadow-md flex flex-col">
-            <div className="h-[3.75rem] w-full flex flex-col justify-between items-center px-5 border-b-2">
-              <span className="text-xl font-bold">UniDrop</span>
-              <span className="text-xl ">Universal AirDrop.</span>
+          <div className="w-[25rem] h-full bg-[#e7f8ff] shadow-md flex flex-col border-r-2">
+            <span className="text-xl font-bold">UniDrop</span>
+            <span className="text-xl">
+              <span className="font-bold">Uni</span> versal Air<span className="font-bold">Drop</span>.
+            </span>
+
+            
+            <div className="flex flex-col">
+              <div className="h-[4rem] py-2 my-1.5 bg-white w-[16rem] rounded-md flex mx-auto shadow-md"></div>
+              <div className="h-[4rem] py-2 my-1.5 bg-white w-[16rem] rounded-md flex mx-auto shadow-md"></div>
             </div>
+
           </div>
 
           {/* right side */}
@@ -28,6 +35,8 @@ function App() {
             <div className="h-[3.75rem] w-full flex justify-between items-center px-5 border-b-2"></div>
             <div className="flex-1 w-full flex justify-center items-center"></div>
             <div className="h-[8rem] w-full flex justify-between items-center px-5 border-t-2"></div>
+
+
           </div>
 
 
