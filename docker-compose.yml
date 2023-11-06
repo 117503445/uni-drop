@@ -1,17 +1,5 @@
 version: '3.9'
 services:
-  # bittorrent-tracker-dev:
-  #   build:
-  #     context: ./bittorrent-tracker
-  #     dockerfile: Dockerfile_dev
-
-  #   container_name: bittorrent-tracker-dev
-  #   # restart: unless-stopped
-  #   volumes:
-  #       - './bittorrent-tracker:/workspace/bittorrent-tracker'
-  #       - './vsc_extensions/bittorrent-tracker:/root/.vscode-server/extensions'
-  #   stdin_open: true
-  #   tty: true
   uni-drop-dev:
     build:
       context: ./src/uni-drop
@@ -23,8 +11,6 @@ services:
         - './dev-data/uni-drop/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
-
-    
   peer-discovery-dev:
     build:
       context: ./src/peer-discovery
@@ -46,7 +32,7 @@ services:
       - ./dev-data/db:/data/db
   mongo-express:
     image: mongo-express
-    restart: unless-stopped
+    # restart: unless-stopped
     ports:
       - 27018:8081
     environment:
