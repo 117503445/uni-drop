@@ -42,8 +42,17 @@ function App() {
           <div className="w-full h-full flex flex-col">
             <div className="h-[3.75rem] w-full flex justify-between items-center px-5 border-b-2"></div>
             <div className="flex-1 w-full flex justify-center items-center"></div>
-            <div className="h-[8rem] w-full flex justify-between items-center px-5 border-t-2">
-          </div>
+            <div className="h-[8rem] w-full flex flex-col justify-between items-center px-5 border-t-2">
+
+              <div className="flex justify-between items-center h-[2.5rem] w-full "></div>
+
+              <div className="flex justify-center items-center h-full w-full ">
+                <textarea className="h-[calc(100%-2rem)] w-[calc(100%-2rem)] px-3 py-2 resize-none border-2 outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab] rounded-md m-auto text-sm" placeholder="Type message here"></textarea>
+
+              </div>
+
+
+            </div>
 
 
           </div>
