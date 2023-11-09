@@ -1,7 +1,22 @@
 import "./App.css";
 import settingImg from "./assets/setting.svg";
+import { useState, useEffect } from "react";
+import { UniPeersManager } from "./peer.js";
 
 function App() {
+  const [uniPeersManager, setUniPeersManager] = useState(new UniPeersManager());
+
+  useEffect(() => {
+
+    const test = async () => {
+      console.log(await uniPeersManager.getPeerId());
+    };
+    test();
+    return function cleanup() {
+      uniPeersManager.close();
+    };
+  });
+
   return (
     <div>
       {/* button to nagivate to demo page, always in left bottom */}
