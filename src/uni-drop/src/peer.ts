@@ -4,11 +4,12 @@ import { publicIpv4, publicIpv6 } from "public-ip";
 
 // UniPeer is a peer that can be connected to
 class UniPeer {
+    // id of the peer that can be connected to
     private id: string;
 
     // my peer
     private peer: Peer;
-    private dataConnection: DataConnection | null = null;
+    private dataConnection: DataConnection | undefined = undefined;
 
     constructor(peer: Peer, id: string) {
         this.peer = peer;
@@ -21,20 +22,41 @@ class UniPeer {
 
     // my peer connect to this UniPeer
     connect() {
-        if (this.dataConnection != null) {
-            console.warn("DataConnection already set, closing old connection");
-            this.dataConnection.close();
+        if (this.dataConnection != undefined) {
+            console.warn("DataConnection already set");
+            return;
         }
         this.dataConnection = this.peer.connect(this.id);
+        this.dataConnection.on("open", () => {
+            console.log("connectted with peer", this.id);
+        });
+        this.dataConnection.on("data", () => {
+            console.log("data received from peer", this.id);
+        });
     }
 
     // UniPeer connect to my peer
     setConnection(dataConnection: DataConnection) {
-        if (this.dataConnection != null) {
+        if (this.dataConnection != undefined) {
             console.warn("DataConnection already set, closing old connection");
             this.dataConnection.close();
         }
         this.dataConnection = dataConnection;
+        this.dataConnection.on("open", () => {
+            console.log("connectted with peer", this.id);
+        });
+        this.dataConnection.on("data", () => {
+            console.log("data received from peer", this.id);
+        });
+    }
+
+    // send message to this UniPeer
+    send(msg: string) {
+        if (this.dataConnection == undefined) {
+            console.warn("DataConnection not set");
+            return;
+        }
+        this.dataConnection.send(msg);
     }
 }
 
@@ -91,12 +113,20 @@ export class UniPeersManager {
     // peers that can be connected to
     private peers: UniPeer[] = [];
 
-    private heartbeatTimer: number | null = null;
+    private heartbeatTimer: number | undefined = undefined;
 
     private setpeerID: React.Dispatch<React.SetStateAction<string>>;
 
-    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, id: string | null = null) {
-        if (id != null) {
+    getPeersId(): string[] {
+        let ids: string[] = [];
+        for (let peer of this.peers) {
+            ids.push(peer.getId());
+        }
+        return ids
+    }
+
+    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, id: string | undefined = undefined) {
+        if (id != undefined) {
             this.peer = new Peer(id);
         }
         else {
@@ -104,6 +134,7 @@ export class UniPeersManager {
         }
         this.peer.on("connection", (dataConnection) => {
             dataConnection.on("open", () => {
+                console.log("be connected by peer", dataConnection.peer);
                 let uniPeer = new UniPeer(this.peer, dataConnection.peer);
                 uniPeer.setConnection(dataConnection);
                 this.peers.push(uniPeer);
@@ -137,9 +168,27 @@ export class UniPeersManager {
 
     }
 
+    private findPeer(id: string): UniPeer | null {
+        for (let peer of this.peers) {
+            if (peer.getId() == id) {
+                return peer;
+            }
+        }
+        return null;
+    }
+
+    send(id: string, msg: string) {
+        let peer = this.findPeer(id);
+        if (peer != null) {
+            peer.connect();
+
+        }
+
+    }
+
     close() {
         this.peer.destroy();
-        if (this.heartbeatTimer != null) {
+        if (this.heartbeatTimer != undefined) {
             clearInterval(this.heartbeatTimer);
         }
     }

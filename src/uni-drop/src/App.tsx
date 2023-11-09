@@ -1,20 +1,25 @@
 import "./App.css";
 import settingImg from "./assets/setting.svg";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UniPeersManager } from "./peer.js";
 
 function App() {
   const [peerID, setpeerID] = useState("");
+  const [postContent, setPostContent] = useState("");
 
+  const managerRef = useRef<UniPeersManager | null>(null);
   useEffect(() => {
     const manager = new UniPeersManager(setpeerID);
+    managerRef.current = manager;
     console.log("useEffect");
     // const test = async () => {
     //   console.log(await manager.getPeerId());
     // };
     // test();
     return function cleanup() {
-      manager.close();
+      if (manager != null) {
+        manager.close();
+      }
     };
   }, []);
 
@@ -64,6 +69,21 @@ function App() {
                 <textarea
                   className="m-auto h-[calc(100%-2rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
                   placeholder="Type message here"
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  onKeyUp={(e) => {
+                    if (e.key === "Enter") {
+                      if (managerRef.current != null) {
+                        let id = managerRef.current.getPeersId()[0];
+                        console.log("send to", id);
+
+                        managerRef.current.send(id, postContent);
+                      } else {
+                        console.log("manager is null");
+                      }
+                      setPostContent("");
+                    }
+                  }}
                 ></textarea>
               </div>
             </div>
