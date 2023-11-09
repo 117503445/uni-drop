@@ -5,17 +5,27 @@ import { UniPeersManager } from "./peer.js";
 
 function App() {
   const [peerID, setpeerID] = useState("");
+
+  const [peersID, setpeersID] = useState<string[]>([]);
+  // console.log("render peersID", peersID);
+  let peerCards = peersID.map((id) => {
+    return (
+      <div
+        className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md"
+        key={id}
+      >
+        <span className="mx-auto">{id}</span>
+      </div>
+    );
+  });
+
   const [postContent, setPostContent] = useState("");
 
   const managerRef = useRef<UniPeersManager | null>(null);
   useEffect(() => {
-    const manager = new UniPeersManager(setpeerID);
+    const manager = new UniPeersManager(setpeerID, setpeersID);
     managerRef.current = manager;
     console.log("useEffect");
-    // const test = async () => {
-    //   console.log(await manager.getPeerId());
-    // };
-    // test();
     return function cleanup() {
       if (manager != null) {
         manager.close();
@@ -47,8 +57,9 @@ function App() {
             <span className="text-xl font-bold">{peerID}</span>
 
             <div className="flex flex-col">
-              <div className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md"></div>
-              <div className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md"></div>
+              {/* <div className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md text-center"></div>
+              <div className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md"></div> */}
+              {peerCards}
             </div>
 
             <div className="mt-auto flex max-h-[5rem] flex-1">
