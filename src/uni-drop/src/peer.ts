@@ -1,6 +1,5 @@
 import { DataConnection, Peer } from "peerjs";
-import { useState, useEffect } from "react";
-import { publicIpv4, publicIpv6 } from "public-ip";
+import { publicIpv4 } from "public-ip";
 
 // UniPeer is a peer that can be connected to
 class UniPeer {
@@ -31,7 +30,7 @@ class UniPeer {
             console.log("connectted with peer", this.id);
         });
         this.dataConnection.on("data", (data) => {
-            console.log("data received from peer", this.id);
+            console.log("data received from peer", this.id, data);
         });
     }
 
@@ -46,7 +45,7 @@ class UniPeer {
             console.log("connectted with peer", this.id);
         });
         this.dataConnection.on("data", (data) => {
-            console.log("data received from peer", this.id);
+            console.log("data received from peer", this.id, data);
         });
     }
 
@@ -197,7 +196,7 @@ export class UniPeersManager {
         if (this.peer.id == null) {
             // wait until peer id is set
             console.warn("Waiting for peer id to be set");
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _) => {
                 this.peer.on("open", () => {
                     resolve(this.peer.id);
                 });
