@@ -68,7 +68,7 @@ class UniDiscovery {
 
         // [ipv4, ipv6] = await Promise.allSettled([publicIpv4({ timeout: 1000 }), publicIpv6({ timeout: 1000 })]);
 
-        console.log(ipv4, ipv6);
+        // console.log(ipv4, ipv6);
 
         let res = await fetch(`${this.host}/api/heartbeat`, {
             method: "POST",
@@ -93,9 +93,8 @@ export class UniPeersManager {
     // peers that can be connected to
     private peers: UniPeer[] = [];
 
-    private heartbeatTimer: number;
+    private heartbeatTimer: number | null = null;
 
-    private discovery: UniDiscovery;
 
     constructor(id: string | null = null) {
         if (id != null) {
@@ -112,11 +111,13 @@ export class UniPeersManager {
             })
         });
 
-        this.peer.on("open", () => {
-            this.discovery = new UniDiscovery(this.peer.id);
+        this.peer.on("open", (id) => {
+            console.log("this Peer id set to", id);
+            const discovery = new UniDiscovery(this.peer.id);
 
             this.heartbeatTimer = setInterval(async () => {
-                const idList = await this.discovery.heartbeat();
+                const idList = await discovery.heartbeat();
+                // console.log("Heartbeat, idList = ", idList);
                 let peerSet = new Set<string>();
                 for (let peer of this.peers) {
                     peerSet.add(peer.getId());
@@ -124,12 +125,12 @@ export class UniPeersManager {
 
                 for (let id of idList) {
                     if (!peerSet.has(id)) {
+                        console.log("Add peer", id);
                         let uniPeer = new UniPeer(this.peer, id);
                         uniPeer.connect();
                         this.peers.push(uniPeer);
                     }
                 }
-
             }, 5000);
         });
     }
