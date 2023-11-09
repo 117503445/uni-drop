@@ -1,6 +1,5 @@
 import "./App.css";
-import settingImg from './assets/setting.svg'
-
+import settingImg from "./assets/setting.svg";
 
 function App() {
   return (
@@ -10,54 +9,48 @@ function App() {
         onClick={() => {
           window.location.hash = "/demo";
         }}
-        className="border-2 border-gray-500 rounded-md fixed bottom-5 left-5"
+        className="fixed bottom-5 left-5 rounded-md border-2 border-gray-500"
       >
         Demo
       </button>
 
-      <div className="h-screen w-screen flex justify-center items-center">
-        <div className="rounded-[1rem] w-[calc(100%-5rem)] max-w-[75rem] h-[calc(100%-5rem)] border-2 shadow-md flex overflow-hidden">
+      <div className="flex h-screen w-screen items-center justify-center">
+        <div className="flex h-[calc(100%-5rem)] w-[calc(100%-5rem)] max-w-[75rem] overflow-hidden rounded-[1rem] border-2 shadow-md">
           {/* left side */}
-          <div className="w-[25rem] h-full bg-[#e7f8ff] shadow-md flex flex-col border-r-2">
+          <div className="flex h-full w-[25rem] flex-col border-r-2 bg-[#e7f8ff] shadow-md">
             <span className="text-xl font-bold">UniDrop</span>
             <span className="text-xl">
-              <span className="font-bold">Uni</span> versal Air<span className="font-bold">Drop</span>.
+              <span className="font-bold">Uni</span> versal Air
+              <span className="font-bold">Drop</span>.
             </span>
 
-
             <div className="flex flex-col">
-              <div className="h-[4rem] py-2 my-1.5 bg-white w-[16rem] rounded-md flex mx-auto shadow-md"></div>
-              <div className="h-[4rem] py-2 my-1.5 bg-white w-[16rem] rounded-md flex mx-auto shadow-md"></div>
+              <div className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md"></div>
+              <div className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md"></div>
             </div>
 
-            <div className="flex-1 flex max-h-[5rem] mt-auto">
-              <button className="h-[2rem] w-[2rem] rounded-md bg-white shadow-md flex justify-center items-center">
+            <div className="mt-auto flex max-h-[5rem] flex-1">
+              <button className="flex h-[2rem] w-[2rem] items-center justify-center rounded-md bg-white shadow-md">
                 <img src={settingImg}></img>
               </button>
             </div>
-
           </div>
 
           {/* right side */}
-          <div className="w-full h-full flex flex-col">
-            <div className="h-[3.75rem] w-full flex justify-between items-center px-5 border-b-2"></div>
-            <div className="flex-1 w-full flex justify-center items-center"></div>
-            <div className="h-[8rem] w-full flex flex-col justify-between items-center px-5 border-t-2">
+          <div className="flex h-full w-full flex-col">
+            <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5"></div>
+            <div className="flex w-full flex-1 items-center justify-center"></div>
+            <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
+              <div className="flex h-[2.5rem] w-full items-center justify-between"></div>
 
-              <div className="flex justify-between items-center h-[2.5rem] w-full "></div>
-
-              <div className="flex justify-center items-center h-full w-full ">
-                <textarea className="h-[calc(100%-2rem)] w-[calc(100%-2rem)] px-3 py-2 resize-none border-2 outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab] rounded-md m-auto text-sm" placeholder="Type message here"></textarea>
-
+              <div className="flex h-full w-full items-center justify-center ">
+                <textarea
+                  className="m-auto h-[calc(100%-2rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
+                  placeholder="Type message here"
+                ></textarea>
               </div>
-
-
             </div>
-
-
           </div>
-
-
         </div>
       </div>
     </div>

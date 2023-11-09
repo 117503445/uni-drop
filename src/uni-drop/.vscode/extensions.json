@@ -1,6 +1,3 @@
 {
-    "recommendations": [
-        "github.copilot",
-        "bradlc.vscode-tailwindcss"
-    ]
+  "recommendations": ["github.copilot", "bradlc.vscode-tailwindcss"]
 }
