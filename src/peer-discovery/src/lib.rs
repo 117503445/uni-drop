@@ -82,6 +82,43 @@ impl RecordService {
         .await?;
         Ok(())
     }
+
+    // remove records, except `remain` latest records
+    pub async fn remove_remain(&self, remain: u64) -> Result<(), Box<dyn Error>> {
+        let mut cursor = self.collection
+            .find(
+                doc! {},
+                None,
+            )
+            .await?;
+
+        let mut records: Vec<Record> = Vec::new();
+        while let Some(result) = cursor.next().await {
+            match result {
+                Ok(record) => {
+                    records.push(record);
+                }
+                Err(err) => {
+                    return Err(Box::new(err));
+                }
+            }
+        }
+
+        records.sort_by(|a, b| b.last_seen.cmp(&a.last_seen));
+        let mut peer_ids: Vec<String> = Vec::new();
+        for record in records.into_iter().skip(remain as usize) {
+            peer_ids.push(record.peer_id);
+        }
+
+        self.collection
+            .delete_many(
+                doc! { "peer_id": { "$in": peer_ids } },
+                None,
+            )
+            .await?;
+        Ok(())
+    }
+
     // ipv4 or ipv6
     pub async fn get_peers_by_ip(&self, ipv4: &str, ipv6: &str) -> Result<Vec<String>, Box<dyn Error>> {
         let mut peer_ids: Vec<String> = Vec::new();

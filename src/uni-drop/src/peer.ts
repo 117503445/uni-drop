@@ -30,7 +30,7 @@ class UniPeer {
         this.dataConnection.on("open", () => {
             console.log("connectted with peer", this.id);
         });
-        this.dataConnection.on("data", () => {
+        this.dataConnection.on("data", (data) => {
             console.log("data received from peer", this.id);
         });
     }
@@ -45,7 +45,7 @@ class UniPeer {
         this.dataConnection.on("open", () => {
             console.log("connectted with peer", this.id);
         });
-        this.dataConnection.on("data", () => {
+        this.dataConnection.on("data", (data) => {
             console.log("data received from peer", this.id);
         });
     }
@@ -181,9 +181,9 @@ export class UniPeersManager {
         let peer = this.findPeer(id);
         if (peer != null) {
             peer.connect();
-
+            peer.send(msg);
         }
-
+        
     }
 
     close() {

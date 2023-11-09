@@ -95,6 +95,18 @@ async fn heartbeat(
         });
     }
 
+    if cfg!(debug_assertions) {
+        const REMAIN: u64 = 2;
+
+        if let Err(err) = record_service.remove_remain(REMAIN).await {
+            return HttpResponse::InternalServerError().json(CommonResponse {
+                code: 1,
+                msg: "MongoDB delete remain record failed".to_string(),
+                data: err.to_string(),
+            });
+        }
+    }
+
     match record_service
         .get_peers_by_ip(&req_body.ipv4, &req_body.ipv6)
         .await
