@@ -46,6 +46,31 @@ struct HeartbeatResponse {
     pub peer_ids: Vec<String>,
 }
 
+#[post("/api/remove")]
+async fn remove_all(record_service: web::Data<RecordService>) -> HttpResponse {
+    if !cfg!(debug_assertions) {
+        return HttpResponse::Ok().json(CommonResponse {
+            code: 401,
+            msg: "You have no permission to remove all records".to_string(),
+            data: "",
+        });
+    }
+
+    if let Err(err) = record_service.remove_all().await {
+        return HttpResponse::InternalServerError().json(CommonResponse {
+            code: 1,
+            msg: "MongoDB remove all records failed".to_string(),
+            data: err.to_string(),
+        });
+    }
+
+    HttpResponse::Ok().json(CommonResponse {
+        code: 0,
+        msg: "".to_string(),
+        data: "",
+    })
+}
+
 #[post("/api/heartbeat")]
 async fn heartbeat(
     record_service: web::Data<RecordService>,
@@ -116,7 +141,6 @@ async fn main() -> std::io::Result<()> {
     let port = 8080;
     println!("Starting server on port {}", port);
     HttpServer::new(move || {
-
         // TODO
         let cors = Cors::default()
             .allow_any_origin()
@@ -127,6 +151,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .app_data(web::Data::new(record_service.clone()))
             .service(heartbeat)
+            .service(remove_all)
             .service(index)
     })
     .bind(("0.0.0.0", port))?

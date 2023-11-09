@@ -4,18 +4,19 @@ import { useState, useEffect } from "react";
 import { UniPeersManager } from "./peer.js";
 
 function App() {
-  const [uniPeersManager, setUniPeersManager] = useState(new UniPeersManager());
+  const [peerID, setpeerID] = useState("");
 
   useEffect(() => {
-
-    const test = async () => {
-      console.log(await uniPeersManager.getPeerId());
-    };
-    test();
+    const manager = new UniPeersManager(setpeerID);
+    console.log("useEffect");
+    // const test = async () => {
+    //   console.log(await manager.getPeerId());
+    // };
+    // test();
     return function cleanup() {
-      uniPeersManager.close();
+      manager.close();
     };
-  });
+  }, []);
 
   return (
     <div>
@@ -38,6 +39,7 @@ function App() {
               <span className="font-bold">Uni</span> versal Air
               <span className="font-bold">Drop</span>.
             </span>
+            <span className="text-xl font-bold">{peerID}</span>
 
             <div className="flex flex-col">
               <div className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md"></div>

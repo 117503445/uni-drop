@@ -51,24 +51,22 @@ class UniDiscovery {
     async heartbeat(): Promise<string[]> {
         let ipv4: string = "";
         let ipv6: string = "";
+
         // get ipv4 and ipv6 in parallel, ignore errors
-        let promises = await Promise.allSettled([publicIpv4({ timeout: 1000 }), publicIpv6({ timeout: 1000 })]);
-        promises.forEach((promise, i) => {
-            console.log(promise.status, i)
-            if (promise.status == "fulfilled") {
-                if (i == 0) {
-                    ipv4 = promise.value;
-                } else if (i == 1) {
-                    ipv6 = promise.value;
-                } else {
-                    console.error("Promise index out of range");
-                }
-            }
-        })
+        // let promises = await Promise.allSettled([publicIpv4({ timeout: 1000 }), publicIpv6({ timeout: 1000 })]);
+        // promises.forEach((promise, i) => {
+        //     if (promise.status == "fulfilled") {
+        //         if (i == 0) {
+        //             ipv4 = promise.value;
+        //         } else if (i == 1) {
+        //             ipv6 = promise.value;
+        //         } else {
+        //             console.error("Promise index out of range");
+        //         }
+        //     }
+        // })
 
-        // [ipv4, ipv6] = await Promise.allSettled([publicIpv4({ timeout: 1000 }), publicIpv6({ timeout: 1000 })]);
-
-        // console.log(ipv4, ipv6);
+        ipv4 = await publicIpv4({ timeout: 1000 });
 
         let res = await fetch(`${this.host}/api/heartbeat`, {
             method: "POST",
@@ -95,8 +93,9 @@ export class UniPeersManager {
 
     private heartbeatTimer: number | null = null;
 
+    private setpeerID: React.Dispatch<React.SetStateAction<string>>;
 
-    constructor(id: string | null = null) {
+    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, id: string | null = null) {
         if (id != null) {
             this.peer = new Peer(id);
         }
@@ -110,9 +109,11 @@ export class UniPeersManager {
                 this.peers.push(uniPeer);
             })
         });
+        this.setpeerID = setpeerID;
 
         this.peer.on("open", (id) => {
             console.log("this Peer id set to", id);
+            this.setpeerID(id);
             const discovery = new UniDiscovery(this.peer.id);
 
             this.heartbeatTimer = setInterval(async () => {
@@ -124,7 +125,7 @@ export class UniPeersManager {
                 }
 
                 for (let id of idList) {
-                    if (!peerSet.has(id)) {
+                    if (!peerSet.has(id) && id != this.peer.id) {
                         console.log("Add peer", id);
                         let uniPeer = new UniPeer(this.peer, id);
                         uniPeer.connect();
@@ -133,6 +134,7 @@ export class UniPeersManager {
                 }
             }, 5000);
         });
+
     }
 
     close() {

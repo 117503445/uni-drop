@@ -10,3 +10,8 @@ Content-Type: application/json
     "ipv6": "fe80::1",
     "peerID": "peer0"
 }
+
+###
+
+POST http://localhost:8080/api/remove
+Content-Type: application/json
