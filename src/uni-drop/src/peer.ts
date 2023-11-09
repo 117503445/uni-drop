@@ -147,8 +147,6 @@ class UniDiscovery {
     private host: string;
     private id: string;
 
-
-
     constructor(id: string) {
         this.host = import.meta.env.VITE_BE_HOST;
         this.id = id;
@@ -183,6 +181,7 @@ class UniDiscovery {
                 ipv6: ipv6,
                 peerID: this.id,
             }),
+            signal: AbortSignal.timeout(50)
         });
         let data = await res.json();
         return data["data"]["peerIDs"];
@@ -248,7 +247,23 @@ export class UniPeersManager {
             const discovery = new UniDiscovery(id);
 
             this.heartbeatTimer = setInterval(async () => {
-                const idList = await discovery.heartbeat();
+
+                let idList: string[] = [];
+                try {
+                    idList = await discovery.heartbeat();
+                } catch (error) {
+                    if (import.meta.env.MODE == "development") {
+                        if (this.heartbeatTimer != undefined) {
+                            clearInterval(this.heartbeatTimer);
+                            this.heartbeatTimer = undefined;
+                        }
+                        setpeersID(["peer1", "peer2", "peer3"]);
+                    } else {
+                        console.error(error);
+                    }
+                    return;
+                }
+
 
                 if (this.peerpool != undefined) {
                     this.peerpool.updateLanPeers(idList);
