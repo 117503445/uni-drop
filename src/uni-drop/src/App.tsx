@@ -1,5 +1,6 @@
 import "./App.css";
 import settingImg from "./assets/setting.svg";
+import githubImg from "./assets/github.svg";
 import { useState, useEffect, useRef } from "react";
 import { UniPeersManager } from "./peer.js";
 
@@ -11,7 +12,7 @@ function App() {
   let peerCards = peersID.map((id) => {
     return (
       <div
-        className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md"
+        className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-xl bg-white py-2 shadow-md"
         key={id}
       >
         <span className="mx-auto">{id}</span>
@@ -48,7 +49,7 @@ function App() {
       <div className="flex h-screen w-screen items-center justify-center">
         <div className="flex h-[calc(100%-5rem)] w-[calc(100%-5rem)] max-w-[75rem] overflow-hidden rounded-[1rem] border-2 shadow-md">
           {/* left side */}
-          <div className="flex h-full w-[25rem] flex-col border-r-2 bg-[#e7f8ff] shadow-md">
+          <div className="flex h-full w-[25rem] flex-col border-r-2 bg-[#e7f8ff] shadow-md p-5">
             <span className="text-xl font-bold">UniDrop</span>
             <span className="text-xl">
               <span className="font-bold">Uni</span> versal Air
@@ -57,14 +58,15 @@ function App() {
             <span className="text-xl font-bold">{peerID}</span>
 
             <div className="flex flex-col">
-              {/* <div className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md text-center"></div>
-              <div className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-md bg-white py-2 shadow-md"></div> */}
               {peerCards}
             </div>
 
-            <div className="mt-auto flex max-h-[5rem] flex-1">
-              <button className="flex h-[2rem] w-[2rem] items-center justify-center rounded-md bg-white shadow-md">
+            <div className="mt-auto flex max-h-[2.25rem] flex-1">
+              <button className="flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md mr-[1.25rem]">
                 <img src={settingImg}></img>
+              </button>
+              <button className="flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md fill-none">
+                <img src={githubImg}></img>
               </button>
             </div>
           </div>
