@@ -1,7 +1,5 @@
 import "./Demo.css";
 import { useState, useEffect, useRef } from "react";
-import { DataConnection, Peer } from "peerjs";
-import { publicIpv4, publicIpv6 } from "public-ip";
 
 import { UniPeersManager } from "./peer.js";
 
@@ -12,11 +10,11 @@ function DemoPeer() {
   const [peersID, setpeersID] = useState<string[]>([]);
 
 
-  const [postContent, setPostContent] = useState("");
+  // const [postContent, setPostContent] = useState("");
 
   const managerRef = useRef<UniPeersManager | null>(null);
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  // const [messages, setMessages] = useState<Message[]>([]);
 
 
   useEffect(() => {
