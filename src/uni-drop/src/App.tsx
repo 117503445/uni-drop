@@ -39,7 +39,8 @@ function App() {
       {/* button to nagivate to demo page, always in left bottom */}
       <button
         onClick={() => {
-          window.location.hash = "/demo";
+          // window.location.hash = "/demo";
+          window.location.hash = "/demopeer";
         }}
         className="fixed bottom-5 left-5 rounded-md border-2 border-gray-500"
       >

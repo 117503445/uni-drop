@@ -125,6 +125,7 @@ function Demo() {
       <button
         onClick={() => {
           if (peer != null) {
+            console.log(`peer.open ${peer.open}`)
             const conn = peer.connect(anotherPeerID);
             conn.on("open", () => {
               console.log("conn open with", conn.peer);

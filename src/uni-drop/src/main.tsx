@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import Demo from "./Demo.tsx";
+import DemoPeer from "./DemoPeer.tsx";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import App from "./App.tsx";
 
@@ -12,6 +13,10 @@ const router = createHashRouter([
   {
     path: "/demo",
     element: <Demo />,
+  },
+  {
+    path: "/demopeer",
+    element: <DemoPeer />,
   },
 ]);
 
