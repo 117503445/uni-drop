@@ -1,6 +1,7 @@
 import { DataConnection, Peer } from "peerjs";
 import { publicIpv4 } from "public-ip";
-
+import React from "react";
+import { Message } from "./model";
 
 class Peerpool {
     // this peer
@@ -12,6 +13,7 @@ class Peerpool {
     private historyPeers: UniPeer[] = [];
 
     private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
+
 
     constructor(peer: Peer, setpeersID: React.Dispatch<React.SetStateAction<string[]>>) {
         this.peer = peer;
@@ -116,8 +118,19 @@ class UniPeer {
         connection.on("open", () => {
             console.info("connectted with peer", this.id);
             connection.on("data", (data) => {
-                console.info("data received from peer", this.id, data);
+                console.warn("data received", data);
+                // if (typeof data === "string") {
+                //     this.receiveCallback(data);
+                // } else {
+                //     console.warn(`received data type is not string: ${typeof data}`);
+                // }
             });
+        });
+        connection.on("close", () => {
+            console.info("connection closed with peer", this.id);
+        });
+        connection.on("error", (error) => {
+            console.error(error);
         });
     }
 
@@ -204,6 +217,7 @@ export class UniPeersManager {
 
     private discovery: UniDiscovery | undefined = undefined;
 
+    private msgCallback: ((msg: Message) => void) | undefined;
 
     getPeersId(): string[] {
         if (this.peerpool == undefined) {
@@ -217,7 +231,7 @@ export class UniPeersManager {
         return ids
     }
 
-    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, id: string | undefined = undefined) {
+    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, id: string | undefined = undefined, msgCallback: ((msg: Message) => void) | undefined = undefined) {
         if (id != undefined) {
             this.peer = new Peer(id);
         }
@@ -231,6 +245,7 @@ export class UniPeersManager {
         }
         this.setpeerID = setpeerID;
         this.setpeersID = setpeersID;
+        this.msgCallback = msgCallback;
 
         this.peer.on("open", (id) => {
             console.info("this Peer id set to", id);
@@ -259,6 +274,9 @@ export class UniPeersManager {
             conn.on("data", (data) => {
                 if (typeof data === "string") {
                     console.info(`<- peer ${conn.peer}: ${data}`);
+                    if (this.msgCallback != undefined) {
+                        this.msgCallback(new Message(conn.peer, this.peer.id, "text", data));
+                    }
                 } else {
                     alert("data is not string");
                 }
