@@ -6,9 +6,7 @@ import imageIcon from "./assets/image.svg";
 
 import { useState, useEffect, useRef } from "react";
 import { UniPeersManager } from "./peer.js";
-import { Message } from "./model";
-
-
+import { Message, MessageContent, MessageType } from "./model";
 
 function App() {
   const [peerID, setpeerID] = useState("");
@@ -60,11 +58,7 @@ function App() {
 
   const managerRef = useRef<UniPeersManager | null>(null);
   useEffect(() => {
-    const manager = new UniPeersManager(
-      setpeerID,
-      setpeersID,
-      insertMessage,
-    );
+    const manager = new UniPeersManager(setpeerID, setpeersID, insertMessage);
     managerRef.current = manager;
     console.log("useEffect");
     return function cleanup() {
@@ -73,6 +67,33 @@ function App() {
       }
     };
   }, []);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const btnFileClick = () => {
+    if (fileInputRef.current != null) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const fileInputChange = (event: any) => {
+    const target: HTMLInputElement = event.target;
+    const files = target.files;
+    if (files == null || files.length == 0) {
+      console.warn("no file selected");
+      return;
+    }
+    const file = files[0];
+
+    if (managerRef.current != null) {
+      let id = managerRef.current.getPeersId()[0];
+      console.log("send to", id);
+      console.log("Selected file:", file);
+      managerRef.current.send(id, new MessageContent(MessageType.FILE, file));
+    } else {
+      console.log("manager is null");
+    }
+  };
 
   return (
     <div>
@@ -118,9 +139,20 @@ function App() {
             </div>
             <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
               <div className="flex h-[2.5rem] w-full items-center justify-between">
-                <button className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md">
+                <button
+                  className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md"
+                  onClick={btnFileClick}
+                >
                   <img className="h-4 w-4" src={fileIcon}></img>
                 </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  // TODO: multiple
+                  style={{ display: "none" }}
+                  onChange={fileInputChange}
+                />
+
                 <button className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md">
                   <img className="h-4 w-4" src={imageIcon}></img>
                 </button>
@@ -138,7 +170,10 @@ function App() {
                         let id = managerRef.current.getPeersId()[0];
                         console.log("send to", id);
 
-                        managerRef.current.send(id, postContent);
+                        managerRef.current.send(
+                          id,
+                          new MessageContent(MessageType.TEXT, postContent),
+                        );
                       } else {
                         console.log("manager is null");
                       }
