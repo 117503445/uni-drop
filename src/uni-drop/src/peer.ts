@@ -4,6 +4,7 @@ import React from "react";
 import { Message, MessageContent } from "./model";
 
 // TODO: prior to use old peers id. If they are not available, use new peers id
+// @ts-ignore
 class PeerIDStore {
     constructor() {
         this.peerIDStorageKey = this.getPeerIDStorageKey();
