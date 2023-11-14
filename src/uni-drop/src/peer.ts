@@ -3,6 +3,70 @@ import { publicIpv4 } from "public-ip";
 import React from "react";
 import { Message } from "./model";
 
+// TODO: prior to use old peers id. If they are not available, use new peers id
+class PeerIDStore {
+    constructor() {
+        this.peerIDStorageKey = this.getPeerIDStorageKey();
+
+        this.refreshTimer = setInterval(() => {
+            this.refreshPeerIDStorage(this.peerIDStorageKey);
+        }, 1000);
+    }
+
+    private refreshTimer: number;
+    private peerIDStorageKey: string;
+
+    private refreshPeerIDStorage(peerIDKey: string) {
+        let v = JSON.parse(localStorage.getItem(peerIDKey) || "{}");
+        v.updatedTime = Date.now();
+        localStorage.setItem(peerIDKey, JSON.stringify(v));
+    }
+
+    private getPeerIDStorageKey() {
+        let peerIDKey = "";
+        let i = 0;
+        while (true) {
+            let k = `peerID-${i}`;
+            let v = localStorage.getItem(k);
+            if (v == null) {
+                peerIDKey = k;
+                break;
+            } else {
+                const timeout = 5 * 1000;
+                if (JSON.parse(v).updatedTime < Date.now() - timeout) {
+                    // expired, reuse this key
+                    peerIDKey = k;
+                    break;
+                }
+            }
+            i++;
+        }
+        console.log("peerIDKey", peerIDKey);
+        this.peerIDStorageKey = peerIDKey;
+        this.refreshPeerIDStorage(peerIDKey);
+        return peerIDKey;
+    }
+
+    setPeerID(peerID: string) {
+        localStorage.setItem(this.peerIDStorageKey, JSON.stringify({
+            peerID: peerID,
+            updatedTime: Date.now(),
+        }));
+    }
+
+    getPeerID(): string | null {
+        let v = localStorage.getItem(this.peerIDStorageKey);
+        if (v == null) {
+            return null;
+        }
+        return JSON.parse(v).peerID;
+    }
+
+    close() {
+        clearInterval(this.refreshTimer);
+    }
+}
+
 class Peerpool {
     // this peer
     private peer: Peer;
@@ -155,7 +219,6 @@ class UniPeer {
     }
 }
 
-
 // UniDiscovery is used to discover peers on the lan
 class UniDiscovery {
     private host: string;
@@ -219,6 +282,8 @@ export class UniPeersManager {
 
     private msgCallback: ((msg: Message) => void) | undefined;
 
+    // private peerIDStore: PeerIDStore = new PeerIDStore();
+
     getPeersId(): string[] {
         if (this.peerpool == undefined) {
             return [];
@@ -231,25 +296,41 @@ export class UniPeersManager {
         return ids
     }
 
-    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, id: string | undefined = undefined, msgCallback: ((msg: Message) => void) | undefined = undefined) {
-        if (id != undefined) {
-            this.peer = new Peer(id);
-        }
-        else {
-            const DEBUG_LEVEL = 0;
-            this.peer = new Peer(
-                {
-                    debug: DEBUG_LEVEL,
-                }
-            );
-        }
+    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, msgCallback: ((msg: Message) => void) | undefined = undefined) {
+
+
         this.setpeerID = setpeerID;
         this.setpeersID = setpeersID;
         this.msgCallback = msgCallback;
 
+        // TODO: use peerIDStore
+        // let peerID = this.peerIDStore.getPeerID();
+        // if (peerID != null && peerID != "") {
+        //     this.peer = new Peer(
+        //         peerID
+        //         , {
+        //             debug: DEBUG_LEVEL,
+        //         }
+        //     );
+        // } else {
+        //     this.peer = new Peer(
+        //         {
+        //             debug: DEBUG_LEVEL,
+        //         }
+        //     );
+        // }
+
+        const DEBUG_LEVEL = 0;
+        this.peer = new Peer(
+            {
+                debug: DEBUG_LEVEL,
+            }
+        );
+
         this.peer.on("open", (id) => {
             console.info("this Peer id set to", id);
             this.setpeerID(id);
+            // this.peerIDStore.setPeerID(id);
 
             this.peerpool = new Peerpool(this.peer, this.setpeersID);
 

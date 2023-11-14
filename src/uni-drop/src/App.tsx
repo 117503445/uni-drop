@@ -1,9 +1,14 @@
 import "./App.css";
-import settingImg from "./assets/setting.svg";
-import githubImg from "./assets/github.svg";
+import settingIcon from "./assets/setting.svg";
+import githubIcon from "./assets/github.svg";
+import fileIcon from "./assets/file.svg";
+import imageIcon from "./assets/image.svg";
+
 import { useState, useEffect, useRef } from "react";
 import { UniPeersManager } from "./peer.js";
 import { Message } from "./model";
+
+
 
 function App() {
   const [peerID, setpeerID] = useState("");
@@ -58,7 +63,6 @@ function App() {
     const manager = new UniPeersManager(
       setpeerID,
       setpeersID,
-      undefined,
       insertMessage,
     );
     managerRef.current = manager;
@@ -98,10 +102,10 @@ function App() {
 
             <div className="mt-auto flex max-h-[2.25rem] flex-1">
               <button className="mr-[1.25rem] flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md">
-                <img src={settingImg}></img>
+                <img src={settingIcon}></img>
               </button>
               <button className="flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white fill-none shadow-md">
-                <img src={githubImg}></img>
+                <img src={githubIcon}></img>
               </button>
             </div>
           </div>
@@ -113,9 +117,16 @@ function App() {
               <p>{messageStorageToString()}</p>
             </div>
             <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
-              <div className="flex h-[2.5rem] w-full items-center justify-between"></div>
+              <div className="flex h-[2.5rem] w-full items-center justify-between">
+                <button className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md">
+                  <img className="h-4 w-4" src={fileIcon}></img>
+                </button>
+                <button className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md">
+                  <img className="h-4 w-4" src={imageIcon}></img>
+                </button>
+              </div>
 
-              <div className="flex h-full w-full items-center justify-center ">
+              <div className="flex h-full w-full flex-col items-center justify-center ">
                 <textarea
                   className="m-auto h-[calc(100%-2rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
                   placeholder="Type message here"
