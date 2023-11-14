@@ -217,14 +217,16 @@ class UniPeer {
             return;
         }
 
-        const metadata = {
+        const payload = {
             from: this.peer.id,
             to: this.id,
-            create_time: Date.now(),
+            createTime: Date.now(),
             type: content.type,
+            data: content.data,
+            filename: content.filename,
         }
 
-        const payload = new Blob([metadata, "<split>", content.data]);
+
         this.connection.send(payload);
     }
 }
@@ -241,20 +243,6 @@ class UniDiscovery {
     async heartbeat(): Promise<string[]> {
         let ipv4: string = "";
         let ipv6: string = "";
-
-        // get ipv4 and ipv6 in parallel, ignore errors
-        // let promises = await Promise.allSettled([publicIpv4({ timeout: 1000 }), publicIpv6({ timeout: 1000 })]);
-        // promises.forEach((promise, i) => {
-        //     if (promise.status == "fulfilled") {
-        //         if (i == 0) {
-        //             ipv4 = promise.value;
-        //         } else if (i == 1) {
-        //             ipv6 = promise.value;
-        //         } else {
-        //             console.error("Promise index out of range");
-        //         }
-        //     }
-        // })
 
         ipv4 = await publicIpv4({ timeout: 2000 });
 
@@ -360,44 +348,25 @@ export class UniPeersManager {
                     this.peerpool.updateConnectedPeer(uniPeer);
                 }
             })
-            conn.on("data", (data) => {
-                let payload = data as ArrayBuffer;
-                // data is a payload
-                console.log("data", data, typeof data);
-                
-                
+            conn.on("data", async (data) => {
+                if (typeof data !== "object") {
+                    console.warn(`received data type is not object: ${typeof data}`);
+                    return;
+                }
+                let payload: any = data;
 
-                let metadata: any;
-                let content: any;
+                let msg: Message;
+                try {
+                    let content = new MessageContent(payload.type, payload.data, payload.filename);
 
-                
+                    msg = new Message(payload.from, payload.to, content, payload.createTime);
+                } catch (error) {
+                    console.error(error);
+                    return;
+                }
 
-                // let reader = new FileReader();
-                // reader.readAsText(payload);
-                // reader.onload = () => {
-                //     let data = reader.result;
-                //     let dataStr = data as string;
-                //     let splitIndex = dataStr.indexOf("<split>");
-                //     if (splitIndex == -1) {
-                //         console.error("invalid data format");
-                //         return;
-                //     }
-                //     metadata = JSON.parse(dataStr.substring(0, splitIndex));
-                //     content = dataStr.substring(splitIndex + "<split>".length);
-                //     // console.log("metadata", metadata);
-                //     // console.log("content", content);
-
-                //     let msg: Message;
-                //     try {
-                //         msg = new Message(metadata.from, metadata.to, new MessageContent(metadata.type, content), metadata.create_time);
-                //     } catch (error) {
-                //         console.error(error);
-                //         return;
-                //     }
-
-                //     console.info(`<- peer ${conn.peer}: ${msg}`);
-                //     this.msgCallback?.(msg);
-                // }
+                console.info(`<- peer ${conn.peer}: ${msg}`);
+                this.msgCallback?.(msg);
             });
         });
 

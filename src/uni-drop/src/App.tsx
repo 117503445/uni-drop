@@ -25,7 +25,7 @@ function App() {
     return str;
   };
 
-  let insertMessage = (msg: Message) => {
+  let insertMessage = async (msg: Message) => {
     console.log("insert message", msg);
     if (peerID == undefined) {
       console.warn("peer id not set");
@@ -40,6 +40,17 @@ function App() {
         ),
       ),
     );
+    if (msg.content.type == MessageType.FILE) {
+      console.log("download file");
+      const downloadLink = document.createElement("a");
+
+      downloadLink.href = msg.content.data;
+
+      downloadLink.download = msg.content.filename;
+
+      downloadLink.click();
+
+    }
   };
 
   // console.log("render peersID", peersID);
@@ -76,7 +87,7 @@ function App() {
     }
   };
 
-  const fileInputChange = (event: any) => {
+  const fileInputChange = async (event: any) => {
     const target: HTMLInputElement = event.target;
     const files = target.files;
     if (files == null || files.length == 0) {
@@ -89,7 +100,10 @@ function App() {
       let id = managerRef.current.getPeersId()[0];
       console.log("send to", id);
       console.log("Selected file:", file);
-      managerRef.current.send(id, new MessageContent(MessageType.FILE, file));
+      const content = new MessageContent(MessageType.FILE);
+      await content.setData(file);
+
+      managerRef.current.send(id, content);
     } else {
       console.log("manager is null");
     }
@@ -164,16 +178,16 @@ function App() {
                   placeholder="Type message here"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
-                  onKeyUp={(e) => {
+                  onKeyUp={async (e) => {
                     if (e.key === "Enter") {
                       if (managerRef.current != null) {
                         let id = managerRef.current.getPeersId()[0];
                         console.log("send to", id);
 
-                        managerRef.current.send(
-                          id,
-                          new MessageContent(MessageType.TEXT, postContent),
-                        );
+                        const content = new MessageContent(MessageType.TEXT);
+                        await content.setData(postContent);
+
+                        managerRef.current.send(id, content);
                       } else {
                         console.log("manager is null");
                       }
