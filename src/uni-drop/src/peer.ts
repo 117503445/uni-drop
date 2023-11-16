@@ -1,72 +1,9 @@
 import { DataConnection, Peer } from "peerjs";
 import { publicIpv4 } from "public-ip";
 import React from "react";
-import { Message, MessageContent } from "./model";
+import { Message, MessageContent, MessageType } from "./model";
 
-// TODO: prior to use old peers id. If they are not available, use new peers id
-// @ts-ignore
-class PeerIDStore {
-    constructor() {
-        this.peerIDStorageKey = this.getPeerIDStorageKey();
 
-        this.refreshTimer = setInterval(() => {
-            this.refreshPeerIDStorage(this.peerIDStorageKey);
-        }, 1000);
-    }
-
-    private refreshTimer: number;
-    private peerIDStorageKey: string;
-
-    private refreshPeerIDStorage(peerIDKey: string) {
-        let v = JSON.parse(localStorage.getItem(peerIDKey) || "{}");
-        v.updatedTime = Date.now();
-        localStorage.setItem(peerIDKey, JSON.stringify(v));
-    }
-
-    private getPeerIDStorageKey() {
-        let peerIDKey = "";
-        let i = 0;
-        while (true) {
-            let k = `peerID-${i}`;
-            let v = localStorage.getItem(k);
-            if (v == null) {
-                peerIDKey = k;
-                break;
-            } else {
-                const timeout = 5 * 1000;
-                if (JSON.parse(v).updatedTime < Date.now() - timeout) {
-                    // expired, reuse this key
-                    peerIDKey = k;
-                    break;
-                }
-            }
-            i++;
-        }
-        console.log("peerIDKey", peerIDKey);
-        this.peerIDStorageKey = peerIDKey;
-        this.refreshPeerIDStorage(peerIDKey);
-        return peerIDKey;
-    }
-
-    setPeerID(peerID: string) {
-        localStorage.setItem(this.peerIDStorageKey, JSON.stringify({
-            peerID: peerID,
-            updatedTime: Date.now(),
-        }));
-    }
-
-    getPeerID(): string | null {
-        let v = localStorage.getItem(this.peerIDStorageKey);
-        if (v == null) {
-            return null;
-        }
-        return JSON.parse(v).peerID;
-    }
-
-    close() {
-        clearInterval(this.refreshTimer);
-    }
-}
 
 class Peerpool {
     // this peer
@@ -86,8 +23,8 @@ class Peerpool {
     }
 
     updateLanPeers(peers: string[]) {
-        let peerSet = new Set<string>();
-        for (let peer of peers) {
+        const peerSet = new Set<string>();
+        for (const peer of peers) {
             peerSet.add(peer);
         }
 
@@ -97,15 +34,15 @@ class Peerpool {
         });
         // console.log("activatePeers", this.activatePeers);
 
-        let lanPeerSet = new Set<string>();
-        for (let peer of this.activatePeers) {
+        const lanPeerSet = new Set<string>();
+        for (const peer of this.activatePeers) {
             lanPeerSet.add(peer.getId());
         }
 
         // peers not in lanpeers should be added to lanPeers
-        for (let p of peers) {
+        for (const p of peers) {
             if (!lanPeerSet.has(p) && p != this.peer.id) {
-                console.info("new peer found", p);
+                console.info(`new peer found: [${p}], this.peer.id = ${this.peer.id}`);
                 this.activatePeers.push(new UniPeer(this.peer, p));
             }
         }
@@ -114,7 +51,7 @@ class Peerpool {
     }
 
     updateConnectedPeer(peer: UniPeer) {
-        for (let peer of this.activatePeers) {
+        for (const peer of this.activatePeers) {
             if (peer.getId() == peer.getId()) {
                 return;
             }
@@ -131,15 +68,15 @@ class Peerpool {
     }
 
     getPeersId(): string[] {
-        let ids: string[] = [];
-        for (let peer of this.getPeers()) {
+        const ids: string[] = [];
+        for (const peer of this.getPeers()) {
             ids.push(peer.getId());
         }
         return ids
     }
 
     findPeer(id: string): UniPeer | null {
-        for (let peer of this.getPeers()) {
+        for (const peer of this.getPeers()) {
             if (peer.getId() == id) {
                 return peer;
             }
@@ -211,7 +148,7 @@ class UniPeer {
     }
 
     // send content to this UniPeer
-    send(content: MessageContent) {
+    send(msg: Message) {
         // const msg = new Message(this.peer.id, this.id, content);
         if (this.connection == undefined) {
             console.warn("DataConnection not set");
@@ -219,14 +156,13 @@ class UniPeer {
         }
 
         const payload = {
-            from: this.peer.id,
-            to: this.id,
-            createTime: Date.now(),
-            type: content.type,
-            data: content.data,
-            filename: content.filename,
+            from: msg.from,
+            to: msg.id,
+            createTime: msg.createTime,
+            type: msg.content.type,
+            data: msg.content.data,
+            filename: msg.content.filename,
         }
-
 
         this.connection.send(payload);
     }
@@ -243,11 +179,11 @@ class UniDiscovery {
     }
     async heartbeat(): Promise<string[]> {
         let ipv4: string = "";
-        let ipv6: string = "";
+        const ipv6: string = "";
 
         ipv4 = await publicIpv4({ timeout: 2000 });
 
-        let res = await fetch(`${this.host}/api/heartbeat`, {
+        const res = await fetch(`${this.host}/api/heartbeat`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -259,12 +195,18 @@ class UniDiscovery {
             }),
             signal: AbortSignal.timeout(300)
         });
-        let data = await res.json();
+        const data = await res.json();
         return data["data"]["peerIDs"];
     }
 }
 
-export class UniPeersManager {
+export abstract class UniPeersService {
+    abstract send(id: string, content: MessageContent): void;
+    abstract close(): void;
+    abstract getPeerId(): Promise<string>;
+}
+
+export class UniPeersManager extends UniPeersService {
     // my peer
     private peer: Peer;
 
@@ -283,19 +225,9 @@ export class UniPeersManager {
 
     // private peerIDStore: PeerIDStore = new PeerIDStore();
 
-    getPeersId(): string[] {
-        if (this.peerpool == undefined) {
-            return [];
-        }
-
-        let ids: string[] = [];
-        for (let peer of this.peerpool.getPeers()) {
-            ids.push(peer.getId());
-        }
-        return ids
-    }
-
     constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, msgCallback: ((msg: Message) => void) | undefined = undefined) {
+        super();
+
         this.setpeerID = setpeerID;
         this.setpeersID = setpeersID;
         this.msgCallback = msgCallback;
@@ -342,7 +274,7 @@ export class UniPeersManager {
         this.peer.on("connection", (conn) => {
             conn.on("open", () => {
                 console.info("connected by peer", conn.peer);
-                let uniPeer = new UniPeer(this.peer, conn.peer, conn);
+                const uniPeer = new UniPeer(this.peer, conn.peer, conn);
                 if (this.peerpool == undefined) {
                     console.warn("another peer connected before peerpool is set");
                 } else {
@@ -354,12 +286,18 @@ export class UniPeersManager {
                     console.warn(`received data type is not object: ${typeof data}`);
                     return;
                 }
-                let payload: any = data;
 
                 let msg: Message;
                 try {
-                    let content = new MessageContent(payload.type, payload.data, payload.filename);
-
+                    const payload = data as {
+                        from: string,
+                        to: string,
+                        createTime: number,
+                        type: MessageType,
+                        data: string,
+                        filename: string,
+                    };
+                    const content = new MessageContent(payload.type, payload.data, payload.filename);
                     msg = new Message(payload.from, payload.to, content, payload.createTime);
                 } catch (error) {
                     console.error(error);
@@ -383,6 +321,7 @@ export class UniPeersManager {
 
     }
 
+    // heartbeat should be called by DemoPeer
     async heartbeat() {
         if (this.discovery == undefined) {
             console.warn("discovery not set");
@@ -393,15 +332,7 @@ export class UniPeersManager {
         try {
             idList = await this.discovery.heartbeat();
         } catch (error) {
-            if (import.meta.env.MODE == "development" && import.meta.env.VITE_MOCK_API == "true") {
-                if (this.heartbeatTimer != undefined) {
-                    clearInterval(this.heartbeatTimer);
-                    this.heartbeatTimer = undefined;
-                }
-                this.setpeersID(["peer1", "peer2", "peer3"]);
-            } else {
-                console.error(error);
-            }
+            console.error(error);
             return;
         }
         if (this.peerpool != undefined) {
@@ -414,10 +345,14 @@ export class UniPeersManager {
             console.warn("peerpool not set");
             return;
         }
-        let peer = this.peerpool.findPeer(id);
+
+        const msg = new Message(this.peer.id, id, content);
+
+        this.msgCallback?.(msg);
+        const peer = this.peerpool.findPeer(id);
         if (peer != null) {
             console.info(`-> peer ${id}: ${content}`);
-            peer.send(content);
+            peer.send(msg);
         } else {
             console.warn("peer not found");
         }
@@ -436,12 +371,53 @@ export class UniPeersManager {
         if (this.peer.id == null) {
             // wait until peer id is set
             console.warn("Waiting for peer id to be set");
-            return new Promise((resolve, _) => {
+            return new Promise((resolve, ) => {
                 this.peer.on("open", () => {
                     resolve(this.peer.id);
                 });
             });
         }
         return this.peer.id;
+    }
+}
+
+export class UniPeersMockManager extends UniPeersService {
+    private setpeerID: React.Dispatch<React.SetStateAction<string>>;
+    private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
+
+    private msgCallback: ((msg: Message) => void) | undefined;
+
+    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, msgCallback: ((msg: Message) => void) | undefined = undefined) {
+        super();
+        this.setpeerID = setpeerID;
+        this.setpeersID = setpeersID;
+
+        this.msgCallback = msgCallback;
+
+        this.set();
+    }
+
+    private async set() {
+        await new Promise((resolve, ) => {
+            setTimeout(() => {
+                resolve(null);
+            }, 100);
+        });
+        console.log("setpeerID to mock")
+        this.setpeerID("mock-peer");
+        this.setpeersID(["peer1", "peer2", "peer3"]);
+    }
+
+    send(id: string, content: MessageContent): void {
+        this.msgCallback?.(new Message("mock-peer", id, content));
+        console.info(`-> peer ${id}: ${content}`);
+        this.msgCallback?.(new Message(id, "mock-peer", content));
+    }
+
+    close(): void {
+    }
+
+    async getPeerId(): Promise<string> {
+        return "mock-peer";
     }
 }

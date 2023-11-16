@@ -4,74 +4,91 @@ import githubIcon from "./assets/github.svg";
 import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
 
+import MessageBubble from "./MessageBubble";
+
 import { useState, useEffect, useRef } from "react";
-import { UniPeersManager } from "./peer.js";
+import {
+  UniPeersManager,
+  UniPeersMockManager,
+  UniPeersService,
+} from "./peer.js";
 import { Message, MessageContent, MessageType } from "./model";
 
 function App() {
+  const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
+
   const [peerID, setpeerID] = useState("");
 
   const [peersID, setpeersID] = useState<string[]>([]);
 
-  const [messageStorage, setmessageStorage] = useState<Map<string, Message[]>>(
-    new Map(),
-  );
+  const [messages, setMessages] = useState<Message[]>([]);
 
-  const messageStorageToString = () => {
-    let str = "";
-    messageStorage.forEach((value, key) => {
-      str += key + ": " + JSON.stringify(value) + "\n";
-    });
-    return str;
-  };
-
-  let insertMessage = async (msg: Message) => {
-    console.log("insert message", msg);
-    if (peerID == undefined) {
-      console.warn("peer id not set");
-      return;
+  const peerMessages = (selectedPeerID: string | null) => {
+    if (selectedPeerID == null) {
+      return <p>No Peer selected</p>;
     }
-    let peerId = msg.from == peerID ? msg.to : msg.from;
-    setmessageStorage(
-      new Map(
-        messageStorage.set(
-          peerId,
-          messageStorage.get(peerId)?.concat(msg) || [msg],
-        ),
-      ),
+
+    // selectedPeerID is `from` or `to`
+    const peerMessages = messages.filter(
+      (msg) => msg.from == selectedPeerID || msg.to == selectedPeerID,
     );
-    if (msg.content.type == MessageType.FILE) {
-      console.log("download file");
-      const downloadLink = document.createElement("a");
 
-      downloadLink.href = msg.content.data;
-
-      downloadLink.download = msg.content.filename;
-
-      downloadLink.click();
-
+    if (peerMessages.length == 0) {
+      return <p>No message with peer {selectedPeerID}</p>;
     }
-  };
 
-  // console.log("render peersID", peersID);
-  let peerCards = peersID.map((id) => {
     return (
-      <div
-        className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-xl bg-white py-2 shadow-md"
-        key={id}
-      >
-        <span className="mx-auto">{id}</span>
+      <div className="flex h-full w-full flex-col overflow-y-auto">
+        {peerMessages.map((msg) => {
+          return (
+            <div
+              className={`flex flex-col ${
+                msg.from == peerID ? "items-end" : "items-start"
+              }`}
+              key={msg.id}
+            >
+              <p className="text-xs text-gray-500">{msg.from}</p>
+              <div
+                className={`flex flex-col ${
+                  msg.from == peerID ? "items-end" : "items-start"
+                }`}
+              >
+                <MessageBubble message={msg} />
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
-  });
+  };
+
+  const insertMessage = (msg: Message) => {
+    setMessages((messages) => [...messages, msg]);
+
+    // if (msg.content.type == MessageType.FILE) {
+    //   console.log("download file");
+    //   const downloadLink = document.createElement("a");
+
+    //   downloadLink.href = msg.content.data;
+
+    //   downloadLink.download = msg.content.filename;
+
+    //   downloadLink.click();
+    // }
+  };
 
   const [postContent, setPostContent] = useState("");
 
-  const managerRef = useRef<UniPeersManager | null>(null);
+  const managerRef = useRef<UniPeersService | null>(null);
   useEffect(() => {
-    const manager = new UniPeersManager(setpeerID, setpeersID, insertMessage);
+    let manager: UniPeersService;
+    if (import.meta.env.VITE_MOCK_API != "true") {
+      manager = new UniPeersManager(setpeerID, setpeersID, insertMessage);
+    } else {
+      manager = new UniPeersMockManager(setpeerID, setpeersID, insertMessage);
+    }
+
     managerRef.current = manager;
-    console.log("useEffect");
     return function cleanup() {
       if (manager != null) {
         manager.close();
@@ -87,7 +104,12 @@ function App() {
     }
   };
 
-  const fileInputChange = async (event: any) => {
+  const fileInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (selectedPeerID == null) {
+      console.warn("no peer selected");
+      return;
+    }
+
     const target: HTMLInputElement = event.target;
     const files = target.files;
     if (files == null || files.length == 0) {
@@ -97,13 +119,11 @@ function App() {
     const file = files[0];
 
     if (managerRef.current != null) {
-      let id = managerRef.current.getPeersId()[0];
-      console.log("send to", id);
+      console.log("send to", selectedPeerID);
       console.log("Selected file:", file);
       const content = new MessageContent(MessageType.FILE);
       await content.setData(file);
-
-      managerRef.current.send(id, content);
+      managerRef.current.send(selectedPeerID, content);
     } else {
       console.log("manager is null");
     }
@@ -128,12 +148,26 @@ function App() {
           <div className="flex h-full w-[25rem] flex-col border-r-2 bg-[#e7f8ff] p-5 shadow-md">
             <span className="text-xl font-bold">UniDrop</span>
             <span className="text-xl">
-              <span className="font-bold">Uni</span> versal Air
+              <span className="font-bold">Uni</span>versal Air
               <span className="font-bold">Drop</span>.
             </span>
             <span className="text-xl font-bold">{peerID}</span>
 
-            <div className="flex flex-col">{peerCards}</div>
+            <div className="flex flex-col">
+              {peersID.map((id) => (
+                <div
+                  className={`mx-auto my-1.5 flex h-[4rem] w-[16rem] cursor-pointer rounded-xl bg-white py-2 shadow-md hover:bg-[#f3f3f3] ${
+                    selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
+                  } hover:shadow-lg`}
+                  key={id}
+                  onClick={() => {
+                    setSelectedPeerID(id);
+                  }}
+                >
+                  <span className="mx-auto">{id}</span>
+                </div>
+              ))}
+            </div>
 
             <div className="mt-auto flex max-h-[2.25rem] flex-1">
               <button className="mr-[1.25rem] flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md">
@@ -145,13 +179,21 @@ function App() {
             </div>
           </div>
 
-          {/* right side */}
+          {/* right*/}
           <div className="flex h-full w-full flex-col">
-            <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5"></div>
-            <div className="flex w-full flex-1 items-center justify-center">
-              <p>{messageStorageToString()}</p>
+            {/* right top */}
+            <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5">
+              {selectedPeerID}
             </div>
+
+            {/* right middle */}
+            <div className="flex w-full flex-1 items-center justify-center">
+              {peerMessages(selectedPeerID)}
+            </div>
+
+            {/* right bottom */}
             <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
+              {/* toolbox */}
               <div className="flex h-[2.5rem] w-full items-center justify-between">
                 <button
                   className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md"
@@ -166,30 +208,33 @@ function App() {
                   style={{ display: "none" }}
                   onChange={fileInputChange}
                 />
-
                 <button className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md">
                   <img className="h-4 w-4" src={imageIcon}></img>
                 </button>
               </div>
-
+              {/* input area */}
               <div className="flex h-full w-full flex-col items-center justify-center ">
                 <textarea
                   className="m-auto h-[calc(100%-2rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
                   placeholder="Type message here"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
+                  disabled={selectedPeerID == null}
                   onKeyUp={async (e) => {
+                    if (selectedPeerID == null) {
+                      console.warn("no peer selected");
+                      return;
+                    }
                     if (e.key === "Enter") {
                       if (managerRef.current != null) {
-                        let id = managerRef.current.getPeersId()[0];
-                        console.log("send to", id);
+                        console.log("send to", selectedPeerID);
 
                         const content = new MessageContent(MessageType.TEXT);
                         await content.setData(postContent);
 
-                        managerRef.current.send(id, content);
+                        managerRef.current.send(selectedPeerID, content);
                       } else {
-                        console.log("manager is null");
+                        console.warn("manager is null");
                       }
                       setPostContent("");
                     }

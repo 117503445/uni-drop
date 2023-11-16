@@ -35,10 +35,10 @@ devDependencies:
     specifier: ^18.2.7
     version: 18.2.14
   '@typescript-eslint/eslint-plugin':
-    specifier: ^6.0.0
+    specifier: ^6.9.0
     version: 6.9.0(@typescript-eslint/parser@6.9.0)(eslint@8.52.0)(typescript@5.2.2)
   '@typescript-eslint/parser':
-    specifier: ^6.0.0
+    specifier: ^6.9.0
     version: 6.9.0(eslint@8.52.0)(typescript@5.2.2)
   '@vitejs/plugin-react-swc':
     specifier: ^3.3.2
@@ -47,7 +47,7 @@ devDependencies:
     specifier: ^10.4.16
     version: 10.4.16(postcss@8.4.31)
   eslint:
-    specifier: ^8.45.0
+    specifier: ^8.52.0
     version: 8.52.0
   eslint-plugin-react-hooks:
     specifier: ^4.6.0
@@ -68,7 +68,7 @@ devDependencies:
     specifier: ^3.3.3
     version: 3.3.3
   typescript:
-    specifier: ^5.0.2
+    specifier: ^5.2.2
     version: 5.2.2
   vite:
     specifier: ^4.4.5

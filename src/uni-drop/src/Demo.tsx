@@ -8,7 +8,7 @@ function Demo() {
   const [anotherPeerID, setAnotherPeerID] = useState("");
   const [DiscoveredPeerIDs, setDiscoveredPeerIDs] = useState<string[]>([]);
 
-  const [connection, setConnection] = useState<DataConnection | any>(null);
+  const [connection, setConnection] = useState<DataConnection | null>(null);
 
   const [message, setMessage] = useState("");
 
@@ -81,7 +81,7 @@ function Demo() {
 
           const host = import.meta.env.VITE_BE_HOST;
           console.log("host", host);
-          let res = await fetch(`${host}/api/heartbeat`, {
+          const res = await fetch(`${host}/api/heartbeat`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -93,7 +93,7 @@ function Demo() {
             }),
           });
 
-          let data = await res.json();
+          const data = await res.json();
           setDiscoveredPeerIDs(data["data"]["peerIDs"]);
         }}
         className="block rounded-md border-2 border-gray-500"
