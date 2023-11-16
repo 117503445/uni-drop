@@ -104,7 +104,7 @@ function App() {
     }
   };
 
-  const fileInputChange = async (event: any) => {
+  const fileInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (selectedPeerID == null) {
       console.warn("no peer selected");
       return;

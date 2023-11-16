@@ -1,0 +1,63 @@
+// TODO: prior to use old peers id. If they are not available, use new peers id
+class PeerIDStore {
+    constructor() {
+        this.peerIDStorageKey = this.getPeerIDStorageKey();
+
+        this.refreshTimer = setInterval(() => {
+            this.refreshPeerIDStorage(this.peerIDStorageKey);
+        }, 1000);
+    }
+
+    private refreshTimer: number;
+    private peerIDStorageKey: string;
+
+    private refreshPeerIDStorage(peerIDKey: string) {
+        const v = JSON.parse(localStorage.getItem(peerIDKey) || "{}");
+        v.updatedTime = Date.now();
+        localStorage.setItem(peerIDKey, JSON.stringify(v));
+    }
+
+    private getPeerIDStorageKey() {
+        let peerIDKey = "";
+        let i = 0;
+        for (;;) {
+            const k = `peerID-${i}`;
+            const v = localStorage.getItem(k);
+            if (v == null) {
+                peerIDKey = k;
+                break;
+            } else {
+                const timeout = 5 * 1000;
+                if (JSON.parse(v).updatedTime < Date.now() - timeout) {
+                    // expired, reuse this key
+                    peerIDKey = k;
+                    break;
+                }
+            }
+            i++;
+        }
+        console.log("peerIDKey", peerIDKey);
+        this.peerIDStorageKey = peerIDKey;
+        this.refreshPeerIDStorage(peerIDKey);
+        return peerIDKey;
+    }
+
+    setPeerID(peerID: string) {
+        localStorage.setItem(this.peerIDStorageKey, JSON.stringify({
+            peerID: peerID,
+            updatedTime: Date.now(),
+        }));
+    }
+
+    getPeerID(): string | null {
+        const v = localStorage.getItem(this.peerIDStorageKey);
+        if (v == null) {
+            return null;
+        }
+        return JSON.parse(v).peerID;
+    }
+
+    close() {
+        clearInterval(this.refreshTimer);
+    }
+}

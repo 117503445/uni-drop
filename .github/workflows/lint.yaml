@@ -1,0 +1,25 @@
+# when pull request opened, run lint.
+# Only run on pull request opened, not on push.
+# Only lint pass, pull request could be merged.
+
+name: Lint
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+    runs-on: ubuntu-latest
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      # https://github.com/pnpm/action-setup
+      - name: install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.1
+      - name: lint
+        run: cd ./src/uni-drop && pnpm install && pnpm run lint
