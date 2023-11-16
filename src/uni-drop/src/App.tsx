@@ -3,6 +3,7 @@ import settingIcon from "./assets/setting.svg";
 import githubIcon from "./assets/github.svg";
 import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
+import addIcon from "./assets/add.svg";
 
 import MessageBubble from "./MessageBubble";
 
@@ -138,6 +139,7 @@ function App() {
             </div>
 
             <div className="mt-auto flex max-h-[2.25rem] flex-1">
+              {/* setting button */}
               <button
                 className="mr-[1.25rem] flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md"
                 onClick={() => {
@@ -146,13 +148,27 @@ function App() {
               >
                 <img src={settingIcon}></img>
               </button>
+
+              {/* github button */}
               <button
-                className="flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white fill-none shadow-md"
+                className="mr-[3rem] flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white fill-none shadow-md"
                 onClick={() => {
                   window.open("https://github.com/117503445/uni-drop");
                 }}
               >
                 <img src={githubIcon}></img>
+              </button>
+
+              {/* add button */}
+              <button
+                className="flex h-[2.25rem] w-[auto] items-center rounded-md bg-white fill-none shadow-md"
+                onClick={() => {
+                  alert("unimplemented");
+                }}
+              >
+                <img className="mx-2" src={addIcon}></img>
+                <div className="min-w-max mr-4">Add Friend</div>
+                
               </button>
             </div>
           </div>
