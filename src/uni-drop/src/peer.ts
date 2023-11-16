@@ -1,4 +1,4 @@
-import { DataConnection, MsgPack, Peer } from "peerjs";
+import { DataConnection, Peer } from "peerjs";
 import { publicIpv4 } from "public-ip";
 import React from "react";
 import { Message, MessageContent } from "./model";
@@ -378,7 +378,8 @@ export class UniPeersManager extends UniPeersService {
 
     }
 
-    private async heartbeat() {
+    // heartbeat should be called by DemoPeer
+    async heartbeat() {
         if (this.discovery == undefined) {
             console.warn("discovery not set");
             return;
@@ -438,8 +439,6 @@ export class UniPeersManager extends UniPeersService {
 }
 
 export class UniPeersMockManager extends UniPeersService {
-    private peersID: string[] = ["peer1", "peer2", "peer3"];
-
     private setpeerID: React.Dispatch<React.SetStateAction<string>>;
     private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
 
