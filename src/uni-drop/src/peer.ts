@@ -201,6 +201,7 @@ class UniDiscovery {
 }
 
 export abstract class UniPeersService {
+    // send content to peer with id, non-blocking
     abstract send(id: string, content: MessageContent): void;
     abstract close(): void;
     abstract getPeerId(): Promise<string>;

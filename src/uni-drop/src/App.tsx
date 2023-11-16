@@ -23,6 +23,19 @@ function App() {
 
   const [messages, setMessages] = useState<Message[]>([]);
 
+  const sendMessages = (content: MessageContent) => {
+    if (selectedPeerID == null) {
+      console.warn("no peer selected");
+      return;
+    }
+    if (managerRef.current == null) {
+      console.warn("manager is null");
+      return;
+    }
+    console.log("send to", selectedPeerID);
+    managerRef.current.send(selectedPeerID, content);
+  };
+
   const peerMessages = (selectedPeerID: string | null) => {
     if (selectedPeerID == null) {
       return <p>No Peer selected</p>;
@@ -104,29 +117,24 @@ function App() {
     }
   };
 
-  const fileInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (selectedPeerID == null) {
-      console.warn("no peer selected");
-      return;
-    }
-
+  const fileInputChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const target: HTMLInputElement = event.target;
     const files = target.files;
     if (files == null || files.length == 0) {
-      console.warn("no file selected");
+      console.info("no file selected");
       return;
+    }
+    if (files.length > 1) {
+      console.warn("multiple files selected, only use the first one");
     }
     const file = files[0];
 
-    if (managerRef.current != null) {
-      console.log("send to", selectedPeerID);
-      console.log("Selected file:", file);
-      const content = new MessageContent(MessageType.FILE);
-      await content.setData(file);
-      managerRef.current.send(selectedPeerID, content);
-    } else {
-      console.log("manager is null");
-    }
+    const content = new MessageContent(MessageType.FILE);
+    await content.setData(file);
+
+    sendMessages(content);
   };
 
   return (
@@ -221,21 +229,10 @@ function App() {
                   onChange={(e) => setPostContent(e.target.value)}
                   disabled={selectedPeerID == null}
                   onKeyUp={async (e) => {
-                    if (selectedPeerID == null) {
-                      console.warn("no peer selected");
-                      return;
-                    }
                     if (e.key === "Enter") {
-                      if (managerRef.current != null) {
-                        console.log("send to", selectedPeerID);
-
-                        const content = new MessageContent(MessageType.TEXT);
-                        await content.setData(postContent);
-
-                        managerRef.current.send(selectedPeerID, content);
-                      } else {
-                        console.warn("manager is null");
-                      }
+                      const content = new MessageContent(MessageType.TEXT);
+                      await content.setData(postContent);
+                      sendMessages(content);
                       setPostContent("");
                     }
                   }}
