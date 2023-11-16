@@ -149,7 +149,7 @@ function App() {
               <button
                 className="flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white fill-none shadow-md"
                 onClick={() => {
-                  alert("unimplemented");
+                  window.open("https://github.com/117503445/uni-drop");
                 }}
               >
                 <img src={githubIcon}></img>
