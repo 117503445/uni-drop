@@ -75,20 +75,7 @@ function App() {
     );
   };
 
-  const insertMessage = (msg: Message) => {
-    setMessages((messages) => [...messages, msg]);
 
-    // if (msg.content.type == MessageType.FILE) {
-    //   console.log("download file");
-    //   const downloadLink = document.createElement("a");
-
-    //   downloadLink.href = msg.content.data;
-
-    //   downloadLink.download = msg.content.filename;
-
-    //   downloadLink.click();
-    // }
-  };
 
   const [postContent, setPostContent] = useState("");
 
@@ -96,13 +83,19 @@ function App() {
   useEffect(() => {
     let manager: UniPeersService;
     if (import.meta.env.VITE_MOCK_API != "true") {
-      manager = new UniPeersManager(setpeerID, setpeersID, insertMessage);
+      manager = new UniPeersManager(setpeerID, setpeersID, setMessages);
     } else {
-      manager = new UniPeersMockManager(setpeerID, setpeersID, insertMessage);
+      manager = new UniPeersMockManager(setpeerID, setpeersID, setMessages);
+
+      manager.send("peer1", new MessageContent(MessageType.TEXT, "hello"));
+      setSelectedPeerID("peer1");
     }
 
     managerRef.current = manager;
     return function cleanup() {
+      setpeerID("");
+      setpeersID([]);
+      setMessages([]);
       if (manager != null) {
         manager.close();
       }
