@@ -1,4 +1,5 @@
 export class Message {
+    id: string
     // milisecond timestamp
     createTime: number;
     from: string;
@@ -8,6 +9,8 @@ export class Message {
         if (!from || !to || !content) {
             throw new Error('from, to and content are required');
         }
+
+        this.id = Math.random().toString(36).substring(2, 9);
         this.createTime = createTime || Date.now();
         this.from = from;
         this.to = to;
@@ -28,7 +31,7 @@ export class MessageContent {
 
     filename: string = "";
 
-    ready = false;
+    private ready = false;
 
     constructor(type: MessageType, data?: string, filename?: string) {
         this.type = type;
@@ -68,5 +71,14 @@ export class MessageContent {
         } else {
             throw new Error('data must be string or blob');
         }
+    }
+
+    toString() {
+        return JSON.stringify(this, (_, v) => {
+            if (v === null || v === undefined) {
+                return undefined;
+            }
+            return v;
+        });
     }
 }
