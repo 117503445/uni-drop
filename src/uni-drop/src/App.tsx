@@ -16,12 +16,12 @@ import { Message, MessageContent, MessageType } from "./model";
 
 function App() {
   const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
-
   const [peerID, setpeerID] = useState("");
-
   const [peersID, setpeersID] = useState<string[]>([]);
-
   const [messages, setMessages] = useState<Message[]>([]);
+  const [postContent, setPostContent] = useState("");
+  const managerRef = useRef<UniPeersService | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sendMessages = (content: MessageContent) => {
     if (selectedPeerID == null) {
@@ -75,9 +75,6 @@ function App() {
     );
   };
 
-  const [postContent, setPostContent] = useState("");
-
-  const managerRef = useRef<UniPeersService | null>(null);
   useEffect(() => {
     let manager: UniPeersService;
     if (import.meta.env.VITE_MOCK_API != "true") {
@@ -99,34 +96,6 @@ function App() {
       }
     };
   }, []);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const btnFileClick = () => {
-    if (fileInputRef.current != null) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const fileInputChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const target: HTMLInputElement = event.target;
-    const files = target.files;
-    if (files == null || files.length == 0) {
-      console.info("no file selected");
-      return;
-    }
-    if (files.length > 1) {
-      console.warn("multiple files selected, only use the first one");
-    }
-    const file = files[0];
-
-    const content = new MessageContent(MessageType.FILE);
-    await content.setData(file);
-
-    sendMessages(content);
-  };
 
   return (
     <div>
@@ -169,10 +138,20 @@ function App() {
             </div>
 
             <div className="mt-auto flex max-h-[2.25rem] flex-1">
-              <button className="mr-[1.25rem] flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md">
+              <button
+                className="mr-[1.25rem] flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md"
+                onClick={() => {
+                  alert("unimplemented");
+                }}
+              >
                 <img src={settingIcon}></img>
               </button>
-              <button className="flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white fill-none shadow-md">
+              <button
+                className="flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white fill-none shadow-md"
+                onClick={() => {
+                  alert("unimplemented");
+                }}
+              >
                 <img src={githubIcon}></img>
               </button>
             </div>
@@ -196,7 +175,11 @@ function App() {
               <div className="flex h-[2.5rem] w-full items-center justify-between">
                 <button
                   className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md"
-                  onClick={btnFileClick}
+                  onClick={() => {
+                    if (fileInputRef.current != null) {
+                      fileInputRef.current.click();
+                    }
+                  }}
                 >
                   <img className="h-4 w-4" src={fileIcon}></img>
                 </button>
@@ -205,9 +188,34 @@ function App() {
                   ref={fileInputRef}
                   // TODO: multiple
                   style={{ display: "none" }}
-                  onChange={fileInputChange}
+                  onChange={async (
+                    event: React.ChangeEvent<HTMLInputElement>,
+                  ) => {
+                    const target: HTMLInputElement = event.target;
+                    const files = target.files;
+                    if (files == null || files.length == 0) {
+                      console.info("no file selected");
+                      return;
+                    }
+                    if (files.length > 1) {
+                      console.warn(
+                        "multiple files selected, only use the first one",
+                      );
+                    }
+                    const file = files[0];
+
+                    const content = new MessageContent(MessageType.FILE);
+                    await content.setData(file);
+
+                    sendMessages(content);
+                  }}
                 />
-                <button className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md">
+                <button
+                  className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md"
+                  onClick={() => {
+                    alert("unimplemented");
+                  }}
+                >
                   <img className="h-4 w-4" src={imageIcon}></img>
                 </button>
               </div>

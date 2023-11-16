@@ -51,8 +51,8 @@ class Peerpool {
     }
 
     updateConnectedPeer(peer: UniPeer) {
-        for (const peer of this.activatePeers) {
-            if (peer.getId() == peer.getId()) {
+        for (const p of this.activatePeers) {
+            if (p.getId() == peer.getId()) {
                 return;
             }
         }
