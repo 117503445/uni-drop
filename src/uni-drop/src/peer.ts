@@ -1,4 +1,4 @@
-import { DataConnection, Peer } from "peerjs";
+import { DataConnection, MsgPack, Peer } from "peerjs";
 import { publicIpv4 } from "public-ip";
 import React from "react";
 import { Message, MessageContent } from "./model";
@@ -264,7 +264,17 @@ class UniDiscovery {
     }
 }
 
-export class UniPeersManager {
+export abstract class UniPeersService {
+    // TODO: Delete this
+    abstract getPeersId(): string[];
+    abstract send(id: string, content: MessageContent): void;
+    abstract close(): void;
+    abstract getPeerId(): Promise<string>;
+    // TODO: Delete this
+    abstract heartbeat(): void;
+}
+
+export class UniPeersManager extends UniPeersService {
     // my peer
     private peer: Peer;
 
@@ -296,6 +306,8 @@ export class UniPeersManager {
     }
 
     constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, msgCallback: ((msg: Message) => void) | undefined = undefined) {
+        super();
+
         this.setpeerID = setpeerID;
         this.setpeersID = setpeersID;
         this.msgCallback = msgCallback;
@@ -393,15 +405,7 @@ export class UniPeersManager {
         try {
             idList = await this.discovery.heartbeat();
         } catch (error) {
-            if (import.meta.env.MODE == "development" && import.meta.env.VITE_MOCK_API == "true") {
-                if (this.heartbeatTimer != undefined) {
-                    clearInterval(this.heartbeatTimer);
-                    this.heartbeatTimer = undefined;
-                }
-                this.setpeersID(["peer1", "peer2", "peer3"]);
-            } else {
-                console.error(error);
-            }
+            console.error(error);
             return;
         }
         if (this.peerpool != undefined) {
@@ -443,5 +447,39 @@ export class UniPeersManager {
             });
         }
         return this.peer.id;
+    }
+}
+
+export class UniPeersMockManager extends UniPeersService{
+    private peersID: string[] = [];
+    private msgCallback: ((msg: Message) => void) | undefined;
+
+    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, msgCallback: ((msg: Message) => void) | undefined = undefined) {
+        super();
+        console.info("init mock peer");
+        setpeerID("mock-peer");
+        setpeersID(["peer1", "peer2", "peer3"]);
+        this.msgCallback = msgCallback;
+    }
+
+    getPeersId(): string[] {
+        return this.peersID;
+    }
+
+    send(id: string, content: MessageContent): void {
+        console.info(`-> peer ${id}: ${content}`);
+        this.msgCallback?.(new Message(id, "mock-peer", content));   
+    }
+
+    close(): void {
+        console.info(`closing mock peer`);
+    }
+
+    async getPeerId(): Promise<string> {
+        return "mock-peer";
+    }
+
+    heartbeat(): void {
+        
     }
 }

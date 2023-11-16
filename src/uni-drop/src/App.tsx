@@ -5,7 +5,7 @@ import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
 
 import { useState, useEffect, useRef } from "react";
-import { UniPeersManager } from "./peer.js";
+import { UniPeersManager, UniPeersMockManager, UniPeersService } from "./peer.js";
 import { Message, MessageContent, MessageType } from "./model";
 
 function App() {
@@ -49,7 +49,6 @@ function App() {
       downloadLink.download = msg.content.filename;
 
       downloadLink.click();
-
     }
   };
 
@@ -67,9 +66,16 @@ function App() {
 
   const [postContent, setPostContent] = useState("");
 
-  const managerRef = useRef<UniPeersManager | null>(null);
+  const managerRef = useRef<UniPeersService | null>(null);
   useEffect(() => {
-    const manager = new UniPeersManager(setpeerID, setpeersID, insertMessage);
+    let manager: UniPeersService;
+    if (import.meta.env.VITE_MOCK_API != "true") {
+      manager = new UniPeersManager(setpeerID, setpeersID, insertMessage);
+    } else {
+      console.log("use mock manager");
+      manager = new UniPeersMockManager(setpeerID, setpeersID, insertMessage);
+    }
+
     managerRef.current = manager;
     console.log("useEffect");
     return function cleanup() {
@@ -128,7 +134,7 @@ function App() {
           <div className="flex h-full w-[25rem] flex-col border-r-2 bg-[#e7f8ff] p-5 shadow-md">
             <span className="text-xl font-bold">UniDrop</span>
             <span className="text-xl">
-              <span className="font-bold">Uni</span> versal Air
+              <span className="font-bold">Uni</span>versal Air
               <span className="font-bold">Drop</span>.
             </span>
             <span className="text-xl font-bold">{peerID}</span>
