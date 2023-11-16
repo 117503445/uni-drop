@@ -75,8 +75,6 @@ function App() {
     );
   };
 
-
-
   const [postContent, setPostContent] = useState("");
 
   const managerRef = useRef<UniPeersService | null>(null);
@@ -221,8 +219,36 @@ function App() {
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
                   disabled={selectedPeerID == null}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && postContent.length == 0) {
+                      e.preventDefault();
+                    }
+                  }}
                   onKeyUp={async (e) => {
                     if (e.key === "Enter") {
+                      if (postContent.length == 0) {
+                        // console.warn("postContent.length == 0");
+                        return;
+                      } else if (postContent.length == 1) {
+                        if (postContent[0] != "\n") {
+                          console.warn(
+                            "postContent.length == 1 && postContent[0] != '\\n'",
+                          );
+                        }
+                        // type 'enter' when textarea is empty
+                        setPostContent("");
+                        return;
+                      }
+                      // remove the last '\n'
+                      if (postContent[postContent.length - 1] == "\n") {
+                        setPostContent(postContent.slice(0, -1));
+                      } else {
+                        console.warn(
+                          "postContent[postContent.length - 1] != '\\n'",
+                          postContent,
+                        );
+                      }
+
                       const content = new MessageContent(MessageType.TEXT);
                       await content.setData(postContent);
                       sendMessages(content);
