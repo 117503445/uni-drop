@@ -13,7 +13,6 @@ import {
 import { Message, MessageContent, MessageType } from "./model";
 
 function App() {
-
   const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
 
   const [peerID, setpeerID] = useState("");
@@ -135,7 +134,9 @@ function App() {
             <div className="flex flex-col">
               {peersID.map((id) => (
                 <div
-                  className={`mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-xl bg-white py-2 shadow-md hover:bg-[#f3f3f3] cursor-pointer ${selectedPeerID == id ? "border-[#1d93ab] border-2" : ""} hover:shadow-lg`}
+                  className={`mx-auto my-1.5 flex h-[4rem] w-[16rem] cursor-pointer rounded-xl bg-white py-2 shadow-md hover:bg-[#f3f3f3] ${
+                    selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
+                  } hover:shadow-lg`}
                   key={id}
                   onClick={() => {
                     setSelectedPeerID(id);
@@ -156,9 +157,13 @@ function App() {
             </div>
           </div>
 
-          {/* right side */}
+          {/* right*/}
           <div className="flex h-full w-full flex-col">
-            <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5"></div>
+            {/* right top */}
+            <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5">
+              {selectedPeerID}
+            </div>
+            {/* right middle */}
             <div className="flex w-full flex-1 items-center justify-center">
               <p>{messageStorageToString()}</p>
             </div>
@@ -183,24 +188,29 @@ function App() {
                 </button>
               </div>
 
+              {/* right bottom */}
               <div className="flex h-full w-full flex-col items-center justify-center ">
                 <textarea
                   className="m-auto h-[calc(100%-2rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
                   placeholder="Type message here"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
+                  disabled={selectedPeerID == null}
                   onKeyUp={async (e) => {
+                    if (selectedPeerID == null) {
+                      console.warn("no peer selected");
+                      return;
+                    }
                     if (e.key === "Enter") {
                       if (managerRef.current != null) {
-                        let id = managerRef.current.getPeersId()[0];
-                        console.log("send to", id);
+                        console.log("send to", selectedPeerID);
 
                         const content = new MessageContent(MessageType.TEXT);
                         await content.setData(postContent);
 
-                        managerRef.current.send(id, content);
+                        managerRef.current.send(selectedPeerID, content);
                       } else {
-                        console.log("manager is null");
+                        console.warn("manager is null");
                       }
                       setPostContent("");
                     }
