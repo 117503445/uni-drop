@@ -5,10 +5,17 @@ import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
 
 import { useState, useEffect, useRef } from "react";
-import { UniPeersManager, UniPeersMockManager, UniPeersService } from "./peer.js";
+import {
+  UniPeersManager,
+  UniPeersMockManager,
+  UniPeersService,
+} from "./peer.js";
 import { Message, MessageContent, MessageType } from "./model";
 
 function App() {
+
+  const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
+
   const [peerID, setpeerID] = useState("");
 
   const [peersID, setpeersID] = useState<string[]>([]);
@@ -52,18 +59,6 @@ function App() {
     }
   };
 
-  // console.log("render peersID", peersID);
-  let peerCards = peersID.map((id) => {
-    return (
-      <div
-        className="mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-xl bg-white py-2 shadow-md"
-        key={id}
-      >
-        <span className="mx-auto">{id}</span>
-      </div>
-    );
-  });
-
   const [postContent, setPostContent] = useState("");
 
   const managerRef = useRef<UniPeersService | null>(null);
@@ -72,12 +67,10 @@ function App() {
     if (import.meta.env.VITE_MOCK_API != "true") {
       manager = new UniPeersManager(setpeerID, setpeersID, insertMessage);
     } else {
-      console.log("use mock manager");
       manager = new UniPeersMockManager(setpeerID, setpeersID, insertMessage);
     }
 
     managerRef.current = manager;
-    console.log("useEffect");
     return function cleanup() {
       if (manager != null) {
         manager.close();
@@ -139,7 +132,19 @@ function App() {
             </span>
             <span className="text-xl font-bold">{peerID}</span>
 
-            <div className="flex flex-col">{peerCards}</div>
+            <div className="flex flex-col">
+              {peersID.map((id) => (
+                <div
+                  className={`mx-auto my-1.5 flex h-[4rem] w-[16rem] rounded-xl bg-white py-2 shadow-md hover:bg-[#f3f3f3] cursor-pointer ${selectedPeerID == id ? "border-[#1d93ab] border-2" : ""} hover:shadow-lg`}
+                  key={id}
+                  onClick={() => {
+                    setSelectedPeerID(id);
+                  }}
+                >
+                  <span className="mx-auto">{id}</span>
+                </div>
+              ))}
+            </div>
 
             <div className="mt-auto flex max-h-[2.25rem] flex-1">
               <button className="mr-[1.25rem] flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md">

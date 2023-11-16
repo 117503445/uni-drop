@@ -451,12 +451,11 @@ export class UniPeersManager extends UniPeersService {
 }
 
 export class UniPeersMockManager extends UniPeersService{
-    private peersID: string[] = [];
+    private peersID: string[] = ["peer1", "peer2", "peer3"];
     private msgCallback: ((msg: Message) => void) | undefined;
 
     constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, msgCallback: ((msg: Message) => void) | undefined = undefined) {
         super();
-        console.info("init mock peer");
         setpeerID("mock-peer");
         setpeersID(["peer1", "peer2", "peer3"]);
         this.msgCallback = msgCallback;
@@ -472,7 +471,6 @@ export class UniPeersMockManager extends UniPeersService{
     }
 
     close(): void {
-        console.info(`closing mock peer`);
     }
 
     async getPeerId(): Promise<string> {
