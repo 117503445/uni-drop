@@ -2,6 +2,7 @@ import "./Demo.css";
 import { useState, useEffect, useRef } from "react";
 
 import { UniPeersManager } from "./peer.js";
+import { Message } from "./model.js";
 
 
 function DemoPeer() {
@@ -14,11 +15,11 @@ function DemoPeer() {
 
   const managerRef = useRef<UniPeersManager | null>(null);
 
-  // const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
 
   useEffect(() => {
-    const manager = new UniPeersManager(setpeerID, setpeersID);
+    const manager = new UniPeersManager(setpeerID, setpeersID, setMessages);
     managerRef.current = manager;
     return function cleanup() {
       if (manager != null) {
@@ -96,19 +97,19 @@ function DemoPeer() {
         Send
       </button> */}
 
-      {/* <p className="mt-10 min-h-[50px] max-w-[500px] rounded-md border-2 border-gray-500">
+      <p className="mt-10 min-h-[50px] max-w-[500px] rounded-md border-2 border-gray-500">
         {
           // messages
           messages.map((message, index) => {
             return (
               <span key={index}>
-                {message}
+                {message.content.data}
                 <br />
               </span>
             );
           })
         }
-      </p> */}
+      </p>
 
       {/* button to nagivate to App page, always in left bottom */}
       <button
