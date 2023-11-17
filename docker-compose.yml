@@ -4,13 +4,15 @@ services:
     build:
       context: ./src/uni-drop
       dockerfile: Dockerfile_dev
-
+    ports:
+      - 5173:5173
     container_name: uni-drop-dev
     volumes:
         - './src/uni-drop:/workspace/uni-drop'
         - './dev-data/uni-drop/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
+    entrypoint: ./build-run.sh
   peer-discovery-dev:
     build:
       context: ./src/peer-discovery
@@ -23,7 +25,7 @@ services:
         - './dev-data/peer-discovery/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
-    entrypoint: cargo run
+    entrypoint: cargo watch -x run
   mongo:
     image: mongo
     # ports:
