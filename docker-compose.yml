@@ -15,12 +15,15 @@ services:
     build:
       context: ./src/peer-discovery
       dockerfile: Dockerfile_dev
+    ports:
+      - 8080:8080
     container_name: peer-discovery-dev
     volumes:
         - './src/peer-discovery:/workspace/peer-discovery'
         - './dev-data/peer-discovery/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
+    entrypoint: cargo run
   mongo:
     image: mongo
     # ports:
