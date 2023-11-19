@@ -4,23 +4,40 @@ services:
     build:
       context: ./src/uni-drop
       dockerfile: Dockerfile_dev
-
+    ports:
+      - 5173:5173
     container_name: uni-drop-dev
     volumes:
         - './src/uni-drop:/workspace/uni-drop'
         - './dev-data/uni-drop/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
+    entrypoint: ./build-run.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+      start_period: 5m
   peer-discovery-dev:
     build:
       context: ./src/peer-discovery
       dockerfile: Dockerfile_dev
+    ports:
+      - 8080:8080
     container_name: peer-discovery-dev
     volumes:
         - './src/peer-discovery:/workspace/peer-discovery'
         - './dev-data/peer-discovery/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
+    entrypoint: cargo watch -x run
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+      start_period: 5m
   mongo:
     image: mongo
     # ports:

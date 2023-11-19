@@ -51,8 +51,8 @@ class Peerpool {
     }
 
     updateConnectedPeer(peer: UniPeer) {
-        for (const peer of this.activatePeers) {
-            if (peer.getId() == peer.getId()) {
+        for (const p of this.activatePeers) {
+            if (p.getId() == peer.getId()) {
                 return;
             }
         }
@@ -201,6 +201,7 @@ class UniDiscovery {
 }
 
 export abstract class UniPeersService {
+    // send content to peer with id, non-blocking
     abstract send(id: string, content: MessageContent): void;
     abstract close(): void;
     abstract getPeerId(): Promise<string>;
@@ -221,16 +222,18 @@ export class UniPeersManager extends UniPeersService {
 
     private discovery: UniDiscovery | undefined = undefined;
 
-    private msgCallback: ((msg: Message) => void) | undefined;
+    private setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+
+    private messages: Message[] = [];
 
     // private peerIDStore: PeerIDStore = new PeerIDStore();
 
-    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, msgCallback: ((msg: Message) => void) | undefined = undefined) {
+    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, setMessages: React.Dispatch<React.SetStateAction<Message[]>>) {
         super();
 
         this.setpeerID = setpeerID;
         this.setpeersID = setpeersID;
-        this.msgCallback = msgCallback;
+        this.setMessages = setMessages;
 
         // TODO: use peerIDStore
         // let peerID = this.peerIDStore.getPeerID();
@@ -305,7 +308,8 @@ export class UniPeersManager extends UniPeersService {
                 }
 
                 console.info(`<- peer ${conn.peer}: ${msg}`);
-                this.msgCallback?.(msg);
+                this.messages.push(msg);
+                this.setMessages(this.messages);
             });
         });
 
@@ -348,7 +352,8 @@ export class UniPeersManager extends UniPeersService {
 
         const msg = new Message(this.peer.id, id, content);
 
-        this.msgCallback?.(msg);
+        this.messages.push(msg);
+        this.setMessages(this.messages);
         const peer = this.peerpool.findPeer(id);
         if (peer != null) {
             console.info(`-> peer ${id}: ${content}`);
@@ -371,7 +376,7 @@ export class UniPeersManager extends UniPeersService {
         if (this.peer.id == null) {
             // wait until peer id is set
             console.warn("Waiting for peer id to be set");
-            return new Promise((resolve, ) => {
+            return new Promise((resolve,) => {
                 this.peer.on("open", () => {
                     resolve(this.peer.id);
                 });
@@ -385,20 +390,22 @@ export class UniPeersMockManager extends UniPeersService {
     private setpeerID: React.Dispatch<React.SetStateAction<string>>;
     private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
 
-    private msgCallback: ((msg: Message) => void) | undefined;
+    private setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 
-    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, msgCallback: ((msg: Message) => void) | undefined = undefined) {
+    private messages: Message[] = [];
+
+    constructor(setpeerID: React.Dispatch<React.SetStateAction<string>>, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, setMessages: React.Dispatch<React.SetStateAction<Message[]>>) {
         super();
         this.setpeerID = setpeerID;
         this.setpeersID = setpeersID;
 
-        this.msgCallback = msgCallback;
+        this.setMessages = setMessages;
 
         this.set();
     }
 
     private async set() {
-        await new Promise((resolve, ) => {
+        await new Promise((resolve,) => {
             setTimeout(() => {
                 resolve(null);
             }, 100);
@@ -409,9 +416,10 @@ export class UniPeersMockManager extends UniPeersService {
     }
 
     send(id: string, content: MessageContent): void {
-        this.msgCallback?.(new Message("mock-peer", id, content));
+        this.messages.push(new Message("mock-peer", id, content));
         console.info(`-> peer ${id}: ${content}`);
-        this.msgCallback?.(new Message(id, "mock-peer", content));
+        this.messages.push(new Message(id, "mock-peer", content));
+        this.setMessages(this.messages);
     }
 
     close(): void {
