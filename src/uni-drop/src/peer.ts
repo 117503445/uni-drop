@@ -154,6 +154,13 @@ class UniPeer {
                 console.error(error);
                 return;
             }
+
+            if (msg.to != this.peer.id) {
+                console.warn(`received msg.to is not my peer id: ${msg.to}`);
+            }else if (msg.from != this.id) {
+                console.warn(`received msg.from is not peer id: ${msg.from}`);
+            }
+
             this.msgReceiver(msg);
         });
     }
