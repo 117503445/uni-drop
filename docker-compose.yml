@@ -13,6 +13,12 @@ services:
     stdin_open: true
     tty: true
     entrypoint: ./build-run.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+      start_period: 5m
   peer-discovery-dev:
     build:
       context: ./src/peer-discovery
@@ -26,6 +32,12 @@ services:
     stdin_open: true
     tty: true
     entrypoint: cargo watch -x run
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+      start_period: 5m
   mongo:
     image: mongo
     # ports:
