@@ -16,10 +16,13 @@ class Peerpool {
 
     private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
 
+    private msgReceiver: (peerID: string, msg: Message) => void;
 
-    constructor(peer: Peer, setpeersID: React.Dispatch<React.SetStateAction<string[]>>) {
+
+    constructor(peer: Peer, setpeersID: React.Dispatch<React.SetStateAction<string[]>>, msgReceiver: (peerID: string, msg: Message) => void) {
         this.peer = peer;
         this.setpeersID = setpeersID;
+        this.msgReceiver = msgReceiver;
     }
 
     updateLanPeers(peers: string[]) {
@@ -43,23 +46,31 @@ class Peerpool {
         for (const p of peers) {
             if (!lanPeerSet.has(p) && p != this.peer.id) {
                 console.info(`new peer found: [${p}], this.peer.id = ${this.peer.id}`);
-                this.activatePeers.push(new UniPeer(this.peer, p));
+                this.activatePeers.push(new UniPeer(this.peer, p,
+                    (msg: Message) => {
+                        this.msgReceiver(p, msg);
+                    }
+                ));
             }
         }
 
         this.setpeersID(this.getPeersId());
     }
 
-    updateConnectedPeer(peer: UniPeer) {
+    updateConnectedPeer(conn: DataConnection) {
+        console.info("connected by new peer", conn.peer);
+
         for (const p of this.activatePeers) {
-            if (p.getId() == peer.getId()) {
+            if (p.getId() == conn.peer) {
+                p.setConnection(conn);
                 return;
             }
         }
 
-        console.info("connected by new peer", peer.getId());
-        this.activatePeers.push(peer);
-
+        this.activatePeers.push(new UniPeer(this.peer, conn.peer,
+            (msg: Message) => {
+                this.msgReceiver(conn.peer, msg);
+            }, conn));
         this.setpeersID(this.getPeersId());
     }
 
@@ -93,10 +104,14 @@ class UniPeer {
     // my peer
     private peer: Peer;
     private connection: DataConnection | undefined = undefined;
+    private msgReceiver: (msg: Message) => void;
 
-    constructor(peer: Peer, id: string, connection: DataConnection | undefined = undefined) {
+    constructor(peer: Peer, id: string, msgReceiver: (msg: Message) => void = () => { },
+
+        connection: DataConnection | undefined = undefined) {
         this.peer = peer;
         this.id = id;
+        this.msgReceiver = msgReceiver;
 
         if (connection == undefined) {
             this.connect();
@@ -110,29 +125,36 @@ class UniPeer {
         return this.id;
     }
 
-    private setConnection(connection: DataConnection) {
+    setConnection(connection: DataConnection) {
         if (this.connection != undefined) {
             console.warn("DataConnection already set");
+            connection.close();
             return;
         }
         this.connection = connection;
+        connection.on("data", (data) => {
+            if (typeof data !== "object") {
+                console.warn(`received data type is not object: ${typeof data}`);
+                return;
+            }
 
-        connection.on("open", () => {
-            console.info("connectted with peer", this.id);
-            connection.on("data", (data) => {
-                console.warn("data received", data);
-                // if (typeof data === "string") {
-                //     this.receiveCallback(data);
-                // } else {
-                //     console.warn(`received data type is not string: ${typeof data}`);
-                // }
-            });
-        });
-        connection.on("close", () => {
-            console.info("connection closed with peer", this.id);
-        });
-        connection.on("error", (error) => {
-            console.error(error);
+            let msg: Message;
+            try {
+                const payload = data as {
+                    from: string,
+                    to: string,
+                    createTime: number,
+                    type: MessageType,
+                    data: string,
+                    filename: string,
+                };
+                const content = new MessageContent(payload.type, payload.data, payload.filename);
+                msg = new Message(payload.from, payload.to, content, payload.createTime);
+            } catch (error) {
+                console.error(error);
+                return;
+            }
+            this.msgReceiver(msg);
         });
     }
 
@@ -157,7 +179,7 @@ class UniPeer {
 
         const payload = {
             from: msg.from,
-            to: msg.id,
+            to: msg.to,
             createTime: msg.createTime,
             type: msg.content.type,
             data: msg.content.data,
@@ -264,7 +286,11 @@ export class UniPeersManager extends UniPeersService {
             this.setpeerID(id);
             // this.peerIDStore.setPeerID(id);
 
-            this.peerpool = new Peerpool(this.peer, this.setpeersID);
+            this.peerpool = new Peerpool(this.peer, this.setpeersID, (peerID: string, msg: Message) => {
+                console.info(`<- peer ${peerID}: ${msg}`);
+                this.messages.push(msg);
+                this.setMessages(this.messages);
+            });
 
             this.discovery = new UniDiscovery(id);
 
@@ -275,42 +301,12 @@ export class UniPeersManager extends UniPeersService {
         });
 
         this.peer.on("connection", (conn) => {
-            conn.on("open", () => {
-                console.info("connected by peer", conn.peer);
-                const uniPeer = new UniPeer(this.peer, conn.peer, conn);
-                if (this.peerpool == undefined) {
-                    console.warn("another peer connected before peerpool is set");
-                } else {
-                    this.peerpool.updateConnectedPeer(uniPeer);
-                }
-            })
-            conn.on("data", async (data) => {
-                if (typeof data !== "object") {
-                    console.warn(`received data type is not object: ${typeof data}`);
-                    return;
-                }
-
-                let msg: Message;
-                try {
-                    const payload = data as {
-                        from: string,
-                        to: string,
-                        createTime: number,
-                        type: MessageType,
-                        data: string,
-                        filename: string,
-                    };
-                    const content = new MessageContent(payload.type, payload.data, payload.filename);
-                    msg = new Message(payload.from, payload.to, content, payload.createTime);
-                } catch (error) {
-                    console.error(error);
-                    return;
-                }
-
-                console.info(`<- peer ${conn.peer}: ${msg}`);
-                this.messages.push(msg);
-                this.setMessages(this.messages);
-            });
+            if (this.peerpool == undefined) {
+                console.warn("another peer connected before peerpool is set");
+                conn.close();
+            } else {
+                this.peerpool.updateConnectedPeer(conn);
+            }
         });
 
         this.peer.on("error", (error) => {
