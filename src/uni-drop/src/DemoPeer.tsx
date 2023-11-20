@@ -4,19 +4,16 @@ import { useState, useEffect, useRef } from "react";
 import { UniPeersManager } from "./peer.js";
 import { Message } from "./model.js";
 
-
 function DemoPeer() {
   const [peerID, setpeerID] = useState("");
 
   const [peersID, setpeersID] = useState<string[]>([]);
-
 
   // const [postContent, setPostContent] = useState("");
 
   const managerRef = useRef<UniPeersManager | null>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
-
 
   useEffect(() => {
     const manager = new UniPeersManager(setpeerID, setpeersID, setMessages);
@@ -27,7 +24,6 @@ function DemoPeer() {
       }
     };
   }, []);
-
 
   return (
     <>
@@ -47,16 +43,14 @@ function DemoPeer() {
       </button>
 
       <p className="mb-10 min-h-[50px] max-w-[500px] rounded-md border-2 border-gray-500">
-        {
-          peersID.map((peerID, index) => {
-            return (
-              <span key={index}>
-                {peerID}
-                <br />
-              </span>
-            );
-          })
-        }
+        {peersID.map((peerID, index) => {
+          return (
+            <span key={index}>
+              {peerID}
+              <br />
+            </span>
+          );
+        })}
       </p>
 
       {/* <input
@@ -66,9 +60,7 @@ function DemoPeer() {
       /> */}
 
       <button
-        onClick={() => {
-
-        }}
+        onClick={() => {}}
         className="rounded-md border-2 border-gray-500"
       >
         Connect
