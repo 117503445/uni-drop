@@ -19,6 +19,11 @@ services:
       timeout: 1s
       retries: 3
       start_period: 5m
+  peerjs-server:
+    image: peerjs/peerjs-server
+    ports:
+      - 9000:9000
+    container_name: peerjs-server
   peer-discovery-dev:
     build:
       context: ./src/peer-discovery

@@ -1,4 +1,4 @@
-import { DataConnection, Peer } from "peerjs";
+import { DataConnection, Peer, PeerOptions } from "peerjs";
 import { publicIpv4 } from "public-ip";
 import React from "react";
 import { Message, MessageContent, MessageType } from "./model";
@@ -157,7 +157,7 @@ class UniPeer {
 
             if (msg.to != this.peer.id) {
                 console.warn(`received msg.to is not my peer id: ${msg.to}`);
-            }else if (msg.from != this.id) {
+            } else if (msg.from != this.id) {
                 console.warn(`received msg.from is not peer id: ${msg.from}`);
             }
 
@@ -282,10 +282,17 @@ export class UniPeersManager extends UniPeersService {
         // }
 
         const DEBUG_LEVEL = 0;
+
+        const peerOptions: PeerOptions = {
+            debug: DEBUG_LEVEL
+        }
+        if (import.meta.env.DEV) {
+            peerOptions.host = "localhost";
+            peerOptions.port = 9000;
+        }
+
         this.peer = new Peer(
-            {
-                debug: DEBUG_LEVEL,
-            }
+            peerOptions
         );
 
         this.peer.on("open", (id) => {
