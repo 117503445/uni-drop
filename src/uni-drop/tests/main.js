@@ -28,10 +28,28 @@ function assertOne(array) {
 
   await Promise.all([page1.goto(url), page2.goto(url)]);
 
-  const [page1Id, page2Id] = await Promise.all([
-    page1.locator('//*[@id="peerID"]').innerText(),
-    page2.locator('//*[@id="peerID"]').innerText(),
-  ]);
+  let page1Id = "";
+  let page2Id = "";
+
+  for (let i = 0; i < 10; i++) {
+    const [id1, id2] = await Promise.all([
+      page1.locator('//*[@id="peerID"]').innerText(),
+      page2.locator('//*[@id="peerID"]').innerText(),
+    ]);
+    if (id1 !== "" && id2 !== "") {
+      page1Id = id1;
+      page2Id = id2;
+      break
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+
+  if (page1Id === "" || page2Id === "") {
+    throw new Error("Could not get peer IDs");
+  }
+
+
+  console.log(`page1Id = ${page1Id}, page2Id = ${page2Id}`);
 
   await Promise.all([
     page1.getByText(page2Id).click(),
