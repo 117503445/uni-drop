@@ -1,0 +1,5 @@
+FROM mcr.microsoft.com/playwright
+
+RUN npm install -g pnpm
+
+WORKDIR /workspace/uni-drop

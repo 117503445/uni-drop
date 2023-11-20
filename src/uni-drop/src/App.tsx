@@ -120,7 +120,7 @@ function App() {
               <span className="font-bold">Uni</span>versal Air
               <span className="font-bold">Drop</span>.
             </span>
-            <span className="text-xl font-bold">{peerID}</span>
+            <span className="text-xl font-bold" id="peerID">{peerID}</span>
 
             <div className="flex flex-col">
               {peersID.map((id) => (

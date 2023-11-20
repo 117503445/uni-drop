@@ -19,6 +19,18 @@ services:
       timeout: 1s
       retries: 3
       start_period: 5m
+  uni-drop-test:
+    build:
+      context: ./src/uni-drop
+      dockerfile: Dockerfile_test_dev
+    container_name: uni-drop-test
+    network_mode: host
+    volumes:
+        - './src/uni-drop:/workspace/uni-drop'
+        - './dev-data/uni-drop-test/vsc_extensions:/root/.vscode-server/extensions'
+    stdin_open: true
+    tty: true
+    entrypoint: bash
   peerjs-server:
     image: peerjs/peerjs-server
     ports:
