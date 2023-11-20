@@ -16,6 +16,14 @@ export class Message {
         this.to = to;
         this.content = content;
     }
+    toString() {
+        return JSON.stringify(this, (_, v) => {
+            if (v === null || v === undefined) {
+                return undefined;
+            }
+            return v;
+        });
+    }
 }
 
 export enum MessageType {

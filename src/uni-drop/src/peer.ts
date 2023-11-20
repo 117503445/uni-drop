@@ -32,10 +32,15 @@ class Peerpool {
         }
 
         // lanpeer not in peers should be removed from lanPeers
-        this.activatePeers = this.activatePeers.filter((peer) => {
-            return peerSet.has(peer.getId());
-        });
-        // console.log("activatePeers", this.activatePeers);
+        let activatePeers = [];
+        for (const peer of this.activatePeers) {
+            if (!peerSet.has(peer.getId())) {
+                peer.close();
+            } else {
+                activatePeers.push(peer);
+            }
+        }
+        this.activatePeers = activatePeers;
 
         const lanPeerSet = new Set<string>();
         for (const peer of this.activatePeers) {
@@ -107,7 +112,6 @@ class UniPeer {
     private msgReceiver: (msg: Message) => void;
 
     constructor(peer: Peer, id: string, msgReceiver: (msg: Message) => void = () => { },
-
         connection: DataConnection | undefined = undefined) {
         this.peer = peer;
         this.id = id;
@@ -192,8 +196,14 @@ class UniPeer {
             data: msg.content.data,
             filename: msg.content.filename,
         }
-
+        console.info(`-> peer ${this.id}: ${msg}`);
         this.connection.send(payload);
+    }
+
+    close() {
+        if (this.connection != undefined) {
+            this.connection.close();
+        }
     }
 }
 
@@ -303,15 +313,17 @@ export class UniPeersManager extends UniPeersService {
             this.peerpool = new Peerpool(this.peer, this.setpeersID, (peerID: string, msg: Message) => {
                 console.info(`<- peer ${peerID}: ${msg}`);
                 this.messages.push(msg);
-                this.setMessages(this.messages);
+
+                this.setMessages(this.messages.slice());
             });
 
             this.discovery = new UniDiscovery(id);
 
-            this.heartbeatTimer = setInterval(async () => {
+            const heartbeatInterval = 5000;
+            this.heartbeatTimer = setInterval(() => {
                 // console.log(`peer.open: ${this.peer.open}`);
                 this.heartbeat();
-            }, 5000);
+            }, heartbeatInterval);
         });
 
         this.peer.on("connection", (conn) => {
@@ -366,7 +378,6 @@ export class UniPeersManager extends UniPeersService {
         this.setMessages(this.messages);
         const peer = this.peerpool.findPeer(id);
         if (peer != null) {
-            console.info(`-> peer ${id}: ${content}`);
             peer.send(msg);
         } else {
             console.warn("peer not found");
