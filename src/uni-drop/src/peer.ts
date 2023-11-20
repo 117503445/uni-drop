@@ -120,6 +120,8 @@ class UniPeer {
   private connection: DataConnection | undefined = undefined;
   private msgReceiver: (msg: Message) => void;
 
+  private closing: boolean = false;
+
   constructor(
     peer: Peer,
     id: string,
@@ -161,6 +163,11 @@ class UniPeer {
       console.info(`connection to peer ${this.id} closed`);
       if (this.connection == connection) {
         this.connection = undefined;
+        if (!this.closing) {
+          console.info(`reconnecting to peer ${this.id}`);
+        }else{
+          console.info(`peer ${this.id} closed`);
+        }
       }
     });
     connection.on("error", (error) => {
@@ -239,6 +246,7 @@ class UniPeer {
   }
 
   close() {
+    this.closing = true;
     if (this.connection != undefined) {
       this.connection.close();
     }
