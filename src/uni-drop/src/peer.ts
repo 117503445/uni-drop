@@ -32,7 +32,7 @@ class Peerpool {
         }
 
         // lanpeer not in peers should be removed from lanPeers
-        let activatePeers = [];
+        const activatePeers = [];
         for (const peer of this.activatePeers) {
             if (!peerSet.has(peer.getId())) {
                 peer.close();
