@@ -11,40 +11,38 @@ function assertOne(array) {
 }
 
 (async () => {
-  const browser = await playwright.chromium.launch(
-    {
-      headless: true,
-    }
-  );
+  const browser = await playwright.chromium.launch({
+    headless: true,
+  });
   const context = await browser.newContext();
 
   const page1 = await context.newPage();
   const page2 = await context.newPage();
 
-  const url = 'http://localhost:5173/';
+  const url = "http://localhost:5173/";
 
   await Promise.all([page1.goto(url), page2.goto(url)]);
 
   const [page1Id, page2Id] = await Promise.all([
     page1.locator('//*[@id="peerID"]').innerText(),
-    page2.locator('//*[@id="peerID"]').innerText()
+    page2.locator('//*[@id="peerID"]').innerText(),
   ]);
 
   await Promise.all([
     page1.getByText(page2Id).click(),
-    page2.getByText(page1Id).click()]
-  )
+    page2.getByText(page1Id).click(),
+  ]);
 
-  const msg1 = 'Hello';
-  await page1.getByPlaceholder('Type message here').click();
-  await page1.getByPlaceholder('Type message here').fill(msg1);
-  await page1.keyboard.press('Enter');
+  const msg1 = "Hello";
+  await page1.getByPlaceholder("Type message here").click();
+  await page1.getByPlaceholder("Type message here").fill(msg1);
+  await page1.keyboard.press("Enter");
   assertOne(await page2.getByText(msg1, { exact: true }).all());
 
-  const msg2 = 'Hi';
-  await page2.getByPlaceholder('Type message here').click();
-  await page2.getByPlaceholder('Type message here').fill(msg2);
-  await page2.keyboard.press('Enter');
+  const msg2 = "Hi";
+  await page2.getByPlaceholder("Type message here").click();
+  await page2.getByPlaceholder("Type message here").fill(msg2);
+  await page2.keyboard.press("Enter");
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 
   await browser.close();

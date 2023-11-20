@@ -120,7 +120,9 @@ function App() {
               <span className="font-bold">Uni</span>versal Air
               <span className="font-bold">Drop</span>.
             </span>
-            <span className="text-xl font-bold" id="peerID">{peerID}</span>
+            <span className="text-xl font-bold" id="peerID">
+              {peerID}
+            </span>
 
             <div className="flex flex-col">
               {peersID.map((id) => (
@@ -167,8 +169,7 @@ function App() {
                 }}
               >
                 <img className="mx-2" src={addIcon}></img>
-                <div className="min-w-max mr-4">Add Friend</div>
-                
+                <div className="mr-4 min-w-max">Add Friend</div>
               </button>
             </div>
           </div>
@@ -221,10 +222,10 @@ function App() {
                     const file = files[0];
 
                     const content = new MessageContent(MessageType.FILE);
-                    console.log("select file")
+                    console.log("select file");
                     await content.setData(file);
-                    console.log("select file setData done")
-                    
+                    console.log("select file setData done");
+
                     sendMessages(content);
                   }}
                 />
