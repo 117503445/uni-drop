@@ -11,4 +11,5 @@ docker tag 117503445/peer-discovery registry.cn-hangzhou.aliyuncs.com/117503445-
 
 ```sh
 docker exec -it uni-drop-test pnpm run playwright
+docker exec -it uni-drop-test pnpm run playwright --url https://www.unidrop.top
 ```

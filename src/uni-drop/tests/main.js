@@ -1,4 +1,11 @@
 import playwright from "playwright";
+import { program } from 'commander';
+
+
+program
+  .option('--url <url>', "the url of frontend", "http://localhost:5173")
+program.parse();
+const url = program.opts()['url']
 
 function assert(condition, message) {
   if (!condition) {
@@ -18,8 +25,6 @@ function assertOne(array) {
 
   const page1 = await context.newPage();
   const page2 = await context.newPage();
-
-  const url = "http://localhost:5173/";
 
   await Promise.all([page1.goto(url), page2.goto(url)]);
 

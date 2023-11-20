@@ -142,9 +142,14 @@ class UniPeer {
 
   setConnection(connection: DataConnection) {
     if (this.connection != undefined) {
-      console.warn("DataConnection already set");
+      if (this.connection.open || !connection.open) {
+        console.info("reject setConnection");
+        return;
+      }
+      console.log(
+        "DataConnection already set but not open, close old connection",
+      );
       connection.close();
-      return;
     }
     this.connection = connection;
     connection.on("data", (data) => {
