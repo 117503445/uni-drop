@@ -220,7 +220,12 @@ class UniDiscovery {
         let ipv4: string = "";
         const ipv6: string = "";
 
-        ipv4 = await publicIpv4({ timeout: 2000 });
+        if (import.meta.env.DEV) {
+            ipv4 = "127.0.0.1"
+        }
+        else {
+            ipv4 = await publicIpv4({ timeout: 2000 });
+        }
 
         const res = await fetch(`${this.host}/api/heartbeat`, {
             method: "POST",
@@ -319,7 +324,10 @@ export class UniPeersManager extends UniPeersService {
 
             this.discovery = new UniDiscovery(id);
 
-            const heartbeatInterval = 5000;
+            let heartbeatInterval = 5000;
+            if (import.meta.env.DEV) {
+                heartbeatInterval = 500;
+            }
             this.heartbeatTimer = setInterval(() => {
                 // console.log(`peer.open: ${this.peer.open}`);
                 this.heartbeat();

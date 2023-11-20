@@ -17,12 +17,13 @@ export class Message {
         this.content = content;
     }
     toString() {
-        return JSON.stringify(this, (_, v) => {
-            if (v === null || v === undefined) {
-                return undefined;
-            }
-            return v;
-        });
+        return JSON.stringify(
+            {
+                id: this.id,
+                createTime: this.createTime,
+                content: this.content.toObject(),
+            },
+        );
     }
 }
 
@@ -57,8 +58,6 @@ export class MessageContent {
             throw new Error('data already set');
         }
 
-
-
         if (typeof data === 'string') {
             this.data = data;
             this.ready = true;
@@ -82,11 +81,24 @@ export class MessageContent {
     }
 
     toString() {
-        return JSON.stringify(this, (_, v) => {
-            if (v === null || v === undefined) {
-                return undefined;
-            }
-            return v;
-        });
+        return JSON.stringify(this.toObject());
+    }
+    toObject() {
+        switch (this.type) {
+            case MessageType.TEXT:
+                return this.data;
+            case MessageType.IMAGE:
+                return {
+                    type: this.type,
+                    filename: this.filename,
+                    size: this.data.length
+                }
+            case MessageType.FILE:
+                return {
+                    type: this.type,
+                    filename: this.filename,
+                    size: this.data.length
+                }
+        }
     }
 }

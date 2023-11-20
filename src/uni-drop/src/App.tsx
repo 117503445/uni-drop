@@ -221,8 +221,10 @@ function App() {
                     const file = files[0];
 
                     const content = new MessageContent(MessageType.FILE);
+                    console.log("select file")
                     await content.setData(file);
-
+                    console.log("select file setData done")
+                    
                     sendMessages(content);
                   }}
                 />
