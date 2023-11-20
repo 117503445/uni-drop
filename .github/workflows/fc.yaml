@@ -2,8 +2,8 @@ name: fc
 
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - "master"
 
 jobs:
   update-peer-discovery-version:
