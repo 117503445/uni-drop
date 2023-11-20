@@ -60,12 +60,14 @@ function assertOne(array) {
   await page1.getByPlaceholder("Type message here").click();
   await page1.getByPlaceholder("Type message here").fill(msg1);
   await page1.keyboard.press("Enter");
+  await new Promise(resolve => setTimeout(resolve, 1000));
   assertOne(await page2.getByText(msg1, { exact: true }).all());
 
   const msg2 = "Hi";
   await page2.getByPlaceholder("Type message here").click();
   await page2.getByPlaceholder("Type message here").fill(msg2);
   await page2.keyboard.press("Enter");
+  await new Promise(resolve => setTimeout(resolve, 1000));
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 
   await browser.close();

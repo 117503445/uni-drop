@@ -115,6 +115,8 @@ class UniPeer {
 
   // my peer
   private peer: Peer;
+
+  // connection must be open
   private connection: DataConnection | undefined = undefined;
   private msgReceiver: (msg: Message) => void;
 
@@ -142,16 +144,31 @@ class UniPeer {
 
   setConnection(connection: DataConnection) {
     if (this.connection != undefined) {
-      if (this.connection.open || !connection.open) {
-        console.info("reject setConnection");
-        return;
-      }
-      console.log(
-        "DataConnection already set but not open, close old connection",
-      );
+      console.info(`peer ${this.id} connection already set`);
       connection.close();
+      return;
     }
-    this.connection = connection;
+    connection.on("open", () => {
+      console.info(`connection to peer ${this.id} opened`);
+      if (this.connection == undefined) {
+        this.connection = connection;
+      } else {
+        console.log(`peer ${this.id} connection opened, but connection already set`);
+        connection.close();
+      }
+    });
+    connection.on("close", () => {
+      console.info(`connection to peer ${this.id} closed`);
+      if (this.connection == connection) {
+        this.connection = undefined;
+      }
+    });
+    connection.on("error", (error) => {
+      console.error(`connection to peer ${this.id} error: ${error}`);
+    });
+    connection.on("iceStateChanged", (state) => {
+      console.info(`connection to peer ${this.id} iceStateChanged: ${state}`);
+    });
     connection.on("data", (data) => {
       if (typeof data !== "object") {
         console.warn(`received data type is not object: ${typeof data}`);
@@ -191,19 +208,6 @@ class UniPeer {
       }
 
       this.msgReceiver(msg);
-    });
-    connection.on("open", () => {
-      console.info(`connection to peer ${this.id} opened`);
-    });
-    connection.on("close", () => {
-      console.info(`connection to peer ${this.id} closed`);
-      this.connection = undefined;
-    });
-    connection.on("error", (error) => {
-      console.error(`connection to peer ${this.id} error: ${error}`);
-    });
-    connection.on("iceStateChanged", (state) => {
-      console.info(`connection to peer ${this.id} iceStateChanged: ${state}`);
     });
   }
 
