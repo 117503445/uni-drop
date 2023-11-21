@@ -32,7 +32,8 @@ export default function Chat(props: {
       </div>
 
       {/* middle */}
-      <div className="flex w-full flex-1 items-center justify-center overflow-clip ">
+      <div className="flex w-full flex-1 items-center justify-center overflow-clip">
+
         {(() => {
           if (props.selectedPeerID == null) {
             return <p>No Peer selected</p>;
@@ -41,7 +42,7 @@ export default function Chat(props: {
             return <p>No message with peer {props.selectedPeerID}</p>;
           }
           return (
-            <div className="flex h-full w-full flex-col overflow-y-auto">
+            <div className="flex h-full w-full flex-col overflow-y-auto px-[1.25rem]">
               {props.messages.map((msg) => {
                 return (
                   <div
@@ -50,14 +51,15 @@ export default function Chat(props: {
                     }`}
                     key={msg.id}
                   >
-                    <p className="text-xs text-gray-500">{msg.from}</p>
+                    {/* <p className="text-xs text-gray-500">{msg.from}</p> */}
                     <div
                       className={`flex flex-col ${
                         msg.from == props.peerID ? "items-end" : "items-start"
-                      }`}
+                      } my-[0.5rem]`}
                     >
-                      <MessageBubble message={msg} />
+                      <MessageBubble message={msg} peerID={props.peerID} />
                     </div>
+
                   </div>
                 );
               })}
