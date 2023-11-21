@@ -16,6 +16,21 @@ import {
 import { Message, MessageContent, MessageType } from "./model";
 
 function App() {
+  const [currentUrl, setCurrentUrl] = useState(window.location.href);
+  useEffect(() => {
+    const handleUrlChange = () => {
+      setCurrentUrl(window.location.href);
+    };
+    window.addEventListener("popstate", handleUrlChange);
+    return () => {
+      window.removeEventListener("popstate", handleUrlChange);
+    };
+  }, []);
+  
+  // useEffect(() => {
+  //   console.log('URL changed:', currentUrl.split("#")[1]);
+  // }, [currentUrl]);
+
   const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
   const [peerID, setpeerID] = useState("");
   const [peersID, setpeersID] = useState<string[]>([]);
@@ -94,9 +109,14 @@ function App() {
   return (
     <div>
       <div className="flex h-screen w-screen items-center justify-center">
-        <div className="flex h-[calc(100%-5rem)] w-[calc(100%-5rem)] max-w-[75rem] overflow-hidden rounded-[1rem] border-2 shadow-md">
+        <div className="flex h-full w-full max-w-[75rem] overflow-hidden rounded-[1rem] sm:h-[calc(100%-5rem)] sm:w-[calc(100%-5rem)] sm:border-2 sm:shadow-md">
           {/* left side */}
-          <div className="flex h-full min-w-[18.75rem] max-w-[18.75rem] flex-col border-r-2 bg-[#e7f8ff] p-5 shadow-md">
+          <div
+            className={`flex h-full min-w-full ${
+              // "!sm:hidden"
+              currentUrl.split("#")[1] != "/" ? "hidden sm:flex" : ""
+            } max-w-full flex-col border-r-2 bg-[#e7f8ff] p-[2rem] shadow-md sm:min-w-[18.75rem] sm:max-w-[18.75rem]`}
+          >
             <span className="text-xl font-bold">UniDrop</span>
             <span className="text-xl">
               <span className="font-bold">Uni</span>versal Air
@@ -109,7 +129,7 @@ function App() {
             <div className="flex flex-col">
               {peersID.map((id) => (
                 <div
-                  className={`mx-auto my-1.5 flex h-[4rem] w-[16rem] cursor-pointer rounded-xl bg-white py-2 shadow-md hover:bg-[#f3f3f3] ${
+                  className={`mx-auto my-1.5 flex h-[4rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-md hover:bg-[#f3f3f3] ${
                     selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
                   } hover:shadow-lg`}
                   key={id}
