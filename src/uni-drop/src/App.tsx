@@ -140,9 +140,17 @@ function App() {
             </span>
 
             {/* me */}
-            <div className="mx-auto my-[2rem] flex max-h-[5rem] min-h-[5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-md items-center">
+            <div className="mx-auto my-[2rem] flex max-h-[5rem] min-h-[5rem] w-[100%] cursor-pointer items-center rounded-xl bg-white py-2 shadow-md">
               <img className="ml-[1rem] max-w-[3rem]" src={qrcodeIcon}></img>
-              <span className="mx-auto">{peerID + " (me)"}</span>
+              <span className="mx-auto">
+                {(() => {
+                  if (peerID.length > 0) {
+                    return peerID + " (me)";
+                  } else {
+                    return "loading...";
+                  }
+                })()}
+              </span>
             </div>
 
             {/* peers */}
@@ -151,7 +159,7 @@ function App() {
                 <div
                   className={`mx-auto my-1.5 flex max-h-[3.5rem] min-h-[3.5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-sm hover:bg-[#f3f3f3] ${
                     selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
-                  } hover:shadow-lg items-center`}
+                  } items-center hover:shadow-lg`}
                   key={id}
                   onClick={() => {
                     setSelectedPeerID(id);
