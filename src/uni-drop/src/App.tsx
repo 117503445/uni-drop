@@ -33,11 +33,16 @@ function App() {
 
   const curHashURL = () => {
     const splits = currentUrl.split("#");
-    if (splits.length == 1) {
-      return "/";
+    switch (splits.length) {
+      case 1:
+        return "/";
+      case 2:
+        return splits[1];
+      default:
+        console.warn("invalid url", currentUrl);
+        return currentUrl;
     }
-    return currentUrl.split("#")[1];
-  }
+  };
 
   const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
   const [peerID, setpeerID] = useState("");
@@ -121,7 +126,6 @@ function App() {
           {/* left side */}
           <div
             className={`flex h-full min-w-full ${
-              // "!sm:hidden"
               curHashURL() != "/" ? "hidden sm:flex" : ""
             } max-w-full flex-col border-r-2 bg-[#e7f8ff] p-[2rem] shadow-md sm:min-w-[18.75rem] sm:max-w-[18.75rem]`}
           >
@@ -134,10 +138,10 @@ function App() {
               {peerID}
             </span>
 
-            <div className="flex flex-col">
+            <div className="mb-[2rem] flex flex-col overflow-clip overflow-y-auto">
               {peersID.map((id) => (
                 <div
-                  className={`mx-auto my-1.5 flex h-[4rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-md hover:bg-[#f3f3f3] ${
+                  className={`mx-auto my-1.5 flex max-h-[3.5rem] min-h-[3.5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-sm hover:bg-[#f3f3f3] ${
                     selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
                   } hover:shadow-lg`}
                   key={id}
@@ -152,10 +156,10 @@ function App() {
               ))}
             </div>
 
-            <div className="mt-auto flex max-h-[3rem] sm:max-h-[2.25rem] flex-1">
+            <div className="mt-auto flex  max-h-[3rem] min-h-[3rem] flex-1 sm:max-h-[2.25rem] sm:min-h-[2.25rem]">
               {/* setting button */}
               <button
-                className="mr-[1.25rem] flex min-h-full min-w-[3rem] sm:min-w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md"
+                className="mr-[1.25rem] flex min-h-full min-w-[3rem] items-center justify-center rounded-md bg-white shadow-md sm:min-w-[2.25rem]"
                 onClick={() => {
                   alert("unimplemented");
                 }}
@@ -165,7 +169,7 @@ function App() {
 
               {/* github button */}
               <button
-                className="flex min-h-full min-w-[3rem] sm:min-w-[2.25rem] items-center justify-center rounded-md bg-white fill-none shadow-md"
+                className="flex min-h-full min-w-[3rem] items-center justify-center rounded-md bg-white fill-none shadow-md sm:min-w-[2.25rem]"
                 onClick={() => {
                   window.open("https://github.com/117503445/uni-drop");
                 }}
@@ -175,7 +179,7 @@ function App() {
 
               {/* add button */}
               <button
-                className="ml-auto flex min-h-full px-2 sm:px-2 items-center rounded-md bg-white fill-none shadow-md"
+                className="ml-auto flex min-h-full items-center rounded-md bg-white fill-none px-2 shadow-md sm:px-2"
                 onClick={() => {
                   window.location.hash = "/add-friend";
                 }}
@@ -187,7 +191,11 @@ function App() {
           </div>
 
           {/* right side */}
-          <div className="h-full w-full bg-white">
+          <div
+            className={`h-full w-full bg-white ${
+              !curHashURL().includes("chat") ? "hidden sm:flex" : ""
+            }`}
+          >
             <RouterProvider router={router} />
           </div>
         </div>

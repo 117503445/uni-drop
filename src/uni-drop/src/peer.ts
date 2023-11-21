@@ -484,18 +484,16 @@ export class UniPeersMockManager extends UniPeersService {
 
     this.setMessages = setMessages;
 
-    this.set();
-  }
-
-  private async set() {
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(null);
-      }, 100);
-    });
-    console.log("setpeerID to mock");
     this.setpeerID("mock-peer");
-    this.setpeersID(["peer1", "peer2", "peer3"]);
+
+    // const peerNum = 20;
+    const peerNum = 3;
+    const peersID = [];
+    for (let i = 1; i <= peerNum; i++) {
+      peersID.push(`peer${i}`);
+    }
+
+    this.setpeersID(peersID);
   }
 
   send(id: string, content: MessageContent): void {

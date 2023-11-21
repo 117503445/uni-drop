@@ -154,18 +154,23 @@ export default function Chat(props: {
                   setPostContent("");
                   return;
                 }
-                // remove the last '\n'
-                if (postContent[postContent.length - 1] == "\n") {
-                  setPostContent(postContent.slice(0, -1));
-                } else {
-                  console.warn(
-                    "postContent[postContent.length - 1] != '\\n'",
-                    postContent,
-                  );
-                }
+
+                let data;
+                data = postContent;
+
+                // pressdown 'w', pressdown 'enter', pressup 'w', pressup 'enter' still will cause '\n' in textarea
+                // if (postContent[postContent.length - 1] == "\n") {
+                //   data = postContent.slice(0, -1);
+                // } else {
+                //   data = postContent;
+                //   console.warn(
+                //     "postContent[postContent.length - 1] != '\\n'",
+                //     postContent,
+                //   );
+                // }
 
                 const content = new MessageContent(MessageType.TEXT);
-                await content.setData(postContent);
+                await content.setData(data);
                 props.sendMessages(content);
                 setPostContent("");
               }
