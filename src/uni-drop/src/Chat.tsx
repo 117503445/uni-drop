@@ -62,7 +62,7 @@ export default function Chat(props: {
                     <div
                       className={`flex flex-col ${
                         msg.from == props.peerID ? "items-end" : "items-start"
-                      } my-[0.5rem]`}
+                      } mt-[1.5rem]`}
                     >
                       <MessageBubble message={msg} peerID={props.peerID} />
                     </div>

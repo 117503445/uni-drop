@@ -17,7 +17,7 @@ function MessageBubble(props: { peerID: string; message: Message }) {
 
   switch (msg.content.type) {
     case MessageType.TEXT:
-      inner = <p className="rounded-md">{msg.content.data}</p>;
+      inner = <p className="max-w-[30rem] break-all">{msg.content.data}</p>;
       break;
 
     case MessageType.FILE:
@@ -47,7 +47,7 @@ function MessageBubble(props: { peerID: string; message: Message }) {
 
   return (
     <div
-      className={`flex flex-col rounded-lg border-2 border-[#dedede] p-2 ${color}`}
+      className={`flex flex-col rounded-lg border-2 border-[#dedede] p-2 ${color} `}
     >
       {inner}
     </div>
