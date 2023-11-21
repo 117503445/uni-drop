@@ -1,46 +1,57 @@
 import { Message, MessageType } from "./model";
 
-function MessageBubble(props: { message: Message }) {
+function MessageBubble(props: { peerID: string; message: Message }) {
   const msg = props.message;
+  let color: string;
+  if (msg.from == props.peerID) {
+    color = "bg-[#e7f8ff]";
+  } else if (msg.to == props.peerID) {
+    color = "bg-[#f2f2f2]";
+  } else {
+    color = "bg-[#f2f2f2]";
+    console.error("peerID != msg.from && peerID != msg.to");
+    console.log(`peerID: ${props.peerID}, msg: ${msg}`);
+  }
+
+  let inner: JSX.Element;
 
   switch (msg.content.type) {
     case MessageType.TEXT:
-      return (
-        <p className="rounded-md bg-white px-3 py-2 shadow-md">
-          {msg.content.data}
-        </p>
-      );
+      inner = <p className="max-w-[30rem] break-all">{msg.content.data}</p>;
+      break;
+
     case MessageType.FILE:
-      return (
-        <div className="flex flex-col">
-          {/* <p className="rounded-md bg-white px-3 py-2 shadow-md">
-            {msg.content.filename}
-          </p> */}
-          <a
-            className="rounded-md bg-yellow-200 px-3 py-2 shadow-md"
-            href={msg.content.data}
-            download={msg.content.filename}
-          >
-            {msg.content.filename}
-          </a>
-        </div>
+      inner = (
+        <a
+          // className="rounded-md bg-yellow-200 "
+          href={msg.content.data}
+          download={msg.content.filename}
+        >
+          {msg.content.filename}
+        </a>
       );
+      break;
     case MessageType.IMAGE:
-      return (
-        <div className="flex flex-col">
-          <p className="rounded-md bg-white px-3 py-2 shadow-md">
-            {msg.content.filename}
-          </p>
-          <img
-            className="rounded-md bg-white px-3 py-2 shadow-md"
-            src={msg.content.data}
-          />
+      inner = (
+        <div>
+          {" "}
+          <p className="rounded-md ">{msg.content.filename}</p>
+          <img className="rounded-md " src={msg.content.data} />
         </div>
       );
+      break;
     default:
-      // error
-      return <p>Unknown message type</p>;
+      inner = <p>Unknown message type</p>;
+      break;
   }
+
+  return (
+    <div
+      className={`flex flex-col rounded-lg border-2 border-[#dedede] p-2 ${color} `}
+    >
+      {inner}
+    </div>
+  );
 }
 
 export default MessageBubble;

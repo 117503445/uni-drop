@@ -1,8 +1,9 @@
-import "./App.css";
+import "./global.css";
 
 import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
-import { useState, useRef } from "react";
+import returnIcon from "./assets/return.svg";
+import { useState, useRef, useEffect } from "react";
 import { Message, MessageContent, MessageType } from "./model";
 import MessageBubble from "./MessageBubble";
 
@@ -14,16 +15,32 @@ export default function Chat(props: {
 }) {
   const [postContent, setPostContent] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }),
+    [props.messages];
 
   return (
     <div className="flex h-full w-full flex-col">
-      {/* right top */}
+      {/* top */}
       <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5">
-        {props.selectedPeerID}
+        <span>{props.selectedPeerID}</span>
+        <button
+          className="flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl bg-white fill-none shadow-md sm:hidden"
+          onClick={() => {
+            window.location.hash = "/";
+          }}
+        >
+          <img className="mx-2" src={returnIcon}></img>
+        </button>
       </div>
 
-      {/* right middle */}
-      <div className="flex w-full flex-1 items-center justify-center">
+      {/* middle */}
+      <div className="flex w-full flex-1 items-center justify-center overflow-clip">
         {(() => {
           if (props.selectedPeerID == null) {
             return <p>No Peer selected</p>;
@@ -32,7 +49,7 @@ export default function Chat(props: {
             return <p>No message with peer {props.selectedPeerID}</p>;
           }
           return (
-            <div className="flex h-full w-full flex-col overflow-y-auto">
+            <div className="flex h-full w-full flex-col overflow-y-auto px-[1.25rem]">
               {props.messages.map((msg) => {
                 return (
                   <div
@@ -41,28 +58,32 @@ export default function Chat(props: {
                     }`}
                     key={msg.id}
                   >
-                    <p className="text-xs text-gray-500">{msg.from}</p>
+                    {/* <p className="text-xs text-gray-500">{msg.from}</p> */}
                     <div
                       className={`flex flex-col ${
                         msg.from == props.peerID ? "items-end" : "items-start"
-                      }`}
+                      } mt-[1.5rem]`}
                     >
-                      <MessageBubble message={msg} />
+                      <MessageBubble message={msg} peerID={props.peerID} />
                     </div>
                   </div>
                 );
               })}
+              <div
+                style={{ clear: "both", height: "1px", width: "100%" }}
+                ref={endRef}
+              ></div>
             </div>
           );
         })()}
       </div>
 
-      {/* right bottom */}
+      {/* bottom */}
       <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
         {/* toolbox */}
-        <div className="flex h-[2.5rem] w-full items-center justify-between">
+        <div className="my-[0.25rem] flex h-[2.5rem] w-full items-center px-[1rem] ">
           <button
-            className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md"
+            className="border-#[dedede] mr-[1rem] flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
             onClick={() => {
               if (fileInputRef.current != null) {
                 fileInputRef.current.click();
@@ -96,8 +117,9 @@ export default function Chat(props: {
               props.sendMessages(content);
             }}
           />
+
           <button
-            className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md"
+            className="border-#[dedede] flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
             onClick={() => {
               alert("unimplemented");
             }}
@@ -108,7 +130,7 @@ export default function Chat(props: {
         {/* input area */}
         <div className="flex h-full w-full flex-col items-center justify-center ">
           <textarea
-            className="m-auto h-[calc(100%-2rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
+            className="m-auto mt-1 h-[calc(100%-1.25rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
             placeholder="Type message here"
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}
@@ -133,17 +155,21 @@ export default function Chat(props: {
                   setPostContent("");
                   return;
                 }
-                // remove the last '\n'
-                if (postContent[postContent.length - 1] == "\n") {
-                  setPostContent(postContent.slice(0, -1));
-                } else {
-                  console.warn(
-                    "postContent[postContent.length - 1] != '\\n'",
-                    postContent,
-                  );
-                }
+
+                // let data;
+                // pressdown 'w', pressdown 'enter', pressup 'w', pressup 'enter' still will cause '\n' in textarea
+                // if (postContent[postContent.length - 1] == "\n") {
+                //   data = postContent.slice(0, -1);
+                // } else {
+                //   data = postContent;
+                //   console.warn(
+                //     "postContent[postContent.length - 1] != '\\n'",
+                //     postContent,
+                //   );
+                // }
 
                 const content = new MessageContent(MessageType.TEXT);
+                // await content.setData(data);
                 await content.setData(postContent);
                 props.sendMessages(content);
                 setPostContent("");

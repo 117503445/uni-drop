@@ -1,11 +1,9 @@
 import playwright from "playwright";
-import { program } from 'commander';
+import { program } from "commander";
 
-
-program
-  .option('--url <url>', "the url of frontend", "http://localhost:5173")
+program.option("--url <url>", "the url of frontend", "http://localhost:5173");
 program.parse();
-const url = program.opts()['url']
+const url = program.opts()["url"];
 
 function assert(condition, message) {
   if (!condition) {
@@ -39,15 +37,14 @@ function assertOne(array) {
     if (id1 !== "" && id2 !== "") {
       page1Id = id1;
       page2Id = id2;
-      break
+      break;
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   if (page1Id === "" || page2Id === "") {
     throw new Error("Could not get peer IDs");
   }
-
 
   console.log(`page1Id = ${page1Id}, page2Id = ${page2Id}`);
 
@@ -60,14 +57,14 @@ function assertOne(array) {
   await page1.getByPlaceholder("Type message here").click();
   await page1.getByPlaceholder("Type message here").fill(msg1);
   await page1.keyboard.press("Enter");
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page2.getByText(msg1, { exact: true }).all());
 
   const msg2 = "Hi";
   await page2.getByPlaceholder("Type message here").click();
   await page2.getByPlaceholder("Type message here").fill(msg2);
   await page2.keyboard.press("Enter");
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 
   await browser.close();
