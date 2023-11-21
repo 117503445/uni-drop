@@ -31,6 +31,14 @@ function App() {
   //   console.log('URL changed:', currentUrl.split("#")[1]);
   // }, [currentUrl]);
 
+  const curHashURL = () => {
+    const splits = currentUrl.split("#");
+    if (splits.length == 1) {
+      return "/";
+    }
+    return currentUrl.split("#")[1];
+  }
+
   const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
   const [peerID, setpeerID] = useState("");
   const [peersID, setpeersID] = useState<string[]>([]);
@@ -114,7 +122,7 @@ function App() {
           <div
             className={`flex h-full min-w-full ${
               // "!sm:hidden"
-              currentUrl.split("#")[1] != "/" ? "hidden sm:flex" : ""
+              curHashURL() != "/" ? "hidden sm:flex" : ""
             } max-w-full flex-col border-r-2 bg-[#e7f8ff] p-[2rem] shadow-md sm:min-w-[18.75rem] sm:max-w-[18.75rem]`}
           >
             <span className="text-xl font-bold">UniDrop</span>
@@ -144,10 +152,10 @@ function App() {
               ))}
             </div>
 
-            <div className="mt-auto flex max-h-[2.25rem] flex-1">
+            <div className="mt-auto flex max-h-[3rem] sm:max-h-[2.25rem] flex-1">
               {/* setting button */}
               <button
-                className="mr-[1.25rem] flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md"
+                className="mr-[1.25rem] flex min-h-full min-w-[3rem] sm:min-w-[2.25rem] items-center justify-center rounded-md bg-white shadow-md"
                 onClick={() => {
                   alert("unimplemented");
                 }}
@@ -157,7 +165,7 @@ function App() {
 
               {/* github button */}
               <button
-                className="mr-[3rem] flex h-[2.25rem] w-[2.25rem] items-center justify-center rounded-md bg-white fill-none shadow-md"
+                className="flex min-h-full min-w-[3rem] sm:min-w-[2.25rem] items-center justify-center rounded-md bg-white fill-none shadow-md"
                 onClick={() => {
                   window.open("https://github.com/117503445/uni-drop");
                 }}
@@ -167,13 +175,13 @@ function App() {
 
               {/* add button */}
               <button
-                className="flex h-[2.25rem] w-[auto] items-center rounded-md bg-white fill-none shadow-md"
+                className="ml-auto flex min-h-full px-2 sm:px-2 items-center rounded-md bg-white fill-none shadow-md"
                 onClick={() => {
                   window.location.hash = "/add-friend";
                 }}
               >
                 <img className="mx-2" src={addIcon}></img>
-                <div className="mr-4 min-w-max">Add Friend</div>
+                <div className="mr-2 min-w-max">Add</div>
               </button>
             </div>
           </div>
