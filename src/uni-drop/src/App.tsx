@@ -4,6 +4,8 @@ import githubIcon from "./assets/github.svg";
 
 import addIcon from "./assets/add.svg";
 import Chat from "./Chat";
+import AddFriend from "./AddFriend";
+import { createHashRouter, RouterProvider } from "react-router-dom";
 
 import { useState, useEffect, useRef } from "react";
 import {
@@ -55,6 +57,39 @@ function App() {
     };
   }, []);
 
+  const chat = (
+    <Chat
+      peerID={peerID}
+      selectedPeerID={selectedPeerID}
+      messages={messages.filter(
+        (msg) => msg.from == selectedPeerID || msg.to == selectedPeerID,
+      )}
+      sendMessages={sendMessages}
+    ></Chat>
+  );
+
+  const router = createHashRouter([
+    {
+      path: "/",
+      element: chat,
+    },
+    {
+      path: "/chat",
+      element: chat,
+    },    {
+      path: "/chat/:id",
+      element: chat,
+    },
+    {
+      path: "/test",
+      element: <div>test</div>,
+    },
+    {
+      path: "/add-friend",
+      element: <AddFriend />,
+    },
+  ]);
+
   return (
     <div>
       {/* button to nagivate to demo page, always in left bottom */}
@@ -90,6 +125,8 @@ function App() {
                   key={id}
                   onClick={() => {
                     setSelectedPeerID(id);
+                    // jump to /chat/:id
+                    window.location.hash = `/chat/${id}`;
                   }}
                 >
                   <span className="mx-auto">{id}</span>
@@ -122,7 +159,7 @@ function App() {
               <button
                 className="flex h-[2.25rem] w-[auto] items-center rounded-md bg-white fill-none shadow-md"
                 onClick={() => {
-                  alert("unimplemented");
+                  window.location.hash = "/add-friend";
                 }}
               >
                 <img className="mx-2" src={addIcon}></img>
@@ -130,14 +167,8 @@ function App() {
               </button>
             </div>
           </div>
-          <Chat
-            peerID={peerID}
-            selectedPeerID={selectedPeerID}
-            messages={messages.filter(
-              (msg) => msg.from == selectedPeerID || msg.to == selectedPeerID,
-            )}
-            sendMessages={sendMessages}
-          ></Chat>
+
+          <RouterProvider router={router} />
         </div>
       </div>
     </div>

@@ -7,8 +7,8 @@ class Peerpool {
   // this peer
   private peer: Peer;
 
-  // peers that can be connected to
-  private activatePeers: UniPeer[] = [];
+  // peers find by discovery
+  private discoveryPeers: UniPeer[] = [];
   // peers has chat history
   private historyPeers: UniPeer[] = [];
 
@@ -33,18 +33,18 @@ class Peerpool {
     }
 
     // lanpeer not in peers should be removed from lanPeers
-    const activatePeers = [];
-    for (const peer of this.activatePeers) {
+    const discoveryPeers = [];
+    for (const peer of this.discoveryPeers) {
       if (!peerSet.has(peer.getId())) {
         peer.close();
       } else {
-        activatePeers.push(peer);
+        discoveryPeers.push(peer);
       }
     }
-    this.activatePeers = activatePeers;
+    this.discoveryPeers = discoveryPeers;
 
     const lanPeerSet = new Set<string>();
-    for (const peer of this.activatePeers) {
+    for (const peer of this.discoveryPeers) {
       lanPeerSet.add(peer.getId());
     }
 
@@ -52,7 +52,7 @@ class Peerpool {
     for (const p of peers) {
       if (!lanPeerSet.has(p) && p != this.peer.id) {
         console.info(`new peer found: [${p}], this.peer.id = ${this.peer.id}`);
-        this.activatePeers.push(
+        this.discoveryPeers.push(
           new UniPeer(this.peer, p, (msg: Message) => {
             this.msgReceiver(p, msg);
           }),
@@ -66,14 +66,14 @@ class Peerpool {
   updateConnectedPeer(conn: DataConnection) {
     console.info("connected by new peer", conn.peer);
 
-    for (const p of this.activatePeers) {
+    for (const p of this.discoveryPeers) {
       if (p.getId() == conn.peer) {
         p.setConnection(conn);
         return;
       }
     }
 
-    this.activatePeers.push(
+    this.discoveryPeers.push(
       new UniPeer(
         this.peer,
         conn.peer,
@@ -87,7 +87,7 @@ class Peerpool {
   }
 
   getPeers(): UniPeer[] {
-    return this.activatePeers.concat(this.historyPeers);
+    return this.discoveryPeers.concat(this.historyPeers);
   }
 
   getPeersId(): string[] {
