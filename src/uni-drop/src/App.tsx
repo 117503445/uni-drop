@@ -76,7 +76,8 @@ function App() {
     {
       path: "/chat",
       element: chat,
-    },    {
+    },
+    {
       path: "/chat/:id",
       element: chat,
     },
@@ -92,21 +93,10 @@ function App() {
 
   return (
     <div>
-      {/* button to nagivate to demo page, always in left bottom */}
-      <button
-        onClick={() => {
-          // window.location.hash = "/demo";
-          window.location.hash = "/demopeer";
-        }}
-        className="fixed bottom-5 left-5 rounded-md border-2 border-gray-500"
-      >
-        Demo
-      </button>
-
       <div className="flex h-screen w-screen items-center justify-center">
         <div className="flex h-[calc(100%-5rem)] w-[calc(100%-5rem)] max-w-[75rem] overflow-hidden rounded-[1rem] border-2 shadow-md">
           {/* left side */}
-          <div className="flex h-full w-[25rem] flex-col border-r-2 bg-[#e7f8ff] p-5 shadow-md">
+          <div className="flex h-full min-w-[18.75rem] max-w-[18.75rem] flex-col border-r-2 bg-[#e7f8ff] p-5 shadow-md">
             <span className="text-xl font-bold">UniDrop</span>
             <span className="text-xl">
               <span className="font-bold">Uni</span>versal Air
@@ -168,6 +158,7 @@ function App() {
             </div>
           </div>
 
+          {/* right side */}
           <RouterProvider router={router} />
         </div>
       </div>
