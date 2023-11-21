@@ -1,7 +1,7 @@
 import "./global.css";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
-export default function AddFriend(props: {}) {
+export default function AddFriend() {
   const [postContent, setPostContent] = useState("");
 
   return (
