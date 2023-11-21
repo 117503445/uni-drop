@@ -500,7 +500,7 @@ export class UniPeersMockManager extends UniPeersService {
     this.messages.push(new Message("mock-peer", id, content));
     console.info(`-> peer ${id}: ${content}`);
     this.messages.push(new Message(id, "mock-peer", content));
-    this.setMessages(this.messages);
+    this.setMessages(this.messages.slice());
   }
 
   close(): void {}
