@@ -81,9 +81,9 @@ export default function Chat(props: {
       {/* bottom */}
       <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
         {/* toolbox */}
-        <div className="flex h-[2.5rem] w-full my-[0.25rem] px-[1rem] items-center ">
+        <div className="my-[0.25rem] flex h-[2.5rem] w-full items-center px-[1rem] ">
           <button
-            className="flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl bg-white fill-none shadow-sm border-#[dedede] border-2 mr-[1rem]"
+            className="border-#[dedede] mr-[1rem] flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
             onClick={() => {
               if (fileInputRef.current != null) {
                 fileInputRef.current.click();
@@ -119,7 +119,7 @@ export default function Chat(props: {
           />
 
           <button
-            className="flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl bg-white fill-none shadow-sm border-#[dedede] border-2"
+            className="border-#[dedede] flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
             onClick={() => {
               alert("unimplemented");
             }}
@@ -156,9 +156,7 @@ export default function Chat(props: {
                   return;
                 }
 
-                let data;
-                data = postContent;
-
+                // let data;
                 // pressdown 'w', pressdown 'enter', pressup 'w', pressup 'enter' still will cause '\n' in textarea
                 // if (postContent[postContent.length - 1] == "\n") {
                 //   data = postContent.slice(0, -1);
@@ -171,7 +169,8 @@ export default function Chat(props: {
                 // }
 
                 const content = new MessageContent(MessageType.TEXT);
-                await content.setData(data);
+                // await content.setData(data);
+                await content.setData(postContent);
                 props.sendMessages(content);
                 setPostContent("");
               }

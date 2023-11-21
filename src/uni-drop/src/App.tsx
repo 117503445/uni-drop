@@ -151,6 +151,9 @@ function App() {
                   }
                 })()}
               </span>
+              <span className="hidden" id="peerID">
+                {peerID}
+              </span>
             </div>
 
             {/* peers */}
