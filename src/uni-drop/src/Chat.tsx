@@ -81,9 +81,9 @@ export default function Chat(props: {
       {/* bottom */}
       <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
         {/* toolbox */}
-        <div className="flex h-[2.5rem] w-full items-center justify-between">
+        <div className="flex h-[2.5rem] w-full my-[0.25rem] px-[1rem] items-center ">
           <button
-            className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md"
+            className="flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl bg-white fill-none shadow-sm border-#[dedede] border-2 mr-[1rem]"
             onClick={() => {
               if (fileInputRef.current != null) {
                 fileInputRef.current.click();
@@ -117,8 +117,9 @@ export default function Chat(props: {
               props.sendMessages(content);
             }}
           />
+
           <button
-            className="flex h-[1.5rem] w-[2.25rem]  items-center justify-center rounded-xl bg-white fill-none shadow-md"
+            className="flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl bg-white fill-none shadow-sm border-#[dedede] border-2"
             onClick={() => {
               alert("unimplemented");
             }}
@@ -129,7 +130,7 @@ export default function Chat(props: {
         {/* input area */}
         <div className="flex h-full w-full flex-col items-center justify-center ">
           <textarea
-            className="m-auto h-[calc(100%-2rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
+            className="m-auto mt-1 h-[calc(100%-1.25rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
             placeholder="Type message here"
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}
