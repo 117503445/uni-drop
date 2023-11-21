@@ -2,6 +2,7 @@ import "./App.css";
 
 import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
+import returnIcon from "./assets/return.svg";
 import { useState, useRef } from "react";
 import { Message, MessageContent, MessageType } from "./model";
 import MessageBubble from "./MessageBubble";
@@ -19,7 +20,15 @@ export default function Chat(props: {
     <div className="flex h-full w-full flex-col">
       {/* right top */}
       <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5">
-        {props.selectedPeerID}
+        <span>{props.selectedPeerID}</span>
+        <button
+          className="flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl bg-white fill-none shadow-md sm:hidden"
+          onClick={() => {
+            window.location.hash = "/";
+          }}
+        >
+          <img className="mx-2" src={returnIcon}></img>
+        </button>
       </div>
 
       {/* right middle */}
