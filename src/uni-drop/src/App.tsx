@@ -1,4 +1,4 @@
-import "./App.css";
+import "./global.css";
 import settingIcon from "./assets/setting.svg";
 import githubIcon from "./assets/github.svg";
 
@@ -26,7 +26,7 @@ function App() {
       window.removeEventListener("popstate", handleUrlChange);
     };
   }, []);
-  
+
   // useEffect(() => {
   //   console.log('URL changed:', currentUrl.split("#")[1]);
   // }, [currentUrl]);
@@ -179,7 +179,9 @@ function App() {
           </div>
 
           {/* right side */}
-          <RouterProvider router={router} />
+          <div className="h-full w-full bg-white">
+            <RouterProvider router={router} />
+          </div>
         </div>
       </div>
     </div>

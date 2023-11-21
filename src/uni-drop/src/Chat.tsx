@@ -1,4 +1,4 @@
-import "./App.css";
+import "./global.css";
 
 import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
@@ -18,7 +18,7 @@ export default function Chat(props: {
 
   return (
     <div className="flex h-full w-full flex-col">
-      {/* right top */}
+      {/* top */}
       <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5">
         <span>{props.selectedPeerID}</span>
         <button
@@ -31,8 +31,8 @@ export default function Chat(props: {
         </button>
       </div>
 
-      {/* right middle */}
-      <div className="flex w-full flex-1 items-center justify-center">
+      {/* middle */}
+      <div className="flex w-full flex-1 items-center justify-center overflow-clip ">
         {(() => {
           if (props.selectedPeerID == null) {
             return <p>No Peer selected</p>;
@@ -66,7 +66,7 @@ export default function Chat(props: {
         })()}
       </div>
 
-      {/* right bottom */}
+      {/* bottom */}
       <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
         {/* toolbox */}
         <div className="flex h-[2.5rem] w-full items-center justify-between">

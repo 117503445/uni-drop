@@ -155,7 +155,9 @@ class UniPeer {
       if (this.connection == undefined) {
         this.connection = connection;
       } else {
-        console.log(`peer ${this.id} connection opened, but connection already set`);
+        console.log(
+          `peer ${this.id} connection opened, but connection already set`,
+        );
         connection.close();
       }
     });
@@ -165,7 +167,7 @@ class UniPeer {
         this.connection = undefined;
         if (!this.closing) {
           console.info(`reconnecting to peer ${this.id}`);
-        }else{
+        } else {
           console.info(`peer ${this.id} closed`);
         }
       }

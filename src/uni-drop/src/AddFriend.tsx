@@ -1,4 +1,4 @@
-import "./App.css";
+import "./global.css";
 import { useState, useRef } from "react";
 
 export default function AddFriend(props: {}) {
