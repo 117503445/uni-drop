@@ -1,8 +1,9 @@
 import "./global.css";
 import settingIcon from "./assets/setting.svg";
 import githubIcon from "./assets/github.svg";
-
 import addIcon from "./assets/add.svg";
+import qrcodeIcon from "./assets/qrcode.svg";
+
 import Chat from "./Chat";
 import AddFriend from "./AddFriend";
 import { createHashRouter, RouterProvider } from "react-router-dom";
@@ -129,25 +130,31 @@ function App() {
               curHashURL() != "/" ? "hidden sm:flex" : ""
             } max-w-full flex-col border-r-2 bg-[#e7f8ff] p-[2rem] shadow-md sm:min-w-[18.75rem] sm:max-w-[18.75rem]`}
           >
+            {/* logo */}
             <span className="text-xl font-bold">UniDrop</span>
-            <span className="text-xl">
-              <span className="font-bold">Uni</span>versal Air
-              <span className="font-bold">Drop</span>.
-            </span>
-            <span className="text-xl font-bold" id="peerID">
-              {peerID}
+            <span className="text-sm">
+              <span className="font-bold">Uni</span>
+              <span>versal Air</span>
+              <span className="font-bold">Drop</span>
+              <span>.</span>
             </span>
 
+            {/* me */}
+            <div className="mx-auto my-[2rem] flex max-h-[5rem] min-h-[5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-md items-center">
+              <img className="ml-[1rem] max-w-[3rem]" src={qrcodeIcon}></img>
+              <span className="mx-auto">{peerID + " (me)"}</span>
+            </div>
+
+            {/* peers */}
             <div className="mb-[2rem] flex flex-col overflow-clip overflow-y-auto">
               {peersID.map((id) => (
                 <div
                   className={`mx-auto my-1.5 flex max-h-[3.5rem] min-h-[3.5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-sm hover:bg-[#f3f3f3] ${
                     selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
-                  } hover:shadow-lg`}
+                  } hover:shadow-lg items-center`}
                   key={id}
                   onClick={() => {
                     setSelectedPeerID(id);
-                    // jump to /chat/:id
                     window.location.hash = `/chat/${id}`;
                   }}
                 >
@@ -156,6 +163,7 @@ function App() {
               ))}
             </div>
 
+            {/* bottom toolbox */}
             <div className="mt-auto flex  max-h-[3rem] min-h-[3rem] flex-1 sm:max-h-[2.25rem] sm:min-h-[2.25rem]">
               {/* setting button */}
               <button
