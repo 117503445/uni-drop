@@ -3,7 +3,7 @@ import "./global.css";
 import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
 import returnIcon from "./assets/return.svg";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Message, MessageContent, MessageType } from "./model";
 import MessageBubble from "./MessageBubble";
 
@@ -15,6 +15,14 @@ export default function Chat(props: {
 }) {
   const [postContent, setPostContent] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }),
+    [props.messages];
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -33,7 +41,6 @@ export default function Chat(props: {
 
       {/* middle */}
       <div className="flex w-full flex-1 items-center justify-center overflow-clip">
-
         {(() => {
           if (props.selectedPeerID == null) {
             return <p>No Peer selected</p>;
@@ -59,10 +66,13 @@ export default function Chat(props: {
                     >
                       <MessageBubble message={msg} peerID={props.peerID} />
                     </div>
-
                   </div>
                 );
               })}
+              <div
+                style={{ clear: "both", height: "1px", width: "100%" }}
+                ref={endRef}
+              ></div>
             </div>
           );
         })()}
