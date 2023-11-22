@@ -99,12 +99,12 @@ services:
 
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: admin
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081"]
-      interval: 10s
-      timeout: 1s
-      retries: 3
-      start_period: 5m
+    # healthcheck:
+    #   test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081"]
+    #   interval: 10s
+    #   timeout: 1s
+    #   retries: 3
+    #   start_period: 5m
     # depends_on:
     #   mongo:
     #     condition: service_healthy

@@ -6,7 +6,7 @@ import returnIcon from "@/assets/return.svg";
 import { useState, useRef, useEffect } from "react";
 import { Message, MessageContent, MessageType } from "../utils/model";
 import MessageBubble from "../components/MessageBubble";
-import {idToName} from '../utils/common'
+import { idToName } from "../utils/common";
 
 export default function Chat(props: {
   peerID: string;

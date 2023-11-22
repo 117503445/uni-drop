@@ -12,7 +12,11 @@ function assert(condition: boolean, message: string) {
   }
 }
 
-function assertOne(array: any[]) {
+interface Lengthable {
+  length: number;
+}
+
+function assertOne(array: Lengthable) {
   assert(array.length === 1, `Expected 1 element, found ${array.length}`);
 }
 
@@ -72,6 +76,7 @@ async function testBasic() {
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 
   await browser.close();
+  console.log("Basic functionality test passed");
 }
 
 async function testAddPeerID() {
@@ -161,6 +166,7 @@ async function testAddPeerID() {
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 
   await browser.close();
+  console.log("Add peer ID functionality test passed");
 }
 
 (async () => {
@@ -170,7 +176,9 @@ async function testAddPeerID() {
         ".env.development.local",
         ".env.development.local.backup",
       );
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   await testBasic();
@@ -181,5 +189,7 @@ async function testAddPeerID() {
       ".env.development.local.backup",
       ".env.development.local",
     );
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 })();
