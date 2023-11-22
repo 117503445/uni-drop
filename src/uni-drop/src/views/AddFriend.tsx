@@ -1,7 +1,9 @@
 import "./global.css";
 import { useState } from "react";
 
-export default function AddFriend() {
+export default function AddFriend(props: {
+  addPeer: (peerId: string) => void;
+}) {
   const [postContent, setPostContent] = useState("");
 
   return (
@@ -15,10 +17,10 @@ export default function AddFriend() {
       <button
         className="flex-1 bg-red-50"
         onClick={() => {
-          alert(postContent);
+          props.addPeer(postContent);
         }}
       >
-        Add
+        AddFriend
       </button>
     </div>
   );

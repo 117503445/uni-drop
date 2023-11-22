@@ -1,11 +1,11 @@
 import "./global.css";
-import settingIcon from "./assets/setting.svg";
-import githubIcon from "./assets/github.svg";
-import addIcon from "./assets/add.svg";
-import qrcodeIcon from "./assets/qrcode.svg";
+import settingIcon from "@/assets/setting.svg";
+import githubIcon from "@/assets/github.svg";
+import addIcon from "@/assets/add.svg";
+import qrcodeIcon from "@/assets/qrcode.svg";
 
-import Chat from "./Chat";
-import AddFriend from "./AddFriend";
+import Chat from "./Chat.js";
+import AddFriend from "./AddFriend.js";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 
 import { useState, useEffect, useRef } from "react";
@@ -13,10 +13,40 @@ import {
   UniPeersManager,
   UniPeersMockManager,
   UniPeersService,
-} from "./peer.js";
-import { Message, MessageContent, MessageType } from "./model";
+} from "../utils/peer.js";
+import { Message, MessageContent, MessageType } from "../utils/model.js";
+import Setting from "./Setting.js";
+import type { RootState } from "../store/store.js";
+import { useSelector } from "react-redux";
+import VConsole from "vconsole";
+
+import { idToName } from "../utils/common.js";
 
 function App() {
+  const enableVConsole = useSelector(
+    (state: RootState) => state.settings.enableVConsole,
+  );
+
+  const vconsole = useRef<VConsole | null>(null);
+
+  useEffect(() => {
+    if (enableVConsole) {
+      if (vconsole.current == null) {
+        vconsole.current = new VConsole();
+      }
+    } else {
+      if (vconsole.current != null) {
+        vconsole.current.destroy();
+        vconsole.current = null;
+      }
+    }
+    return () => {
+      if (vconsole.current != null) {
+        vconsole.current.destroy();
+      }
+    };
+  }, [enableVConsole]);
+
   const [currentUrl, setCurrentUrl] = useState(window.location.href);
   useEffect(() => {
     const handleUrlChange = () => {
@@ -97,6 +127,18 @@ function App() {
     ></Chat>
   );
 
+  const addFriend = (
+    <AddFriend
+      addPeer={(peerId: string) => {
+        if (managerRef.current == null) {
+          console.warn("manager is null");
+          return;
+        }
+        managerRef.current.addPeer(peerId);
+      }}
+    ></AddFriend>
+  );
+
   const router = createHashRouter([
     {
       path: "/",
@@ -111,12 +153,12 @@ function App() {
       element: chat,
     },
     {
-      path: "/test",
-      element: <div>test</div>,
+      path: "/add-friend",
+      element: addFriend,
     },
     {
-      path: "/add-friend",
-      element: <AddFriend />,
+      path: "/settings",
+      element: <Setting />,
     },
   ]);
 
@@ -145,7 +187,7 @@ function App() {
               <span className="mx-auto">
                 {(() => {
                   if (peerID.length > 0) {
-                    return peerID + " (me)";
+                    return idToName(peerID) + " (me)";
                   } else {
                     return "loading...";
                   }
@@ -153,6 +195,9 @@ function App() {
               </span>
               <span className="hidden" id="peerID">
                 {peerID}
+              </span>
+              <span className="hidden" id="peerName">
+                {idToName(peerID)}
               </span>
             </div>
 
@@ -169,7 +214,7 @@ function App() {
                     window.location.hash = `/chat/${id}`;
                   }}
                 >
-                  <span className="mx-auto">{id}</span>
+                  <span className="mx-auto">{idToName(id)}</span>
                 </div>
               ))}
             </div>
@@ -180,7 +225,7 @@ function App() {
               <button
                 className="mr-[1.25rem] flex min-h-full min-w-[3rem] items-center justify-center rounded-md bg-white shadow-md sm:min-w-[2.25rem]"
                 onClick={() => {
-                  alert("unimplemented");
+                  window.location.hash = "/settings";
                 }}
               >
                 <img src={settingIcon}></img>
@@ -212,7 +257,7 @@ function App() {
           {/* right side */}
           <div
             className={`h-full w-full bg-white ${
-              !curHashURL().includes("chat") ? "hidden sm:flex" : ""
+              curHashURL() == "/" ? "hidden sm:flex" : ""
             }`}
           >
             <RouterProvider router={router} />

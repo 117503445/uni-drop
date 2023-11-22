@@ -3,14 +3,36 @@ import { publicIpv4 } from "public-ip";
 import React from "react";
 import { Message, MessageContent, MessageType } from "./model";
 
+class UniPeerState {
+  // is the peer found by discovery currently
+  isDiscovery: boolean = false;
+
+  // is the peer has chat history
+  isHistory: boolean = false;
+
+  // user manually add peer, or peer manually add my peer
+  isManual: boolean = false;
+
+  isOnlyDiscovery(): boolean {
+    return this.isDiscovery && !this.isHistory && !this.isManual;
+  }
+
+  constructor({
+    isDiscovery = false,
+    isHistory = false,
+    isManual = false,
+  } = {}) {
+    this.isDiscovery = isDiscovery;
+    this.isHistory = isHistory;
+    this.isManual = isManual;
+  }
+}
+
 class Peerpool {
   // this peer
   private peer: Peer;
 
-  // peers find by discovery
-  private discoveryPeers: UniPeer[] = [];
-  // peers has chat history
-  private historyPeers: UniPeer[] = [];
+  private peers: Map<UniPeer, UniPeerState> = new Map();
 
   private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
 
@@ -27,37 +49,46 @@ class Peerpool {
   }
 
   updateLanPeers(peers: string[]) {
-    const peerSet = new Set<string>();
+    // newPeerSet = set(peers)
+    const newPeerSet = new Set<string>();
     for (const peer of peers) {
-      peerSet.add(peer);
+      newPeerSet.add(peer);
     }
 
-    // lanpeer not in peers should be removed from lanPeers
-    const discoveryPeers = [];
-    for (const peer of this.discoveryPeers) {
-      if (!peerSet.has(peer.getId())) {
-        peer.close();
-      } else {
-        discoveryPeers.push(peer);
+    // remove old onlyDiscovery peers
+    const deletePeers: UniPeer[] = [];
+    for (const [peer, state] of this.peers) {
+      if (state.isOnlyDiscovery() && !newPeerSet.has(peer.getId())) {
+        deletePeers.push(peer);
       }
     }
-    this.discoveryPeers = discoveryPeers;
-
-    const lanPeerSet = new Set<string>();
-    for (const peer of this.discoveryPeers) {
-      lanPeerSet.add(peer.getId());
+    for (const peer of deletePeers) {
+      peer.close();
+      this.peers.delete(peer);
     }
 
-    // peers not in lanpeers should be added to lanPeers
+    // oldPeerSet = set(p.id for p in peers.keys())
+    const oldPeerSet = new Set<string>();
+    for (const peer of this.peers.keys()) {
+      oldPeerSet.add(peer.getId());
+    }
+
+    // peers not in oldPeerSet should be added
     for (const p of peers) {
-      if (!lanPeerSet.has(p) && p != this.peer.id) {
+      if (!oldPeerSet.has(p) && p != this.peer.id) {
         console.info(`new peer found: [${p}], this.peer.id = ${this.peer.id}`);
-        this.discoveryPeers.push(
+        this.peers.set(
           new UniPeer(this.peer, p, (msg: Message) => {
             this.msgReceiver(p, msg);
           }),
+          new UniPeerState({ isDiscovery: true }),
         );
       }
+    }
+
+    // update isDiscovery state
+    for (const [peer, state] of this.peers) {
+      state.isDiscovery = newPeerSet.has(peer.getId());
     }
 
     this.setpeersID(this.getPeersId());
@@ -66,14 +97,14 @@ class Peerpool {
   updateConnectedPeer(conn: DataConnection) {
     console.info("connected by new peer", conn.peer);
 
-    for (const p of this.discoveryPeers) {
+    for (const p of this.peers.keys()) {
       if (p.getId() == conn.peer) {
         p.setConnection(conn);
         return;
       }
     }
 
-    this.discoveryPeers.push(
+    this.peers.set(
       new UniPeer(
         this.peer,
         conn.peer,
@@ -82,12 +113,14 @@ class Peerpool {
         },
         conn,
       ),
+      new UniPeerState({ isManual: true }), // TODO: isManual and by another peer discovery should be separated
     );
+
     this.setpeersID(this.getPeersId());
   }
 
   getPeers(): UniPeer[] {
-    return this.discoveryPeers.concat(this.historyPeers);
+    return Array.from(this.peers.keys());
   }
 
   getPeersId(): string[] {
@@ -105,6 +138,22 @@ class Peerpool {
       }
     }
     return null;
+  }
+
+  // user manually add peer
+  addPeer(id: string) {
+    if (this.findPeer(id) != null) {
+      console.info(`peer ${id} already added`);
+      return;
+    }
+    console.info(`add peer ${id}`);
+    this.peers.set(
+      new UniPeer(this.peer, id, (msg: Message) => {
+        this.msgReceiver(id, msg);
+      }),
+      new UniPeerState({ isManual: true }),
+    );
+    this.setpeersID(this.getPeersId());
   }
 }
 
@@ -289,13 +338,24 @@ class UniDiscovery {
     const data = await res.json();
     return data["data"]["peerIDs"];
   }
+  async ping(): Promise<boolean> {
+    try {
+      await (await fetch(`${this.host}`)).json();
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+    return true;
+  }
 }
 
 export abstract class UniPeersService {
   // send content to peer with id, non-blocking
   abstract send(id: string, content: MessageContent): void;
-  abstract close(): void;
+  // user manually add peer
+  abstract addPeer(id: string): void;
   abstract getPeerId(): Promise<string>;
+  abstract close(): void;
 }
 
 export class UniPeersManager extends UniPeersService {
@@ -305,7 +365,7 @@ export class UniPeersManager extends UniPeersService {
   // peers that can be connected to
   private peerpool: Peerpool | undefined = undefined;
 
-  private heartbeatTimer: number | undefined = undefined;
+  private heartbeatTimer: NodeJS.Timeout | undefined = undefined;
 
   private setpeerID: React.Dispatch<React.SetStateAction<string>>;
 
@@ -381,9 +441,11 @@ export class UniPeersManager extends UniPeersService {
       if (import.meta.env.DEV) {
         heartbeatInterval = 500;
       }
-      this.heartbeatTimer = setInterval(() => {
-        this.heartbeat();
-      }, heartbeatInterval);
+      if (import.meta.env.VITE_DISABLE_HEARTBEAT != "true") {
+        this.heartbeatTimer = setInterval(() => {
+          this.heartbeat();
+        }, heartbeatInterval);
+      }
     });
 
     this.peer.on("connection", (conn) => {
@@ -463,6 +525,13 @@ export class UniPeersManager extends UniPeersService {
     }
     return this.peer.id;
   }
+  addPeer(id: string) {
+    if (this.peerpool == undefined) {
+      console.warn("peerpool not set");
+      return;
+    }
+    this.peerpool.addPeer(id);
+  }
 }
 
 export class UniPeersMockManager extends UniPeersService {
@@ -472,6 +541,16 @@ export class UniPeersMockManager extends UniPeersService {
   private setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 
   private messages: Message[] = [];
+
+  private peersID: string[] = (() => {
+    // const peerNum = 20;
+    const peerNum = 3;
+    const peersID = [];
+    for (let i = 1; i <= peerNum; i++) {
+      peersID.push(`peer${i}`);
+    }
+    return peersID;
+  })();
 
   constructor(
     setpeerID: React.Dispatch<React.SetStateAction<string>>,
@@ -486,14 +565,7 @@ export class UniPeersMockManager extends UniPeersService {
 
     this.setpeerID("mock-peer");
 
-    // const peerNum = 20;
-    const peerNum = 3;
-    const peersID = [];
-    for (let i = 1; i <= peerNum; i++) {
-      peersID.push(`peer${i}`);
-    }
-
-    this.setpeersID(peersID);
+    this.setpeersID(this.peersID);
   }
 
   send(id: string, content: MessageContent): void {
@@ -507,5 +579,11 @@ export class UniPeersMockManager extends UniPeersService {
 
   async getPeerId(): Promise<string> {
     return "mock-peer";
+  }
+
+  addPeer(id: string): void {
+    console.info(`add peer ${id}`);
+    this.peersID.push(id);
+    this.setpeersID(this.peersID);
   }
 }

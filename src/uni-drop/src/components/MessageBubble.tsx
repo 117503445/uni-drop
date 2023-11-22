@@ -1,4 +1,4 @@
-import { Message, MessageType } from "./model";
+import { Message, MessageType } from "../utils/model";
 
 function MessageBubble(props: { peerID: string; message: Message }) {
   const msg = props.message;
