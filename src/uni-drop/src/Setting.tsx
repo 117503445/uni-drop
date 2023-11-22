@@ -1,4 +1,5 @@
 import "./global.css";
+import VConsole from "vconsole";
 
 import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
@@ -9,6 +10,18 @@ import MessageBubble from "./MessageBubble";
 
 export default function Setting() {
   const [vconsoleChecked, setVconsoleChecked] = useState(false);
+
+  useEffect(() => {
+    let vConsole: VConsole | null = null;
+    if (vconsoleChecked) {
+      vConsole = new VConsole();
+    }
+    return () => {
+      if (vConsole) {
+        vConsole.destroy();
+      }
+    };
+  }, [vconsoleChecked]);
 
   return (
     <div>
