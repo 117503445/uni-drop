@@ -17,7 +17,7 @@ function assertOne(array) {
 
 (async () => {
   const browser = await playwright.chromium.launch({
-    headless: true,
+    headless: false,
   });
   const context = await browser.newContext();
 
