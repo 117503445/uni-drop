@@ -20,7 +20,7 @@ export default function AddFriend(props: {
           props.addPeer(postContent);
         }}
       >
-        Add
+        AddFriend
       </button>
     </div>
   );
