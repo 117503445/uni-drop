@@ -20,6 +20,8 @@ import type { RootState } from "./store";
 import { useSelector } from "react-redux";
 import VConsole from "vconsole";
 
+import {idToName} from './utils'
+
 function App() {
   const enableVConsole = useSelector(
     (state: RootState) => state.settings.enableVConsole,
@@ -177,7 +179,7 @@ function App() {
               <span className="mx-auto">
                 {(() => {
                   if (peerID.length > 0) {
-                    return peerID + " (me)";
+                    return idToName(peerID) + " (me)";
                   } else {
                     return "loading...";
                   }
@@ -201,7 +203,7 @@ function App() {
                     window.location.hash = `/chat/${id}`;
                   }}
                 >
-                  <span className="mx-auto">{id}</span>
+                  <span className="mx-auto">{idToName(id)}</span>
                 </div>
               ))}
             </div>

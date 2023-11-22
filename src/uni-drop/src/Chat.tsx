@@ -6,6 +6,7 @@ import returnIcon from "./assets/return.svg";
 import { useState, useRef, useEffect } from "react";
 import { Message, MessageContent, MessageType } from "./model";
 import MessageBubble from "./MessageBubble";
+import {idToName} from './utils'
 
 export default function Chat(props: {
   peerID: string;
@@ -28,7 +29,7 @@ export default function Chat(props: {
     <div className="flex h-full w-full flex-col">
       {/* top */}
       <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5">
-        <span>{props.selectedPeerID}</span>
+        <span>{idToName(props.selectedPeerID)}</span>
         <button
           className="flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl bg-white fill-none shadow-md sm:hidden"
           onClick={() => {
@@ -46,7 +47,7 @@ export default function Chat(props: {
             return <p>No Peer selected</p>;
           }
           if (props.messages.length == 0) {
-            return <p>No message with peer {props.selectedPeerID}</p>;
+            return <p>No message with peer {idToName(props.selectedPeerID)}</p>;
           }
           return (
             <div className="flex h-full w-full flex-col overflow-y-auto px-[1.25rem]">
