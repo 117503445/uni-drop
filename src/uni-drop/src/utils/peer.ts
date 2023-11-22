@@ -113,7 +113,7 @@ class Peerpool {
         },
         conn,
       ),
-      new UniPeerState({isManual: true}), // TODO: isManual and by another peer discovery should be separated
+      new UniPeerState({ isManual: true }), // TODO: isManual and by another peer discovery should be separated
     );
 
     this.setpeersID(this.getPeersId());
@@ -138,6 +138,22 @@ class Peerpool {
       }
     }
     return null;
+  }
+
+  // user manually add peer
+  addPeer(id: string) {
+    if (this.findPeer(id) != null) {
+      console.info(`peer ${id} already added`);
+      return;
+    }
+    console.info(`add peer ${id}`);
+    this.peers.set(
+      new UniPeer(this.peer, id, (msg: Message) => {
+        this.msgReceiver(id, msg);
+      }),
+      new UniPeerState({ isManual: true }),
+    );
+    this.setpeersID(this.getPeersId());
   }
 }
 
@@ -336,8 +352,10 @@ class UniDiscovery {
 export abstract class UniPeersService {
   // send content to peer with id, non-blocking
   abstract send(id: string, content: MessageContent): void;
-  abstract close(): void;
+  // user manually add peer
+  abstract addPeer(id: string): void;
   abstract getPeerId(): Promise<string>;
+  abstract close(): void;
 }
 
 export class UniPeersManager extends UniPeersService {
@@ -423,9 +441,11 @@ export class UniPeersManager extends UniPeersService {
       if (import.meta.env.DEV) {
         heartbeatInterval = 500;
       }
-      this.heartbeatTimer = setInterval(() => {
-        this.heartbeat();
-      }, heartbeatInterval);
+      if (import.meta.env.VITE_DISABLE_HEARTBEAT != "true") {
+        this.heartbeatTimer = setInterval(() => {
+          this.heartbeat();
+        }, heartbeatInterval);
+      }
     });
 
     this.peer.on("connection", (conn) => {
@@ -505,6 +525,13 @@ export class UniPeersManager extends UniPeersService {
     }
     return this.peer.id;
   }
+  addPeer(id: string) {
+    if (this.peerpool == undefined) {
+      console.warn("peerpool not set");
+      return;
+    }
+    this.peerpool.addPeer(id);
+  }
 }
 
 export class UniPeersMockManager extends UniPeersService {
@@ -514,6 +541,16 @@ export class UniPeersMockManager extends UniPeersService {
   private setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 
   private messages: Message[] = [];
+
+  private peersID: string[] = (() => {
+    // const peerNum = 20;
+    const peerNum = 3;
+    const peersID = [];
+    for (let i = 1; i <= peerNum; i++) {
+      peersID.push(`peer${i}`);
+    }
+    return peersID;
+  })();
 
   constructor(
     setpeerID: React.Dispatch<React.SetStateAction<string>>,
@@ -528,14 +565,7 @@ export class UniPeersMockManager extends UniPeersService {
 
     this.setpeerID("mock-peer");
 
-    // const peerNum = 20;
-    const peerNum = 3;
-    const peersID = [];
-    for (let i = 1; i <= peerNum; i++) {
-      peersID.push(`peer${i}`);
-    }
-
-    this.setpeersID(peersID);
+    this.setpeersID(this.peersID);
   }
 
   send(id: string, content: MessageContent): void {
@@ -549,5 +579,11 @@ export class UniPeersMockManager extends UniPeersService {
 
   async getPeerId(): Promise<string> {
     return "mock-peer";
+  }
+
+  addPeer(id: string): void {
+    console.info(`add peer ${id}`);
+    this.peersID.push(id);
+    this.setpeersID(this.peersID);
   }
 }

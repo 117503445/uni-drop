@@ -20,7 +20,7 @@ import type { RootState } from "../store/store.js";
 import { useSelector } from "react-redux";
 import VConsole from "vconsole";
 
-import {idToName} from '../utils/common.js'
+import { idToName } from "../utils/common.js";
 
 function App() {
   const enableVConsole = useSelector(
@@ -127,6 +127,18 @@ function App() {
     ></Chat>
   );
 
+  const addFriend = (
+    <AddFriend
+      addPeer={(peerId: string) => {
+        if (managerRef.current == null) {
+          console.warn("manager is null");
+          return;
+        }
+        managerRef.current.addPeer(peerId);
+      }}
+    ></AddFriend>
+  );
+
   const router = createHashRouter([
     {
       path: "/",
@@ -141,12 +153,8 @@ function App() {
       element: chat,
     },
     {
-      path: "/test",
-      element: <div>test</div>,
-    },
-    {
       path: "/add-friend",
-      element: <AddFriend />,
+      element: addFriend,
     },
     {
       path: "/settings",
