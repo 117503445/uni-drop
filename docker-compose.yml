@@ -32,11 +32,24 @@ services:
     tty: true
     entrypoint: ./tests/entrypoint.sh
     # wait 1 minutes(TODO: why?), visit http://localhost:9900/vnc.html
+    depends_on:
+      uni-drop-dev:
+        condition: service_healthy
+      peerjs-server:
+        condition: service_healthy
+      peer-discovery-dev:
+        condition: service_healthy
   peerjs-server:
     image: peerjs/peerjs-server
     ports:
       - 9000:9000
     container_name: peerjs-server
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9000"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+      start_period: 5m
   peer-discovery-dev:
     build:
       context: ./src/peer-discovery
@@ -56,6 +69,9 @@ services:
       timeout: 1s
       retries: 3
       start_period: 5m
+    # depends_on:
+    #   mongo:
+    #     condition: service_healthy
   mongo:
     image: mongo
     # ports:
@@ -65,6 +81,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: E8kHTYJca96gEC
     volumes:
       - ./dev-data/db:/data/db
+    # healthcheck:
+    #   test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet | grep 1
+    #   interval: 10s
+    #   timeout: 1s
+    #   retries: 3
+    #   start_period: 5m
   mongo-express:
     image: mongo-express
     # restart: unless-stopped
@@ -77,3 +99,12 @@ services:
 
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: admin
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+      start_period: 5m
+    # depends_on:
+    #   mongo:
+    #     condition: service_healthy
