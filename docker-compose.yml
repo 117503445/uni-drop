@@ -30,8 +30,8 @@ services:
         - './dev-data/uni-drop-test/vsc_extensions:/root/.vscode-server/extensions'
     stdin_open: true
     tty: true
-    entrypoint: bash
-    # 9001
+    entrypoint: ./tests/entrypoint.sh
+    # wait 1 minutes(TODO: why?), visit http://localhost:9900/vnc.html
   peerjs-server:
     image: peerjs/peerjs-server
     ports:
