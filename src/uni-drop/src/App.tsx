@@ -16,9 +16,8 @@ import {
 } from "./peer.js";
 import { Message, MessageContent, MessageType } from "./model";
 import Setting from "./Setting";
-import { setVConsole } from "./settingStore";
 import type { RootState } from "./store";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import VConsole from "vconsole";
 
 function App() {

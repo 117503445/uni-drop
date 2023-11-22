@@ -1,11 +1,5 @@
 import "./global.css";
 
-import fileIcon from "./assets/file.svg";
-import imageIcon from "./assets/image.svg";
-import returnIcon from "./assets/return.svg";
-import { useState, useRef, useEffect } from "react";
-import { Message, MessageContent, MessageType } from "./model";
-import MessageBubble from "./MessageBubble";
 import { setVConsole } from "./settingStore";
 
 import type { RootState } from "./store";
@@ -16,8 +10,6 @@ export default function Setting() {
     (state: RootState) => state.settings.enableVConsole,
   );
   const dispatch = useDispatch();
-
-
 
   return (
     <div>
