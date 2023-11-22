@@ -31,8 +31,8 @@ function assertOne(array) {
 
   for (let i = 0; i < 10; i++) {
     const [id1, id2] = await Promise.all([
-      page1.locator('//*[@id="peerID"]').innerText(),
-      page2.locator('//*[@id="peerID"]').innerText(),
+      page1.locator('//*[@id="peerName"]').innerText(),
+      page2.locator('//*[@id="peerName"]').innerText(),
     ]);
     if (id1 !== "" && id2 !== "") {
       page1Id = id1;
@@ -46,7 +46,7 @@ function assertOne(array) {
     throw new Error("Could not get peer IDs");
   }
 
-  console.log(`page1Id = ${page1Id}, page2Id = ${page2Id}`);
+  console.log(`page1Name = ${page1Id}, page2Name = ${page2Id}`);
 
   await Promise.all([
     page1.getByText(page2Id).click(),

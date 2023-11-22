@@ -188,6 +188,9 @@ function App() {
               <span className="hidden" id="peerID">
                 {peerID}
               </span>
+              <span className="hidden" id="peerName">
+                {idToName(peerID)}
+              </span>
             </div>
 
             {/* peers */}
