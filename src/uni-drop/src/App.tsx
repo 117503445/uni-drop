@@ -15,6 +15,7 @@ import {
   UniPeersService,
 } from "./peer.js";
 import { Message, MessageContent, MessageType } from "./model";
+import Setting from "./Setting";
 
 function App() {
   const [currentUrl, setCurrentUrl] = useState(window.location.href);
@@ -118,6 +119,10 @@ function App() {
       path: "/add-friend",
       element: <AddFriend />,
     },
+    {
+      path: "/settings",
+      element: <Setting />,
+    },
   ]);
 
   return (
@@ -180,7 +185,7 @@ function App() {
               <button
                 className="mr-[1.25rem] flex min-h-full min-w-[3rem] items-center justify-center rounded-md bg-white shadow-md sm:min-w-[2.25rem]"
                 onClick={() => {
-                  alert("unimplemented");
+                  window.location.hash = "/settings";
                 }}
               >
                 <img src={settingIcon}></img>
@@ -212,7 +217,7 @@ function App() {
           {/* right side */}
           <div
             className={`h-full w-full bg-white ${
-              !curHashURL().includes("chat") ? "hidden sm:flex" : ""
+              curHashURL() == "/" ? "hidden sm:flex" : ""
             }`}
           >
             <RouterProvider router={router} />
