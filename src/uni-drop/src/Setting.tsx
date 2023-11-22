@@ -1,5 +1,4 @@
 import "./global.css";
-import VConsole from "vconsole";
 
 import fileIcon from "./assets/file.svg";
 import imageIcon from "./assets/image.svg";
@@ -7,21 +6,18 @@ import returnIcon from "./assets/return.svg";
 import { useState, useRef, useEffect } from "react";
 import { Message, MessageContent, MessageType } from "./model";
 import MessageBubble from "./MessageBubble";
+import { setVConsole } from "./settingStore";
+
+import type { RootState } from "./store";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function Setting() {
-  const [vconsoleChecked, setVconsoleChecked] = useState(false);
+  const enableVConsole = useSelector(
+    (state: RootState) => state.settings.enableVConsole,
+  );
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    let vConsole: VConsole | null = null;
-    if (vconsoleChecked) {
-      vConsole = new VConsole();
-    }
-    return () => {
-      if (vConsole) {
-        vConsole.destroy();
-      }
-    };
-  }, [vconsoleChecked]);
+
 
   return (
     <div>
@@ -29,9 +25,9 @@ export default function Setting() {
       <input
         type="checkbox"
         name="vconsole"
-        checked={vconsoleChecked}
+        checked={enableVConsole}
         onChange={(e) => {
-          setVconsoleChecked(e.currentTarget.checked);
+          dispatch(setVConsole(e.target.checked));
         }}
       ></input>
     </div>

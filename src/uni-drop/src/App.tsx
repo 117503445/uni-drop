@@ -16,8 +16,36 @@ import {
 } from "./peer.js";
 import { Message, MessageContent, MessageType } from "./model";
 import Setting from "./Setting";
+import { setVConsole } from "./settingStore";
+import type { RootState } from "./store";
+import { useSelector, useDispatch } from "react-redux";
+import VConsole from "vconsole";
 
 function App() {
+  const enableVConsole = useSelector(
+    (state: RootState) => state.settings.enableVConsole,
+  );
+
+  const vconsole = useRef<VConsole | null>(null);
+
+  useEffect(() => {
+    if (enableVConsole) {
+      if (vconsole.current == null) {
+        vconsole.current = new VConsole();
+      }
+    } else {
+      if (vconsole.current != null) {
+        vconsole.current.destroy();
+        vconsole.current = null;
+      }
+    }
+    return () => {
+      if (vconsole.current != null) {
+        vconsole.current.destroy();
+      }
+    };
+  }, [enableVConsole]);
+
   const [currentUrl, setCurrentUrl] = useState(window.location.href);
   useEffect(() => {
     const handleUrlChange = () => {
