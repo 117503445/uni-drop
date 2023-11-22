@@ -365,7 +365,7 @@ export class UniPeersManager extends UniPeersService {
   // peers that can be connected to
   private peerpool: Peerpool | undefined = undefined;
 
-  private heartbeatTimer: number | undefined = undefined;
+  private heartbeatTimer: NodeJS.Timeout | undefined = undefined;
 
   private setpeerID: React.Dispatch<React.SetStateAction<string>>;
 
