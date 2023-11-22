@@ -1,8 +1,8 @@
 import "./global.css";
 
-import { setVConsole } from "./settingStore";
+import { setVConsole } from "../store/settingStore";
 
-import type { RootState } from "./store";
+import type { RootState } from "../store/store";
 import { useSelector, useDispatch } from "react-redux";
 
 export default function Setting() {

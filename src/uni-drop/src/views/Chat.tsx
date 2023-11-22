@@ -1,12 +1,12 @@
 import "./global.css";
 
-import fileIcon from "./assets/file.svg";
-import imageIcon from "./assets/image.svg";
-import returnIcon from "./assets/return.svg";
+import fileIcon from "@/assets/file.svg";
+import imageIcon from "@/assets/image.svg";
+import returnIcon from "@/assets/return.svg";
 import { useState, useRef, useEffect } from "react";
-import { Message, MessageContent, MessageType } from "./model";
-import MessageBubble from "./MessageBubble";
-import {idToName} from './utils'
+import { Message, MessageContent, MessageType } from "../utils/model";
+import MessageBubble from "../components/MessageBubble";
+import {idToName} from '../utils/common'
 
 export default function Chat(props: {
   peerID: string;

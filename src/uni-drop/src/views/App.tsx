@@ -1,11 +1,11 @@
 import "./global.css";
-import settingIcon from "./assets/setting.svg";
-import githubIcon from "./assets/github.svg";
-import addIcon from "./assets/add.svg";
-import qrcodeIcon from "./assets/qrcode.svg";
+import settingIcon from "@/assets/setting.svg";
+import githubIcon from "@/assets/github.svg";
+import addIcon from "@/assets/add.svg";
+import qrcodeIcon from "@/assets/qrcode.svg";
 
-import Chat from "./Chat";
-import AddFriend from "./AddFriend";
+import Chat from "./Chat.js";
+import AddFriend from "./AddFriend.js";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 
 import { useState, useEffect, useRef } from "react";
@@ -13,14 +13,14 @@ import {
   UniPeersManager,
   UniPeersMockManager,
   UniPeersService,
-} from "./peer.js";
-import { Message, MessageContent, MessageType } from "./model";
-import Setting from "./Setting";
-import type { RootState } from "./store";
+} from "../utils/peer.js";
+import { Message, MessageContent, MessageType } from "../utils/model.js";
+import Setting from "./Setting.js";
+import type { RootState } from "../store/store.js";
 import { useSelector } from "react-redux";
 import VConsole from "vconsole";
 
-import {idToName} from './utils'
+import {idToName} from '../utils/common.js'
 
 function App() {
   const enableVConsole = useSelector(
