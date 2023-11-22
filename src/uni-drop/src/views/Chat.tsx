@@ -16,7 +16,22 @@ export default function Chat(props: {
 }) {
   const [postContent, setPostContent] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
+
+  const selectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const target: HTMLInputElement = event.target;
+    const files = target.files;
+    if (files == null || files.length == 0) {
+      console.info("no file selected");
+      return;
+    }
+    if (files.length > 1) {
+      console.warn("multiple files selected, only use the first one");
+    }
+    const file = files[0];
+    return file;
+  };
 
   useEffect(() => {
     if (endRef.current) {
@@ -92,40 +107,56 @@ export default function Chat(props: {
             }}
           >
             <img className="h-4 w-4" src={fileIcon}></img>
+            <input
+              type="file"
+              ref={fileInputRef}
+              // TODO: multiple
+              style={{ display: "none" }}
+              onChange={async (event: React.ChangeEvent<HTMLInputElement>) => {
+                const file = selectFile(event);
+                if (!file) {
+                  return;
+                }
+
+                const content = new MessageContent(MessageType.FILE);
+                console.log("select file");
+                await content.setData(file);
+                console.log("select file setData done");
+
+                props.sendMessages(content);
+              }}
+            />
           </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            // TODO: multiple
-            style={{ display: "none" }}
-            onChange={async (event: React.ChangeEvent<HTMLInputElement>) => {
-              const target: HTMLInputElement = event.target;
-              const files = target.files;
-              if (files == null || files.length == 0) {
-                console.info("no file selected");
-                return;
-              }
-              if (files.length > 1) {
-                console.warn("multiple files selected, only use the first one");
-              }
-              const file = files[0];
-
-              const content = new MessageContent(MessageType.FILE);
-              console.log("select file");
-              await content.setData(file);
-              console.log("select file setData done");
-
-              props.sendMessages(content);
-            }}
-          />
 
           <button
             className="border-#[dedede] flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
             onClick={() => {
-              alert("unimplemented");
+              if (imageInputRef.current != null) {
+                imageInputRef.current.click();
+              }
             }}
           >
             <img className="h-4 w-4" src={imageIcon}></img>
+            <input
+              type="file"
+              ref={imageInputRef}
+              // TODO: multiple
+              style={{ display: "none" }}
+              accept="image/*"
+              onChange={async (event: React.ChangeEvent<HTMLInputElement>) => {
+                const file = selectFile(event);
+                if (!file) {
+                  return;
+                }
+
+                const content = new MessageContent(MessageType.IMAGE);
+                console.log("select image");
+                await content.setData(file);
+                console.log("select image setData done");
+
+                props.sendMessages(content);
+              }}
+            />
           </button>
         </div>
         {/* input area */}
