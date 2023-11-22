@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "playwright": "node tests/main.js",
+    "playwright": "tsc ./tests/main.ts && node tests/main.js",
     "prettier": "prettier . --write"
   },
   "dependencies": {
@@ -24,6 +24,7 @@
     "vconsole": "^3.15.1"
   },
   "devDependencies": {
+    "@types/node": "^20.9.4",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.9.0",

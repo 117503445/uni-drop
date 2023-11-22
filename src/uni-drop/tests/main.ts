@@ -1,22 +1,22 @@
-import playwright from "playwright";
+import { chromium } from "playwright";
 import { program } from "commander";
 
 program.option("--url <url>", "the url of frontend", "http://localhost:5173");
 program.parse();
 const url = program.opts()["url"];
 
-function assert(condition, message) {
+function assert(condition: boolean, message: string) {
   if (!condition) {
     throw new Error(message);
   }
 }
 
-function assertOne(array) {
+function assertOne(array: any[]) {
   assert(array.length === 1, `Expected 1 element, found ${array.length}`);
 }
 
 (async () => {
-  const browser = await playwright.chromium.launch({
+  const browser = await chromium.launch({
     headless: false,
   });
   const context = await browser.newContext();
