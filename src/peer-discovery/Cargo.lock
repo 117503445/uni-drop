@@ -1199,6 +1199,7 @@ dependencies = [
  "actix-web",
  "futures",
  "mongodb",
+ "rand",
  "serde",
 ]
 

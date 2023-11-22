@@ -11,7 +11,6 @@ use peer_discovery::RecordService;
 use serde::{Deserialize, Serialize};
 
 const DB_NAME: &str = "peer_discovery";
-const COLL_NAME: &str = "records";
 const PEER_TIMEOUT_SECONDS: u64 = 90;
 
 use std::time::Duration;
@@ -144,7 +143,7 @@ async fn main() -> std::io::Result<()> {
 
     let client = get_mongo_client(&uri).await;
 
-    let record_service = RecordService::new(client.clone(), DB_NAME, COLL_NAME);
+    let record_service = RecordService::new(client.clone(), DB_NAME);
     record_service
         .create_peerid_index()
         .await
