@@ -9,7 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "playwright": "tsc ./tests/main.ts && mv tests/main.js tests/main.cjs && node tests/main.cjs",
-    "prettier": "prettier . --write"
+    "prettier": "prettier . --write",
+    "check": "pnpm run lint && pnpm run prettier && pnpm run build"
   },
   "dependencies": {
     "@faker-js/faker": "^8.3.1",
