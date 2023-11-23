@@ -231,7 +231,7 @@ impl PinService {
         Ok(())
     }
 
-    pub async fn get_peerid_by_pin(&self, pin_code: &str) -> Result<Option<String>, Box<dyn Error>> {
+    pub async fn get_peerid_by_pin(&self, pin_code: &str) -> Result<String, Box<dyn Error>> {
         let mut cursor = self.collection
             .find(
                 doc! { "pin_code": pin_code },
@@ -242,7 +242,28 @@ impl PinService {
         while let Some(result) = cursor.next().await {
             match result {
                 Ok(pin) => {
-                    return Ok(Some(pin.peer_id));
+                    return Ok(pin.peer_id);
+                }
+                Err(err) => {
+                    return Err(Box::new(err));
+                }
+            }
+        }
+        return Err(Box::new(MyError::new(String::from("pin_code not found"))))
+    }
+
+    pub async fn get_pin_by_peerid(&self, peer_id: &str) -> Result<Option<String>, Box<dyn Error>> {
+        let mut cursor = self.collection
+            .find(
+                doc! { "peer_id": peer_id },
+                None,
+            )
+            .await?;
+
+        while let Some(result) = cursor.next().await {
+            match result {
+                Ok(pin) => {
+                    return Ok(Some(pin.pin_code));
                 }
                 Err(err) => {
                     return Err(Box::new(err));
@@ -268,6 +289,34 @@ impl PinService {
             .build();
         self.collection.create_index(model, None).await?;
         Ok(())
+    }
+
+    pub async fn get_available_pin_code(&self) -> Result<String, Box<dyn Error>> {
+        let mut cursor = self.collection
+            .find(
+                doc! {},
+                None,
+            )
+            .await?;
+
+        let mut pin_codes: Vec<String> = Vec::new();
+        while let Some(result) = cursor.next().await {
+            match result {
+                Ok(pin) => {
+                    pin_codes.push(pin.pin_code);
+                }
+                Err(err) => {
+                    return Err(Box::new(err));
+                }
+            }
+        }
+
+        let mut pin_code = self.gen_pin_code();
+        // TODO: if pin_codes.len() == 10000, dead loop; too slow
+        while pin_codes.contains(&pin_code) {
+            pin_code = self.gen_pin_code();
+        }
+        Ok(pin_code)
     }
 
     // pin_code from 0000 to 9999
