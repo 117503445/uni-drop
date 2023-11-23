@@ -121,7 +121,7 @@ async function testAddPeerID() {
   await page1.getByText("Add").click();
   await page1.getByPlaceholder("Add friend by peer id").click();
   await page1.getByPlaceholder("Add friend by peer id").fill(page2Id);
-  await page1.getByText("AddFriend").click();
+  await page1.getByText("AddFriendByID").click();
 
   await new Promise((resolve) => setTimeout(resolve, 10000));
 

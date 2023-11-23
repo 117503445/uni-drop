@@ -21,7 +21,7 @@ export default function AddFriend(props: {
           props.addPeer(idContent);
         }}
       >
-        AddFriend
+        AddFriendByID
       </button>
 
       <br />
@@ -57,7 +57,7 @@ export default function AddFriend(props: {
           props.addPeer(data.data.peerID);
         }}
       >
-        AddFriend
+        AddFriendByPin
       </button>
     </div>
   );
