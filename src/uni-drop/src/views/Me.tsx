@@ -7,6 +7,10 @@ export default function Me(props: { peerID: string }) {
 
   useEffect(() => {
     const call = async () => {
+      if (props.peerID.length == 0) {
+        console.warn("peerID is empty");
+        return;
+      }
       const host = import.meta.env.VITE_BE_HOST;
       const res = await fetch(`${host}/api/pin`, {
         method: "POST",
@@ -28,7 +32,7 @@ export default function Me(props: { peerID: string }) {
         clearInterval(timer.current);
       }
     };
-  }, []);
+  }, [props.peerID]);
 
   return (
     <div>
