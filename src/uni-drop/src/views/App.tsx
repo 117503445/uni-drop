@@ -22,6 +22,7 @@ import VConsole from "vconsole";
 
 import { idToName } from "../utils/common.js";
 import Me from "./Me";
+import FromFriend from "./FromFriend.js";
 
 function App() {
   const enableVConsole = useSelector(
@@ -158,6 +159,10 @@ function App() {
     {
       path: "/add-friend",
       element: addFriend,
+    },
+    {
+      path: "/from-friend/:id",
+      element: <FromFriend />,
     },
     {
       path: "/settings",
