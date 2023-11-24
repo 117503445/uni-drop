@@ -131,7 +131,6 @@ function App() {
 
   const addFriend = (
     <AddFriend
-      peerID={peerID}
       addPeer={(peerId: string) => {
         if (managerRef.current == null) {
           console.warn("manager is null");

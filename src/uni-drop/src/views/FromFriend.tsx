@@ -5,7 +5,6 @@ export default function FromFriend(props: {
   addPeer: (peerId: string) => void;
 }) {
   useEffect(() => {
-
     // TODO: this is a hack, we should use a better way to pass peerID
     setTimeout(() => {
       const peerID = window.location.href.split("/").pop();
@@ -15,8 +14,7 @@ export default function FromFriend(props: {
       }
       window.location.hash = `/chat/${peerID}`;
     }, 1000);
-
-  }, []);
+  }, [props]);
 
   return <div>From friend</div>;
 }

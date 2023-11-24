@@ -436,7 +436,7 @@ export class UniPeersManager extends UniPeersService {
           this.setMessages(this.messages.slice());
         },
       );
-      console.log("current pendingAddPeers", this.pendingAddPeers)
+      console.log("current pendingAddPeers", this.pendingAddPeers);
       for (const id of this.pendingAddPeers) {
         console.info(`add pending peer ${id}`);
         this.peerpool.addPeer(id);
