@@ -141,6 +141,18 @@ function App() {
     ></AddFriend>
   );
 
+  const fromFriend = (
+    <FromFriend
+      addPeer={(peerId: string) => {
+        if (managerRef.current == null) {
+          console.warn("manager is null");
+          return;
+        }
+        managerRef.current.addPeer(peerId);
+      }}
+    ></FromFriend>
+  );
+
   const me = <Me peerID={peerID}></Me>;
 
   const router = createHashRouter([
@@ -162,7 +174,7 @@ function App() {
     },
     {
       path: "/from-friend/:id",
-      element: <FromFriend />,
+      element: fromFriend,
     },
     {
       path: "/settings",
