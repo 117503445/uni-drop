@@ -1,9 +1,26 @@
 import "./global.css";
 import { useState, useEffect, useRef } from "react";
+import QRCode from "qrcode";
 
 export default function Me(props: { peerID: string }) {
   const [pin, setPin] = useState("");
   const timer = useRef<NodeJS.Timeout | null>(null);
+
+  const [qrcode, setQrcode] = useState("");
+  useEffect(() => {
+    console.log("AddFriend peerID", props.peerID);
+    if (!props.peerID) {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    url.hash = `/from-friend/${props.peerID}`;
+
+    QRCode.toDataURL(url.toString()).then((dataURL) => {
+      console.log(dataURL);
+      setQrcode(dataURL);
+    });
+  }, [props.peerID]);
 
   useEffect(() => {
     const call = async () => {
@@ -39,6 +56,8 @@ export default function Me(props: { peerID: string }) {
       <span>peerid: {props.peerID}</span>
       <br />
       <span>pin: {pin}</span>
+      <br />
+      <img src={qrcode} />
     </div>
   );
 }

@@ -377,6 +377,8 @@ export class UniPeersManager extends UniPeersService {
 
   private messages: Message[] = [];
 
+  private pendingAddPeers: string[] = [];
+
   // private peerIDStore: PeerIDStore = new PeerIDStore();
 
   constructor(
@@ -434,6 +436,12 @@ export class UniPeersManager extends UniPeersService {
           this.setMessages(this.messages.slice());
         },
       );
+      console.log("current pendingAddPeers", this.pendingAddPeers);
+      for (const id of this.pendingAddPeers) {
+        console.info(`add pending peer ${id}`);
+        this.peerpool.addPeer(id);
+      }
+      this.pendingAddPeers = [];
 
       this.discovery = new UniDiscovery(id);
 
@@ -527,10 +535,11 @@ export class UniPeersManager extends UniPeersService {
   }
   addPeer(id: string) {
     if (this.peerpool == undefined) {
-      console.warn("peerpool not set");
-      return;
+      console.log(`add peer ${id} to pending list`);
+      this.pendingAddPeers.push(id);
+    } else {
+      this.peerpool.addPeer(id);
     }
-    this.peerpool.addPeer(id);
   }
 }
 
