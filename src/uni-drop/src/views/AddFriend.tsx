@@ -1,11 +1,13 @@
 import "./global.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AddFriend(props: {
   addPeer: (peerId: string) => void;
 }) {
   const [idContent, setIdContent] = useState("");
   const [pinContent, setPinContent] = useState("");
+  
+
 
   return (
     <div>
@@ -59,6 +61,7 @@ export default function AddFriend(props: {
       >
         AddFriendByPin
       </button>
+
     </div>
   );
 }
