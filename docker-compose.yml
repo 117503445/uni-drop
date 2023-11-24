@@ -24,6 +24,7 @@ services:
       context: ./src/uni-drop
       dockerfile: Dockerfile_test_dev
     container_name: uni-drop-test
+    # noVNC: http://localhost:9900/vnc.html
     network_mode: host
     volumes:
         - './src/uni-drop:/workspace/uni-drop'
@@ -68,7 +69,7 @@ services:
       interval: 10s
       timeout: 1s
       retries: 3
-      start_period: 5m
+      start_period: 10m
     # depends_on:
     #   mongo:
     #     condition: service_healthy
