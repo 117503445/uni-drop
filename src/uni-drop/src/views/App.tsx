@@ -21,6 +21,7 @@ import { useSelector } from "react-redux";
 import VConsole from "vconsole";
 
 import { idToName } from "../utils/common.js";
+import Me from "./Me";
 
 function App() {
   const enableVConsole = useSelector(
@@ -139,6 +140,8 @@ function App() {
     ></AddFriend>
   );
 
+  const me = <Me peerID={peerID}></Me>;
+
   const router = createHashRouter([
     {
       path: "/",
@@ -159,6 +162,10 @@ function App() {
     {
       path: "/settings",
       element: <Setting />,
+    },
+    {
+      path: "/me",
+      element: me,
     },
   ]);
 
@@ -182,7 +189,12 @@ function App() {
             </span>
 
             {/* me */}
-            <div className="mx-auto my-[2rem] flex max-h-[5rem] min-h-[5rem] w-[100%] cursor-pointer items-center rounded-xl bg-white py-2 shadow-md">
+            <div
+              className="mx-auto my-[2rem] flex max-h-[5rem] min-h-[5rem] w-[100%] cursor-pointer items-center rounded-xl bg-white py-2 shadow-md"
+              onClick={() => {
+                window.location.hash = "/me";
+              }}
+            >
               <img className="ml-[1rem] max-w-[3rem]" src={qrcodeIcon}></img>
               <span className="mx-auto">
                 {(() => {

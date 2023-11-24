@@ -7,11 +7,10 @@ mod test;
 use actix_cors::Cors;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer};
 use mongodb::{bson::doc, options::ClientOptions, Client};
-use peer_discovery::RecordService;
+use peer_discovery::{PinService, RecordService};
 use serde::{Deserialize, Serialize};
 
 const DB_NAME: &str = "peer_discovery";
-const COLL_NAME: &str = "records";
 const PEER_TIMEOUT_SECONDS: u64 = 90;
 
 use std::time::Duration;
@@ -124,6 +123,111 @@ async fn heartbeat(
     }
 }
 
+#[derive(Deserialize)]
+struct PinUpsertRequest {
+    #[serde(rename = "peerID")]
+    pub peer_id: String,
+}
+
+#[derive(Serialize)]
+struct PinUpsertResponse {
+    #[serde(rename = "pinCode")]
+    pub pin: String,
+}
+
+#[post("/api/pin")]
+async fn pin_upsert(
+    pin_service: web::Data<PinService>,
+    req_body: web::Json<PinUpsertRequest>,
+) -> HttpResponse {
+    if let Err(err) = pin_service.remove_expired(PEER_TIMEOUT_SECONDS).await {
+        return HttpResponse::InternalServerError().json(CommonResponse {
+            code: 1,
+            msg: "MongoDB delete timeout pin failed".to_string(),
+            data: err.to_string(),
+        });
+    }
+
+    let pin_result = pin_service.get_pin_by_peerid(&req_body.peer_id).await;
+    if let Err(err) = pin_result {
+        return HttpResponse::InternalServerError().json(CommonResponse {
+            code: 1,
+            msg: "MongoDB get pin by peerid failed".to_string(),
+            data: err.to_string(),
+        });
+    }
+
+    // if pin_result is not none, pin = pin_result.unwrap()
+    // else pin = pin_service.get_available_pin_code()
+    let pin;
+    if let Some(pin_code) = pin_result.unwrap() {
+        pin = pin_code;
+    } else {
+        let pin_result = pin_service.get_available_pin_code().await;
+        if let Err(err) = pin_result {
+            return HttpResponse::InternalServerError().json(CommonResponse {
+                code: 1,
+                msg: "MongoDB get available pin code failed".to_string(),
+                data: err.to_string(),
+            });
+        }
+        pin = pin_result.unwrap();
+    }
+
+    if let Err(err) = pin_service
+        .upsert(&req_body.peer_id, &pin, None)
+        .await
+    {
+        return HttpResponse::InternalServerError().json(CommonResponse {
+            code: 1,
+            msg: "MongoDB insert pin failed".to_string(),
+            data: err.to_string(),
+        });
+    }
+
+    HttpResponse::Ok().json(CommonResponse {
+        code: 0,
+        msg: "".to_string(),
+        data: PinUpsertResponse { pin },
+    })
+}
+
+#[derive(Serialize)]
+struct PinGetResponse {
+    #[serde(rename = "peerID")]
+    pub peer_id: String,
+}
+
+#[get("/api/pin/{pin}")]
+async fn pin_get(
+    pin_service: web::Data<PinService>,
+    path: web::Path<String>,
+) -> HttpResponse {
+
+    let pin = path.into_inner();
+
+    if let Err(err) = pin_service.remove_expired(PEER_TIMEOUT_SECONDS).await {
+        return HttpResponse::InternalServerError().json(CommonResponse {
+            code: 1,
+            msg: "MongoDB delete timeout pin failed".to_string(),
+            data: err.to_string(),
+        });
+    }
+
+    match pin_service.get_peerid_by_pin(&pin).await {
+        Ok(peer_id) => HttpResponse::Ok().json(CommonResponse {
+            code: 0,
+            msg: "".to_string(),
+            data: PinGetResponse { peer_id },
+        }),
+        Err(err) => HttpResponse::InternalServerError().json(CommonResponse {
+            code: 1,
+            msg: "MongoDB get peerid by pin failed: ".to_string() + err.to_string().as_str(),
+            data: ""
+        }),
+    }
+}
+
 async fn get_mongo_client(uri: &str) -> Client {
     let mut client_options = ClientOptions::parse(uri)
         .await
@@ -144,9 +248,15 @@ async fn main() -> std::io::Result<()> {
 
     let client = get_mongo_client(&uri).await;
 
-    let record_service = RecordService::new(client.clone(), DB_NAME, COLL_NAME);
+    let record_service = RecordService::new(client.clone(), DB_NAME);
     record_service
         .create_peerid_index()
+        .await
+        .expect("failed to create index");
+
+    let pin_service = PinService::new(client, DB_NAME);
+    pin_service
+        .create_index()
         .await
         .expect("failed to create index");
 
@@ -162,9 +272,12 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(record_service.clone()))
+            .app_data(web::Data::new(pin_service.clone()))
             .service(heartbeat)
             .service(remove_all)
             .service(index)
+            .service(pin_upsert)
+            .service(pin_get)
     })
     .bind(("0.0.0.0", port))?
     .run()

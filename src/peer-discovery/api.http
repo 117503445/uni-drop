@@ -15,3 +15,18 @@ Content-Type: application/json
 
 POST http://localhost:8080/api/remove
 Content-Type: application/json
+
+###
+
+POST http://localhost:8080/api/pin
+Content-Type: application/json
+
+{
+    "peerID": "peer0"
+}
+
+###
+
+GET http://localhost:8080/api/pin/0123
+Content-Type: application/json
+
