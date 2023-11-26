@@ -171,14 +171,14 @@ async function testAddPeerID() {
 
 (async () => {
   if (!fs.existsSync(".env.development.local.backup")) {
-    try {
-      await fs.promises.rename(
-        ".env.development.local",
-        ".env.development.local.backup",
-      );
-    } catch (error) {
-      console.log(error);
+    if (!fs.existsSync(".env.development.local")) {
+      await fs.promises.writeFile(".env.development.local", "");
     }
+
+    await fs.promises.rename(
+      ".env.development.local",
+      ".env.development.local.backup",
+    );
   }
 
   await testBasic();
