@@ -47,7 +47,7 @@ class TestCase {
       headless: false,
     });
     const context = await browser.newContext();
-    context.setDefaultTimeout(5000);
+    // context.setDefaultTimeout(5000);
 
     await context.tracing.start({ screenshots: true, snapshots: true });
 
