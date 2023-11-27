@@ -1,10 +1,16 @@
 import "./global.css";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import QRCode from "qrcode";
 
 export default function Me(props: { peerID: string }) {
   const [pin, setPin] = useState("");
   const timer = useRef<NodeJS.Timeout | null>(null);
+
+  const url = useMemo(() => {
+    const u = new URL(window.location.href);
+    u.hash = `/from-friend/${props.peerID}`;
+    return u;
+  }, [props.peerID]);
 
   const [qrcode, setQrcode] = useState("");
   useEffect(() => {
@@ -13,14 +19,11 @@ export default function Me(props: { peerID: string }) {
       return;
     }
 
-    const url = new URL(window.location.href);
-    url.hash = `/from-friend/${props.peerID}`;
-
     QRCode.toDataURL(url.toString()).then((dataURL) => {
       console.log(dataURL);
       setQrcode(dataURL);
     });
-  }, [props.peerID]);
+  }, [url, props.peerID]);
 
   useEffect(() => {
     const call = async () => {
@@ -52,7 +55,14 @@ export default function Me(props: { peerID: string }) {
   }, [props.peerID]);
 
   return (
-    <div>
+    <div
+      id="me-meta"
+      test-mata={JSON.stringify({
+        peerID: props.peerID,
+        pin,
+        url,
+      })}
+    >
       <span>peerid: {props.peerID}</span>
       <br />
       <span>pin: {pin}</span>

@@ -32,7 +32,7 @@ services:
     stdin_open: true
     tty: true
     entrypoint: ./tests/entrypoint.sh
-    # wait 1 minutes(TODO: why?), visit http://localhost:9900/vnc.html
+    # wait 1 minutes(TODO: why?), visit http://localhost:9900/vnc.html?host=localhost&port=9900
     depends_on:
       uni-drop-dev:
         condition: service_healthy
@@ -70,9 +70,9 @@ services:
       timeout: 1s
       retries: 3
       start_period: 10m
-    # depends_on:
-    #   mongo:
-    #     condition: service_healthy
+    depends_on:
+      mongo:
+        condition: service_healthy
   mongo:
     image: mongo
     # ports:
@@ -82,12 +82,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: E8kHTYJca96gEC
     volumes:
       - ./dev-data/db:/data/db
-    # healthcheck:
-    #   test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet | grep 1
-    #   interval: 10s
-    #   timeout: 1s
-    #   retries: 3
-    #   start_period: 5m
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet | grep 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5m
   mongo-express:
     image: mongo-express
     # restart: unless-stopped
@@ -106,6 +106,6 @@ services:
     #   timeout: 1s
     #   retries: 3
     #   start_period: 5m
-    # depends_on:
-    #   mongo:
-    #     condition: service_healthy
+    depends_on:
+      mongo:
+        condition: service_healthy

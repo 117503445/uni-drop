@@ -17,13 +17,18 @@ function MessageBubble(props: { peerID: string; message: Message }) {
 
   switch (msg.content.type) {
     case MessageType.TEXT:
-      inner = <p className="max-w-[30rem] break-all">{msg.content.data}</p>;
+      inner = (
+        <p className="msg-bubble-text max-w-[30rem] break-all">
+          {msg.content.data}
+        </p>
+      );
       break;
 
     case MessageType.FILE:
       inner = (
         <a
           // className="rounded-md bg-yellow-200 "
+          className="msg-bubble-file"
           href={msg.content.data}
           download={msg.content.filename}
         >
@@ -33,7 +38,7 @@ function MessageBubble(props: { peerID: string; message: Message }) {
       break;
     case MessageType.IMAGE:
       inner = (
-        <div>
+        <div className="msg-bubble-image">
           {" "}
           <p className="rounded-md ">{msg.content.filename}</p>
           <img className="rounded-md " src={msg.content.data} />

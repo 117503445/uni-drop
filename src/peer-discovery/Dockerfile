@@ -1,6 +1,7 @@
 FROM rust:1.73.0 as build-env
 WORKDIR /app
-COPY . /app
+COPY . .
+# RUN cargo test
 RUN cargo build --release
 
 FROM gcr.io/distroless/cc-debian12
