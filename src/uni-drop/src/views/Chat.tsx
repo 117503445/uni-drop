@@ -2,11 +2,11 @@ import "./global.css";
 
 import fileIcon from "@/assets/file.svg";
 import imageIcon from "@/assets/image.svg";
-import returnIcon from "@/assets/return.svg";
 import { useState, useRef, useEffect } from "react";
 import { Message, MessageContent, MessageType } from "../utils/model";
 import MessageBubble from "../components/MessageBubble";
 import { idToName } from "../utils/common";
+import RightTopBar from "../components/RightTopBar";
 
 export default function Chat(props: {
   peerID: string;
@@ -43,17 +43,9 @@ export default function Chat(props: {
   return (
     <div className="flex h-full w-full flex-col">
       {/* top */}
-      <div className="flex h-[3.75rem] w-full items-center justify-between border-b-2 px-5">
-        <span>{idToName(props.selectedPeerID)}</span>
-        <button
-          className="flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl bg-white fill-none shadow-md sm:hidden"
-          onClick={() => {
-            window.location.hash = "/";
-          }}
-        >
-          <img className="mx-2" src={returnIcon}></img>
-        </button>
-      </div>
+      <RightTopBar>
+        <span className="m-auto text-xl">{idToName(props.selectedPeerID)}</span>
+      </RightTopBar>
 
       {/* middle */}
       <div className="flex w-full flex-1 items-center justify-center overflow-clip">
@@ -78,7 +70,7 @@ export default function Chat(props: {
                     <div
                       className={`flex flex-col ${
                         msg.from == props.peerID ? "items-end" : "items-start"
-                      } mt-[1.5rem]`}
+                      } mb-[0.5rem] mt-[1rem]`}
                     >
                       <MessageBubble message={msg} peerID={props.peerID} />
                     </div>
