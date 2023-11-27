@@ -255,10 +255,44 @@ async function testAddPin(context: BrowserContext) {
   ]);
 
   await pagesSendText(page1, page2);
-
-  // sleep 30s
-  // await new Promise((resolve) => setTimeout(resolve, 30000));
 }
+
+async function testAddQRCode(context: BrowserContext) {
+  const page1 = await getPage(context);
+
+  await page1.getByText("me").click();
+
+  const meta = await page1.locator("#me-meta").getAttribute("test-mata");
+  if (!meta) {
+    throw new Error("meta not found");
+  }
+  console.log(`meta = ${meta}`);
+
+  // just use url
+  // TODO: use QRCode
+  const url = JSON.parse(meta)["url"];
+  if (!url) {
+    throw new Error("url not found");
+  }
+
+  const page2 = await context.newPage();
+  await page2.goto(url);
+
+  const [page1Name, page2Name] = await Promise.all([
+    getPeerName(page1),
+    getPeerName(page2),
+  ]);
+
+  console.log(`page1Name = ${page1Name}, page2Name = ${page2Name}`);
+
+  await Promise.all([
+    page1.getByText(page2Name).click(),
+    page2.getByText(page1Name).click(),
+  ]);
+
+  await pagesSendText(page1, page2);
+}
+
 (async () => {
   if (!fs.existsSync(".env.development.local.backup")) {
     if (!fs.existsSync(".env.development.local")) {
@@ -272,7 +306,7 @@ async function testAddPin(context: BrowserContext) {
   }
 
   const cases = [
-    // new TestCase("Basic", testBasic),
+    new TestCase("Basic", testBasic),
     new TestCase(
       "AddPeerID",
       testAddPeerID,
@@ -281,6 +315,11 @@ async function testAddPin(context: BrowserContext) {
     new TestCase(
       "AddPin",
       testAddPin,
+      new Map([["VITE_DISABLE_HEARTBEAT", "true"]]),
+    ),
+    new TestCase(
+      "AddQRCode",
+      testAddQRCode,
       new Map([["VITE_DISABLE_HEARTBEAT", "true"]]),
     ),
   ];
