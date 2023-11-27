@@ -32,7 +32,7 @@ services:
     stdin_open: true
     tty: true
     entrypoint: ./tests/entrypoint.sh
-    # wait 1 minutes(TODO: why?), visit http://localhost:9900/vnc.html
+    # wait 1 minutes(TODO: why?), visit http://localhost:9900/vnc.html?host=localhost&port=9900
     depends_on:
       uni-drop-dev:
         condition: service_healthy

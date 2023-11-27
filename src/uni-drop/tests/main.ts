@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { Browser, chromium } from "playwright";
 import { program } from "commander";
 import * as fs from "fs";
 
@@ -20,13 +20,32 @@ function assertOne(array: Lengthable) {
   assert(array.length === 1, `Expected 1 element, found ${array.length}`);
 }
 
-async function testBasic() {
-  console.log("Testing basic functionality");
+class TestCase {
+  constructor(
+    public name: string,
+    public func: (browser: Browser) => Promise<void>,
+    public timeout: number = 10000,
+  ) {}
+  async run() {
+    const browser = await chromium.launch({
+      headless: false,
+    });
+    try {
+      console.log(`Running test case: ${this.name}`);
+      await this.func(browser);
+      console.log(`Test case ${this.name} passed`);
+    } catch (error) {
+      console.log(`Test case ${this.name} failed`);
+      console.log(error);
+    } finally {
+      browser.close();
+    }
+  }
+}
+
+async function testBasic(browser: Browser) {
   await fs.promises.writeFile(".env.development.local", "");
 
-  const browser = await chromium.launch({
-    headless: false,
-  });
   const context = await browser.newContext();
 
   const page1 = await context.newPage();
@@ -74,21 +93,14 @@ async function testBasic() {
   await page2.keyboard.press("Enter");
   await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page1.getByText(msg2, { exact: true }).all());
-
-  await browser.close();
-  console.log("Basic functionality test passed");
 }
 
-async function testAddPeerID() {
-  console.log("Testing add peer ID functionality");
+async function testAddPeerID(browser: Browser) {
   await fs.promises.writeFile(
     ".env.development.local",
     "VITE_DISABLE_HEARTBEAT=true",
   );
 
-  const browser = await chromium.launch({
-    headless: false,
-  });
   const context = await browser.newContext();
 
   const page1 = await context.newPage();
@@ -164,9 +176,6 @@ async function testAddPeerID() {
   await page2.keyboard.press("Enter");
   await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page1.getByText(msg2, { exact: true }).all());
-
-  await browser.close();
-  console.log("Add peer ID functionality test passed");
 }
 
 (async () => {
@@ -181,8 +190,13 @@ async function testAddPeerID() {
     );
   }
 
-  await testBasic();
-  await testAddPeerID();
+  const cases = [
+    new TestCase("Basic", testBasic),
+    new TestCase("AddPeerID", testAddPeerID),
+  ];
+  for (const c of cases) {
+    await c.run();
+  }
 
   try {
     await fs.promises.rename(
