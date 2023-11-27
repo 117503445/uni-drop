@@ -157,10 +157,11 @@ async function getPin(page: Page) {
     if (!meta) {
       throw new Error("meta not found");
     }
-    console.log(`meta = ${meta}`);
+    // console.log(`meta = ${meta}`);
 
     const pin = JSON.parse(meta)["pin"];
     if (pin) {
+      console.log(`pin = ${pin}`);
       return pin;
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
