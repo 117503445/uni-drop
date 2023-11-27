@@ -132,6 +132,13 @@ async function pagesSendText(page1: Page, page2: Page) {
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 }
 
+async function selectFile(page: Page, filename: string, selector: string) {
+  const fileChooserPromise = page.waitForEvent("filechooser");
+  await page.locator(selector).click();
+  const fileChooser = await fileChooserPromise;
+  await fileChooser.setFiles(filename);
+}
+
 async function testBasic(context: BrowserContext) {
   const [page1, page2] = await Promise.all([
     getPage(context),
@@ -152,10 +159,7 @@ async function testBasic(context: BrowserContext) {
 
   pagesSendText(page1, page2);
 
-  const fileChooserPromise = page1.waitForEvent("filechooser");
-  await page1.locator('//*[@id="btn-file"]').click();
-  const fileChooser = await fileChooserPromise;
-  await fileChooser.setFiles("./public/logo.jpg");
+  selectFile(page1, "./public/logo.jpg", '//*[@id="btn-file"]');
 
   await until(
     async () => (await page2.locator(".msg-bubble-file").count()) === 1,
@@ -174,6 +178,11 @@ async function testBasic(context: BrowserContext) {
     "./tests/downloads/" + download.suggestedFilename(),
   );
   assert(logo1.equals(logo2), "File not the same");
+
+  selectFile(page1, "./public/logo.jpg", '//*[@id="btn-image"]');
+  await until(
+    async () => (await page2.locator(".msg-bubble-image").count()) === 1,
+  );
 }
 
 async function testAddPeerID(context: BrowserContext) {

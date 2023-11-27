@@ -34,7 +34,7 @@ function MessageBubble(props: { peerID: string; message: Message }) {
       break;
     case MessageType.IMAGE:
       inner = (
-        <div className="msg-bubble-img">
+        <div className="msg-bubble-image">
           {" "}
           <p className="rounded-md ">{msg.content.filename}</p>
           <img className="rounded-md " src={msg.content.data} />
