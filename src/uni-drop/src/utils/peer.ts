@@ -55,10 +55,13 @@ class Peerpool {
       newPeerSet.add(peer);
     }
 
+    let changed = false;
+
     // remove old onlyDiscovery peers
     const deletePeers: UniPeer[] = [];
     for (const [peer, state] of this.peers) {
       if (state.isOnlyDiscovery() && !newPeerSet.has(peer.getId())) {
+        changed = true;
         deletePeers.push(peer);
       }
     }
@@ -77,6 +80,7 @@ class Peerpool {
     for (const p of peers) {
       if (!oldPeerSet.has(p) && p != this.peer.id) {
         console.info(`new peer found: [${p}], this.peer.id = ${this.peer.id}`);
+        changed = true;
         this.peers.set(
           new UniPeer(this.peer, p, (msg: Message) => {
             this.msgReceiver(p, msg);
@@ -91,7 +95,9 @@ class Peerpool {
       state.isDiscovery = newPeerSet.has(peer.getId());
     }
 
-    this.setpeersID(this.getPeersId());
+    if (changed) {
+      this.setpeersID(this.getPeersId());
+    }
   }
 
   updateConnectedPeer(conn: DataConnection) {
@@ -433,7 +439,7 @@ export class UniPeersManager extends UniPeersService {
           console.info(`<- peer ${peerID}: ${msg}`);
           this.messages.push(msg);
 
-          this.setMessages(this.messages.slice());
+          this.setMessages([...this.messages]);
         },
       );
       console.log("current pendingAddPeers", this.pendingAddPeers);
@@ -504,7 +510,8 @@ export class UniPeersManager extends UniPeersService {
     const msg = new Message(this.peer.id, id, content);
 
     this.messages.push(msg);
-    this.setMessages(this.messages);
+    
+    this.setMessages([...this.messages]);
     const peer = this.peerpool.findPeer(id);
     if (peer != null) {
       peer.send(msg);
@@ -581,7 +588,7 @@ export class UniPeersMockManager extends UniPeersService {
     this.messages.push(new Message("mock-peer", id, content));
     console.info(`-> peer ${id}: ${content}`);
     this.messages.push(new Message(id, "mock-peer", content));
-    this.setMessages(this.messages.slice());
+    this.setMessages([...this.messages]);
   }
 
   close(): void {}
