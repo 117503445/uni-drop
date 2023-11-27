@@ -8,6 +8,7 @@ program.parse();
 const url = program.opts()["url"];
 
 fs.mkdirSync("./tests/traces", { recursive: true });
+fs.mkdirSync("./tests/downloads", { recursive: true });
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -117,7 +118,9 @@ async function getPage(context: BrowserContext) {
       if (title === "UniDrop") {
         return page;
       }
-    } catch (e) {}
+    } catch (e) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
   }
   return page;
 }
