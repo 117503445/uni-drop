@@ -23,7 +23,7 @@ export default function AddFriend(props: {
 
         <div className="mb-[0.5rem] mt-[1rem] text-lg">1. Pin</div>
         <input
-          className="border-gray-300 border-2 rounded-md p-[0.5rem] mb-[1rem] w-[16rem]"
+          className="mb-[1rem] w-[16rem] rounded-md border-2 border-gray-300 p-[0.5rem]"
           placeholder="Press Enter to submit Pin"
           value={pinContent}
           onChange={(e) => setPinContent(e.target.value)}
@@ -56,7 +56,7 @@ export default function AddFriend(props: {
         <hr className="m-[auto] w-11/12"></hr>
         <div className="mb-[0.5rem] mt-[1rem] text-lg">2. Peer ID</div>
         <input
-          className="border-gray-300 border-2 rounded-md p-[0.5rem] mb-[1rem] w-[16rem]"
+          className="mb-[1rem] w-[16rem] rounded-md border-2 border-gray-300 p-[0.5rem]"
           placeholder="Press Enter to submit PeerID"
           value={idContent}
           onChange={(e) => setIdContent(e.target.value)}
