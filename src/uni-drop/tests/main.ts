@@ -113,7 +113,7 @@ async function getPage(context: BrowserContext) {
   const page = await context.newPage();
   for (let i = 0; i < 60; i++) {
     try {
-      if(i>=5){
+      if (i >= 5) {
         console.log(`goto ${url}, try ${i}`);
       }
       await page.goto(url);
@@ -122,8 +122,10 @@ async function getPage(context: BrowserContext) {
         return page;
       }
     } catch (error) {
-      if(i>=5){
-        console.log(`goto ${url}, try ${i} failed, error: ${error}, timestamp: ${new Date().toISOString()}`);
+      if (i >= 5) {
+        console.log(
+          `goto ${url}, try ${i} failed, error: ${error}, timestamp: ${new Date().toISOString()}`,
+        );
       }
     } finally {
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -147,6 +149,23 @@ async function selectFile(page: Page, filename: string, selector: string) {
   await page.locator(selector).click();
   const fileChooser = await fileChooserPromise;
   await fileChooser.setFiles(filename);
+}
+
+async function getPin(page: Page) {
+  for (let i = 0; i < 10; i++) {
+    const meta = await page.locator("#me-meta").getAttribute("test-mata");
+    if (!meta) {
+      throw new Error("meta not found");
+    }
+    console.log(`meta = ${meta}`);
+
+    const pin = JSON.parse(meta)["pin"];
+    if (pin) {
+      return pin;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error("Could not get pin");
 }
 
 async function testBasic(context: BrowserContext) {
@@ -236,16 +255,7 @@ async function testAddPin(context: BrowserContext) {
 
   await page1.getByText("(me)").click();
 
-  const meta = await page1.locator("#me-meta").getAttribute("test-mata");
-  if (!meta) {
-    throw new Error("meta not found");
-  }
-  console.log(`meta = ${meta}`);
-
-  const pin = JSON.parse(meta)["pin"];
-  if (!pin) {
-    throw new Error("pin not found");
-  }
+  const pin = await getPin(page1);
 
   await page2.getByText("Add").click();
   await page2.getByPlaceholder("Add friend by pin").click();

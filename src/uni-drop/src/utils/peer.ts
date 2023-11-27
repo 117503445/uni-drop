@@ -510,7 +510,7 @@ export class UniPeersManager extends UniPeersService {
     const msg = new Message(this.peer.id, id, content);
 
     this.messages.push(msg);
-    
+
     this.setMessages([...this.messages]);
     const peer = this.peerpool.findPeer(id);
     if (peer != null) {

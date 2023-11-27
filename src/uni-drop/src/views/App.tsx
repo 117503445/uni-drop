@@ -4,25 +4,31 @@ import githubIcon from "@/assets/github.svg";
 import addIcon from "@/assets/add.svg";
 import qrcodeIcon from "@/assets/qrcode.svg";
 
-import Chat from "./Chat.js";
-import AddFriend from "./AddFriend.js";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
+// import Chat from "./Chat.js";
+const Chat = lazy(() => import("./Chat.js"));
+// import AddFriend from "./AddFriend.js";
+const AddFriend = lazy(() => import("./AddFriend.js"));
+// import Setting from "./Setting.js";
+const Setting = lazy(() => import("./Setting.js"));
+// import FromFriend from "./FromFriend.js";
+const FromFriend = lazy(() => import("./FromFriend.js"));
+// import Me from "./Me.js";
+const Me = lazy(() => import("./Me.js"));
+
+import { idToName } from "../utils/common.js";
+
 import {
   UniPeersManager,
   UniPeersMockManager,
   UniPeersService,
 } from "../utils/peer.js";
 import { Message, MessageContent, MessageType } from "../utils/model.js";
-import Setting from "./Setting.js";
 import type { RootState } from "../store/store.js";
 import { useSelector } from "react-redux";
 import VConsole from "vconsole";
-
-import { idToName } from "../utils/common.js";
-import Me from "./Me";
-import FromFriend from "./FromFriend.js";
 
 function App() {
   const enableVConsole = useSelector(
@@ -289,7 +295,9 @@ function App() {
               curHashURL() == "/" ? "hidden sm:flex" : ""
             }`}
           >
-            <RouterProvider router={router} />
+            <Suspense fallback={<div>Loading...</div>}>
+              <RouterProvider router={router} />
+            </Suspense>
           </div>
         </div>
       </div>
