@@ -111,12 +111,19 @@ async function sendMsg(page: Page, msg: string) {
 
 async function getPage(context: BrowserContext) {
   const page = await context.newPage();
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 20; i++) {
     try {
+      if(i>=5){
+        console.log(`goto ${url}, try ${i}`);
+      }
       await page.goto(url);
       const title = await page.title();
       if (title === "UniDrop") {
         return page;
+      }
+    } catch (error) {
+      if(i>=5){
+        console.log(`goto ${url}, try ${i} failed, error: ${error}`);
       }
     } finally {
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -227,7 +234,7 @@ async function testAddPin(context: BrowserContext) {
     getPage(context),
   ]);
 
-  await page1.getByText("me").click();
+  await page1.getByText("(me)").click();
 
   const meta = await page1.locator("#me-meta").getAttribute("test-mata");
   if (!meta) {
@@ -263,7 +270,7 @@ async function testAddPin(context: BrowserContext) {
 async function testAddQRCode(context: BrowserContext) {
   const page1 = await getPage(context);
 
-  await page1.getByText("me").click();
+  await page1.getByText("(me)").click();
 
   const meta = await page1.locator("#me-meta").getAttribute("test-mata");
   if (!meta) {
