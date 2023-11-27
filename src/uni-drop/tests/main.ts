@@ -96,11 +96,11 @@ async function getInnerText(
 }
 
 async function getPeerName(page: Page) {
-  return getInnerText(page, '//*[@id="peerName"]', true);
+  return getInnerText(page, '#peerName', true);
 }
 
 async function getPeerID(page: Page) {
-  return getInnerText(page, '//*[@id="peerID"]', true);
+  return getInnerText(page, '#peerID', true);
 }
 
 async function sendMsg(page: Page, msg: string) {
