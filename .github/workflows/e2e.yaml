@@ -22,3 +22,10 @@ jobs:
       - run: docker compose up -d
       
       - run: docker exec uni-drop-test pnpm run playwright
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-trace
+          path: ./tests/traces
+          retention-days: 1
