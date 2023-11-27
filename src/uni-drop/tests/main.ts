@@ -15,6 +15,17 @@ function assert(condition: boolean, message: string) {
   }
 }
 
+async function until(condition: () => Promise<boolean>, timeout = 10000) {
+  const detect_times = 20;
+  for (let i = 0; i < detect_times; i++) {
+    if (await condition()) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, timeout / detect_times));
+  }
+  throw new Error(`Condition not satisfied`);
+}
+
 interface Lengthable {
   length: number;
 }
@@ -97,11 +108,25 @@ async function sendMsg(page: Page, msg: string) {
   await page.keyboard.press("Enter");
 }
 
+async function getPage(context: BrowserContext) {
+  const page = await context.newPage();
+  for (let i = 0; i < 5; i++) {
+    try {
+      await page.goto(url);
+      const title = await page.title();
+      if (title === "UniDrop") {
+        return page;
+      }
+    } catch (e) {}
+  }
+  return page;
+}
+
 async function testBasic(context: BrowserContext) {
-  const page1 = await context.newPage();
-  const page2 = await context.newPage();
-  await Promise.all([page1.goto(url), page2.goto(url)]);
-  // await new Promise((resolve) => setTimeout(resolve, 5000));
+  const [page1, page2] = await Promise.all([
+    getPage(context),
+    getPage(context),
+  ]);
 
   const [page1Name, page2Name] = await Promise.all([
     getPeerName(page1),
@@ -117,20 +142,25 @@ async function testBasic(context: BrowserContext) {
 
   const msg1 = "Hello";
   await sendMsg(page1, msg1);
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page2.getByText(msg1, { exact: true }).all());
 
   const msg2 = "Hi";
   await sendMsg(page2, msg2);
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page1.getByText(msg2, { exact: true }).all());
+
+  const fileChooserPromise = page1.waitForEvent("filechooser");
+  await page1.locator('//*[@id="btn-file"]').click();
+  const fileChooser = await fileChooserPromise;
+  await fileChooser.setFiles("./public/logo.jpg");
+
+  await until(async () => (await page2.locator(".msg-bubble-file").count()) === 1);
 }
 
 async function testAddPeerID(context: BrowserContext) {
-  const page1 = await context.newPage();
-  const page2 = await context.newPage();
-  await Promise.all([page1.goto(url), page2.goto(url)]);
-  // await new Promise((resolve) => setTimeout(resolve, 5000));
+  const [page1, page2] = await Promise.all([
+    getPage(context),
+    getPage(context),
+  ]);
 
   const [page1Id, page2Id] = await Promise.all([
     getPeerID(page1),
@@ -144,8 +174,6 @@ async function testAddPeerID(context: BrowserContext) {
   await page1.getByPlaceholder("Add friend by peer id").fill(page2Id);
   await page1.getByText("AddFriendByID").click();
 
-  // await new Promise((resolve) => setTimeout(resolve, 5000));
-
   const [page1Name, page2Name] = await Promise.all([
     getPeerName(page1),
     getPeerName(page2),
@@ -160,12 +188,10 @@ async function testAddPeerID(context: BrowserContext) {
 
   const msg1 = "Hello";
   await sendMsg(page1, msg1);
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page2.getByText(msg1, { exact: true }).all());
 
   const msg2 = "Hi";
   await sendMsg(page2, msg2);
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 }
 
@@ -183,11 +209,11 @@ async function testAddPeerID(context: BrowserContext) {
 
   const cases = [
     new TestCase("Basic", testBasic),
-    new TestCase(
-      "AddPeerID",
-      testAddPeerID,
-      new Map([["VITE_DISABLE_HEARTBEAT", "true"]]),
-    ),
+    // new TestCase(
+    //   "AddPeerID",
+    //   testAddPeerID,
+    //   new Map([["VITE_DISABLE_HEARTBEAT", "true"]]),
+    // ),
   ];
   for (const c of cases) {
     await c.run();

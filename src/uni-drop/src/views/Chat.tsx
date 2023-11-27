@@ -99,6 +99,7 @@ export default function Chat(props: {
         {/* toolbox */}
         <div className="my-[0.25rem] flex h-[2.5rem] w-full items-center px-[1rem] ">
           <button
+            id="btn-file"
             className="border-#[dedede] mr-[1rem] flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
             onClick={() => {
               if (fileInputRef.current != null) {
@@ -129,6 +130,7 @@ export default function Chat(props: {
           </button>
 
           <button
+            id="btn-image"
             className="border-#[dedede] flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
             onClick={() => {
               if (imageInputRef.current != null) {
