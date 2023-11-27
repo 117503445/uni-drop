@@ -27,3 +27,4 @@ dist-ssr
 /blob-report/
 /playwright/.cache/
 *.backup
+tests/traces/

@@ -7,6 +7,8 @@ program.option("--url <url>", "the url of frontend", "http://localhost:5173");
 program.parse();
 const url = program.opts()["url"];
 
+fs.mkdirSync("./tests/traces", { recursive: true });
+
 function assert(condition: boolean, message: string) {
   if (!condition) {
     throw new Error(message);
@@ -26,7 +28,6 @@ class TestCase {
     public name: string,
     public func: (context: BrowserContext) => Promise<void>,
     private config: Map<string, string> = new Map(),
-    public timeout: number = 10000,
   ) {}
 
   async run() {
@@ -34,6 +35,9 @@ class TestCase {
       headless: false,
     });
     const context = await browser.newContext();
+    context.setDefaultTimeout(5000);
+
+    await context.tracing.start({ screenshots: true, snapshots: true });
 
     try {
       console.log(`Running test case: ${this.name}`);
@@ -51,29 +55,40 @@ class TestCase {
       console.log(error);
       exit(1);
     } finally {
+      await context.tracing.stop({ path: `./tests/traces/${this.name}.zip` });
       context.close();
       browser.close();
     }
   }
 }
 
-async function getInnerText(page: Page, selector: string) {
-  for (let i = 0; i < 10; i++) {
+async function getInnerText(
+  page: Page,
+  selector: string,
+  until_not_empty = false,
+) {
+  const timeout = 10000;
+
+  const detect_times = 20;
+  for (let i = 0; i < detect_times; i++) {
     const element = page.locator(selector);
     if (element) {
-      return element.innerText();
+      const text = await element.innerText();
+      if (!until_not_empty || text !== "") {
+        return text;
+      }
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, timeout / detect_times));
   }
   throw new Error(`Could not get innerText of ${selector}`);
 }
 
 async function getPeerName(page: Page) {
-  return getInnerText(page, '//*[@id="peerName"]');
+  return getInnerText(page, '//*[@id="peerName"]', true);
 }
 
 async function getPeerID(page: Page) {
-  return getInnerText(page, '//*[@id="peerID"]');
+  return getInnerText(page, '//*[@id="peerID"]', true);
 }
 
 async function sendMsg(page: Page, msg: string) {
@@ -86,16 +101,12 @@ async function testBasic(context: BrowserContext) {
   const page1 = await context.newPage();
   const page2 = await context.newPage();
   await Promise.all([page1.goto(url), page2.goto(url)]);
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
 
   const [page1Name, page2Name] = await Promise.all([
     getPeerName(page1),
     getPeerName(page2),
   ]);
-
-  if (page1Name === "" || page2Name === "") {
-    throw new Error("Could not get peer Names");
-  }
 
   console.log(`page1Name = ${page1Name}, page2Name = ${page2Name}`);
 
@@ -106,12 +117,12 @@ async function testBasic(context: BrowserContext) {
 
   const msg1 = "Hello";
   await sendMsg(page1, msg1);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page2.getByText(msg1, { exact: true }).all());
 
   const msg2 = "Hi";
   await sendMsg(page2, msg2);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 }
 
@@ -119,16 +130,12 @@ async function testAddPeerID(context: BrowserContext) {
   const page1 = await context.newPage();
   const page2 = await context.newPage();
   await Promise.all([page1.goto(url), page2.goto(url)]);
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
 
   const [page1Id, page2Id] = await Promise.all([
     getPeerID(page1),
     getPeerID(page2),
   ]);
-
-  if (page1Id === "" || page2Id === "") {
-    throw new Error("Could not get peer IDs");
-  }
 
   console.log(`page1Id = ${page1Id}, page2Id = ${page2Id}`);
 
@@ -137,16 +144,12 @@ async function testAddPeerID(context: BrowserContext) {
   await page1.getByPlaceholder("Add friend by peer id").fill(page2Id);
   await page1.getByText("AddFriendByID").click();
 
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
 
   const [page1Name, page2Name] = await Promise.all([
     getPeerName(page1),
     getPeerName(page2),
   ]);
-
-  if (page1Name === "" || page2Name === "") {
-    throw new Error("Could not get peer Names");
-  }
 
   console.log(`page1Name = ${page1Name}, page2Name = ${page2Name}`);
 
@@ -157,12 +160,12 @@ async function testAddPeerID(context: BrowserContext) {
 
   const msg1 = "Hello";
   await sendMsg(page1, msg1);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page2.getByText(msg1, { exact: true }).all());
 
   const msg2 = "Hi";
   await sendMsg(page2, msg2);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 }
 
