@@ -121,14 +121,15 @@ impl RecordService {
         Ok(())
     }
 
-    // ipv4 or ipv6
+    // ipv4
     pub async fn get_peers_by_ip(&self, ipv4: &str, ipv6: &str) -> Result<Vec<String>, Box<dyn Error>> {
         let mut peer_ids: Vec<String> = Vec::new();
         let mut cursor = self.collection
             .find(
                 doc! { "$or": [
                     { "ipv4": ipv4 },
-                    { "ipv6": ipv6 },
+                    // not use ipv6
+                    // { "ipv6": ipv6 },
                 ] },
                 None,
             )
