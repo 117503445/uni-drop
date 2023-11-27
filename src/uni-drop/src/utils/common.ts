@@ -1,4 +1,4 @@
-import { fakerDE as faker } from "@faker-js/faker";
+import { faker } from '@faker-js/faker/locale/en_US';
 
 // https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
 const cyrb53 = (str: string, seed = 0) => {
