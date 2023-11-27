@@ -17,7 +17,11 @@ function MessageBubble(props: { peerID: string; message: Message }) {
 
   switch (msg.content.type) {
     case MessageType.TEXT:
-      inner = <p className="msg-bubble-text max-w-[30rem] break-all">{msg.content.data}</p>;
+      inner = (
+        <p className="msg-bubble-text max-w-[30rem] break-all">
+          {msg.content.data}
+        </p>
+      );
       break;
 
     case MessageType.FILE:
