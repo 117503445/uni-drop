@@ -24,7 +24,6 @@ services:
       context: ./src/uni-drop
       dockerfile: Dockerfile_test_dev
     container_name: uni-drop-test
-    # noVNC: http://localhost:9900/vnc.html
     network_mode: host
     volumes:
         - './src/uni-drop:/workspace/uni-drop'
