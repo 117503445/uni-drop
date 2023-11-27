@@ -123,7 +123,7 @@ async function getPage(context: BrowserContext) {
       }
     } catch (error) {
       if(i>=5){
-        console.log(`goto ${url}, try ${i} failed, error: ${error}`);
+        console.log(`goto ${url}, try ${i} failed, error: ${error}, timestamp: ${new Date().toISOString()}`);
       }
     } finally {
       await new Promise((resolve) => setTimeout(resolve, 1000));
