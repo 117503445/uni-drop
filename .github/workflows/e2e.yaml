@@ -27,5 +27,5 @@ jobs:
         if: always()
         with:
           name: playwright-trace
-          path: ./src/uni-drop/tests/traces
+          path: ./src/uni-drop/tests/traces/
           retention-days: 1
