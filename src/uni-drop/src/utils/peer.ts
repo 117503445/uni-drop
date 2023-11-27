@@ -433,7 +433,7 @@ export class UniPeersManager extends UniPeersService {
           console.info(`<- peer ${peerID}: ${msg}`);
           this.messages.push(msg);
 
-          this.setMessages(this.messages.slice());
+          this.setMessages([...this.messages]);
         },
       );
       console.log("current pendingAddPeers", this.pendingAddPeers);
@@ -504,7 +504,8 @@ export class UniPeersManager extends UniPeersService {
     const msg = new Message(this.peer.id, id, content);
 
     this.messages.push(msg);
-    this.setMessages(this.messages);
+    
+    this.setMessages([...this.messages]);
     const peer = this.peerpool.findPeer(id);
     if (peer != null) {
       peer.send(msg);
@@ -581,7 +582,7 @@ export class UniPeersMockManager extends UniPeersService {
     this.messages.push(new Message("mock-peer", id, content));
     console.info(`-> peer ${id}: ${content}`);
     this.messages.push(new Message(id, "mock-peer", content));
-    this.setMessages(this.messages.slice());
+    this.setMessages([...this.messages]);
   }
 
   close(): void {}

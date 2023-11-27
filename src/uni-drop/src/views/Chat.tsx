@@ -14,6 +14,7 @@ export default function Chat(props: {
   messages: Message[];
   sendMessages: (content: MessageContent) => void;
 }) {
+  console.log("render Chat", props.messages.length);
   const [postContent, setPostContent] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -34,6 +35,7 @@ export default function Chat(props: {
   };
 
   useEffect(() => {
+    console.log("scroll to bottom");
     if (endRef.current) {
       endRef.current.scrollIntoView({ behavior: "smooth" });
     }
