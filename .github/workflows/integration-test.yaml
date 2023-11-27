@@ -1,9 +1,9 @@
-name: e2e
+name: integration-test
 
 on: [push]
 
 jobs:
-  e2e:
+  integration-test:
     runs-on: ubuntu-latest
     steps:
       # https://github.com/actions/checkout
@@ -21,6 +21,8 @@ jobs:
 
       - run: docker compose up -d
       
+      - run: docker exec peer-discovery-dev cargo test
+
       - run: docker exec uni-drop-test pnpm run playwright
 
       - uses: actions/upload-artifact@v3

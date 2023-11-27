@@ -96,11 +96,11 @@ async function getInnerText(
 }
 
 async function getPeerName(page: Page) {
-  return getInnerText(page, '#peerName', true);
+  return getInnerText(page, "#peerName", true);
 }
 
 async function getPeerID(page: Page) {
-  return getInnerText(page, '#peerID', true);
+  return getInnerText(page, "#peerID", true);
 }
 
 async function sendMsg(page: Page, msg: string) {
@@ -118,11 +118,11 @@ async function getPage(context: BrowserContext) {
       if (title === "UniDrop") {
         return page;
       }
-    } catch (e) {
+    } finally {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
-  return page;
+  throw new Error("Could not get page");
 }
 
 async function pagesSendText(page1: Page, page2: Page) {
