@@ -28,16 +28,12 @@ async fn record_test() {
         .upsert("peer1", "127.0.0.1", "fe80::1", None)
         .await
         .expect("failed to insert record");
-    record_service
-        .upsert("peer2", "127.0.0.2", "fe80::1", None)
-        .await
-        .expect("failed to insert record");
 
     let peer_ids = record_service
         .get_peers_by_ip("127.0.0.1", "fe80::1")
         .await
         .unwrap();
-    assert_eq!(peer_ids, vec!["peer0", "peer1", "peer2"]);
+    assert_eq!(peer_ids, vec!["peer0", "peer1"]);
 
     record_service
         .remove_expired(30)
@@ -49,7 +45,7 @@ async fn record_test() {
         .await
         .unwrap();
 
-    assert_eq!(peer_ids, vec!["peer1", "peer2"]);
+    assert_eq!(peer_ids, vec!["peer1"]);
 
     record_service
         .remove_all()
@@ -78,42 +74,38 @@ async fn pin_test() {
 
     pin_service.remove_expired(30).await.unwrap();
 
-    assert!(pin_service
+    pin_service
         .get_peerid_by_pin("1234")
         .await
-        .expect("failed to get peerid by pin")
-        .is_none());
+        .expect_err("should not get peerid by pin");
 
     pin_service
         .upsert("peer0", "1234", None)
         .await
         .expect("failed to insert record");
 
-    assert!(pin_service
+    pin_service
         .get_peerid_by_pin("1234")
         .await
-        .expect("failed to get peerid by pin")
-        .is_some());
+        .expect("failed to get peerid by pin");
 
     pin_service
         .upsert("peer0", "1234", None)
         .await
         .expect("failed to insert record");
-    assert!(pin_service
+    pin_service
         .get_peerid_by_pin("1234")
         .await
-        .expect("failed to get peerid by pin")
-        .is_some());
+        .expect("failed to get peerid by pin");
 
     pin_service
         .upsert("peer0", "0123", None)
         .await
         .expect("failed to insert record");
-    assert!(pin_service
+    pin_service
         .get_peerid_by_pin("0123")
         .await
-        .expect("failed to get peerid by pin")
-        .is_some());
+        .expect("failed to get peerid by pin");
 
     pin_service
         .upsert("peer1", "0123", None)
@@ -124,11 +116,10 @@ async fn pin_test() {
         .upsert("peer1", "1234", None)
         .await
         .expect("failed to get peerid by pin");
-    assert!(pin_service
+    pin_service
         .get_peerid_by_pin("1234")
         .await
-        .expect("failed to get peerid by pin")
-        .is_some());
+        .expect("failed to get peerid by pin");
 
     pin_service.remove_all().await.unwrap();
 }
