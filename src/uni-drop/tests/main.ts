@@ -111,7 +111,7 @@ async function sendMsg(page: Page, msg: string) {
 
 async function getPage(context: BrowserContext) {
   const page = await context.newPage();
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 60; i++) {
     try {
       if(i>=5){
         console.log(`goto ${url}, try ${i}`);
