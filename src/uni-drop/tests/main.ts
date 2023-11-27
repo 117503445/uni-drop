@@ -1,4 +1,4 @@
-import { Browser, Page, chromium } from "playwright";
+import { Page, chromium, BrowserContext } from "playwright";
 import { program } from "commander";
 import * as fs from "fs";
 import { exit } from "process";
@@ -24,7 +24,7 @@ function assertOne(array: Lengthable) {
 class TestCase {
   constructor(
     public name: string,
-    public func: (browser: Browser) => Promise<void>,
+    public func: (context: BrowserContext) => Promise<void>,
     private config: Map<string, string> = new Map(),
     public timeout: number = 10000,
   ) {}
@@ -33,6 +33,8 @@ class TestCase {
     const browser = await chromium.launch({
       headless: false,
     });
+    const context = await browser.newContext();
+
     try {
       console.log(`Running test case: ${this.name}`);
 
@@ -42,13 +44,14 @@ class TestCase {
       }
       await fs.promises.writeFile(".env.development.local", configText);
 
-      await this.func(browser);
+      await this.func(context);
       console.log(`Test case ${this.name} passed`);
     } catch (error) {
       console.log(`Test case ${this.name} failed`);
       console.log(error);
       exit(1);
     } finally {
+      context.close();
       browser.close();
     }
   }
@@ -79,9 +82,7 @@ async function sendMsg(page: Page, msg: string) {
   await page.keyboard.press("Enter");
 }
 
-async function testBasic(browser: Browser) {
-  const context = await browser.newContext();
-
+async function testBasic(context: BrowserContext) {
   const page1 = await context.newPage();
   const page2 = await context.newPage();
   await Promise.all([page1.goto(url), page2.goto(url)]);
@@ -114,9 +115,7 @@ async function testBasic(browser: Browser) {
   assertOne(await page1.getByText(msg2, { exact: true }).all());
 }
 
-async function testAddPeerID(browser: Browser) {
-  const context = await browser.newContext();
-
+async function testAddPeerID(context: BrowserContext) {
   const page1 = await context.newPage();
   const page2 = await context.newPage();
   await Promise.all([page1.goto(url), page2.goto(url)]);
