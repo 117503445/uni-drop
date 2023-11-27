@@ -44,7 +44,7 @@ export default function Chat(props: {
     <div className="flex h-full w-full flex-col">
       {/* top */}
       <RightTopBar>
-        <span className="m-auto">{idToName(props.selectedPeerID)}</span>
+        <span className="m-auto text-xl">{idToName(props.selectedPeerID)}</span>
       </RightTopBar>
 
       {/* middle */}

@@ -1,5 +1,6 @@
 import "./global.css";
 import { useState } from "react";
+import RightTopBar from "../components/RightTopBar";
 
 export default function AddFriend(props: {
   addPeer: (peerId: string) => void;
@@ -9,56 +10,63 @@ export default function AddFriend(props: {
 
   return (
     <div>
-      <textarea
-        placeholder="Add friend by peer id"
-        className="flex-1"
-        value={idContent}
-        onChange={(e) => setIdContent(e.target.value)}
-      />
-      <button
-        className="flex-1 bg-blue-50"
-        onClick={() => {
-          props.addPeer(idContent);
-        }}
-      >
-        AddFriendByID
-      </button>
+      <RightTopBar>
+        <span className="m-auto text-xl">Add Friend</span>
+      </RightTopBar>
 
-      <br />
+      <div className="p-[1rem]">
+        <div className=" my-[2rem] text-lg">
+          There are many ways you can connect to other devices...
+        </div>
 
-      <textarea
-        placeholder="Add friend by pin"
-        className="flex-1"
-        value={pinContent}
-        onChange={(e) => setPinContent(e.target.value)}
-      />
-      <button
-        className="flex-1 bg-blue-50"
-        onClick={async () => {
-          // pinContent should be a string of 4 digits
-          if (!/^\d{4}$/.test(pinContent)) {
-            alert("pin should be a string of 4 digits");
-            return;
-          }
+        <hr className="m-[auto] w-11/12"></hr>
 
-          const host = import.meta.env.VITE_BE_HOST;
-          const res = await fetch(`${host}/api/pin/${pinContent}`, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          const data = await res.json();
-          const peerID = data.data.peerID;
-          if (peerID == null) {
-            alert("pin not found");
-            return;
-          }
-          console.log("pin found", peerID);
-          props.addPeer(data.data.peerID);
-        }}
-      >
-        AddFriendByPin
-      </button>
+        <div className="mb-[0.5rem] mt-[1rem] text-lg">1. Pin</div>
+        <input
+          className="border-gray-300 border-2 rounded-md p-[0.5rem] mb-[1rem] w-[16rem]"
+          placeholder="Press Enter to submit Pin"
+          value={pinContent}
+          onChange={(e) => setPinContent(e.target.value)}
+          onKeyUp={async (e) => {
+            if (e.key == "Enter") {
+              // pinContent should be a string of 4 digits
+              if (!/^\d{4}$/.test(pinContent)) {
+                alert("pin should be a string of 4 digits");
+                return;
+              }
+
+              const host = import.meta.env.VITE_BE_HOST;
+              const res = await fetch(`${host}/api/pin/${pinContent}`, {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
+              const data = await res.json();
+              const peerID = data.data.peerID;
+              if (peerID == null) {
+                alert("peerID not found");
+                return;
+              }
+              console.log("peerID found", peerID);
+              props.addPeer(data.data.peerID);
+            }
+          }}
+        ></input>
+
+        <hr className="m-[auto] w-11/12"></hr>
+        <div className="mb-[0.5rem] mt-[1rem] text-lg">2. Peer ID</div>
+        <input
+          className="border-gray-300 border-2 rounded-md p-[0.5rem] mb-[1rem] w-[16rem]"
+          placeholder="Press Enter to submit PeerID"
+          value={idContent}
+          onChange={(e) => setIdContent(e.target.value)}
+          onKeyUp={async (e) => {
+            if (e.key == "Enter") {
+              props.addPeer(idContent);
+            }
+          }}
+        ></input>
+      </div>
     </div>
   );
 }

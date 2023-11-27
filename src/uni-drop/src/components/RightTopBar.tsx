@@ -1,6 +1,10 @@
 import returnIcon from "@/assets/return.svg";
 
-export default function RightTopBar(props: {children: JSX.Element | never[] }  ) {
+type Props = {
+  children?: React.ReactNode;
+};
+
+export default function RightTopBar(props: Props) {
   return (
     <div className="flex h-[3.75rem] w-full flex-row items-center justify-between border-b-2 px-5">
       {/* <span>{idToName(props.selectedPeerID)}</span> */}

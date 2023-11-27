@@ -228,9 +228,9 @@ async function testAddPeerID(context: BrowserContext) {
   console.log(`page1Id = ${page1Id}, page2Id = ${page2Id}`);
 
   await page1.getByText("Add").click();
-  await page1.getByPlaceholder("Add friend by peer id").click();
-  await page1.getByPlaceholder("Add friend by peer id").fill(page2Id);
-  await page1.getByText("AddFriendByID").click();
+  await page1.getByPlaceholder("Press Enter to submit PeerID").click();
+  await page1.getByPlaceholder("Press Enter to submit PeerID").fill(page2Id);
+  await page1.keyboard.press("Enter");
 
   const [page1Name, page2Name] = await Promise.all([
     getPeerName(page1),
@@ -258,9 +258,9 @@ async function testAddPin(context: BrowserContext) {
   const pin = await getPin(page1);
 
   await page2.getByText("Add").click();
-  await page2.getByPlaceholder("Add friend by pin").click();
-  await page2.getByPlaceholder("Add friend by pin").fill(pin);
-  await page2.getByText("AddFriendByPin").click();
+  await page2.getByPlaceholder("Press Enter to submit Pin").click();
+  await page2.getByPlaceholder("Press Enter to submit Pin").fill(pin);
+  await page2.keyboard.press("Enter");
 
   const [page1Name, page2Name] = await Promise.all([
     getPeerName(page1),
