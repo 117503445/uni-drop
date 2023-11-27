@@ -122,6 +122,16 @@ async function getPage(context: BrowserContext) {
   return page;
 }
 
+async function pagesSendText(page1: Page, page2: Page) {
+  const msg1 = "Hello";
+  await sendMsg(page1, msg1);
+  assertOne(await page2.getByText(msg1, { exact: true }).all());
+
+  const msg2 = "Hi";
+  await sendMsg(page2, msg2);
+  assertOne(await page1.getByText(msg2, { exact: true }).all());
+}
+
 async function testBasic(context: BrowserContext) {
   const [page1, page2] = await Promise.all([
     getPage(context),
@@ -140,20 +150,30 @@ async function testBasic(context: BrowserContext) {
     page2.getByText(page1Name).click(),
   ]);
 
-  const msg1 = "Hello";
-  await sendMsg(page1, msg1);
-  assertOne(await page2.getByText(msg1, { exact: true }).all());
-
-  const msg2 = "Hi";
-  await sendMsg(page2, msg2);
-  assertOne(await page1.getByText(msg2, { exact: true }).all());
+  pagesSendText(page1, page2);
 
   const fileChooserPromise = page1.waitForEvent("filechooser");
   await page1.locator('//*[@id="btn-file"]').click();
   const fileChooser = await fileChooserPromise;
   await fileChooser.setFiles("./public/logo.jpg");
 
-  await until(async () => (await page2.locator(".msg-bubble-file").count()) === 1);
+  await until(
+    async () => (await page2.locator(".msg-bubble-file").count()) === 1,
+  );
+  // Start waiting for download before clicking. Note no await.
+  const downloadPromise = page2.waitForEvent("download");
+  await page2.getByText("logo.jpg").click();
+  const download = await downloadPromise;
+
+  // Wait for the download process to complete and save the downloaded file somewhere.
+  await download.saveAs("./tests/downloads/" + download.suggestedFilename());
+
+  // check if the file is the same
+  const logo1 = await fs.promises.readFile("./public/logo.jpg");
+  const logo2 = await fs.promises.readFile(
+    "./tests/downloads/" + download.suggestedFilename(),
+  );
+  assert(logo1.equals(logo2), "File not the same");
 }
 
 async function testAddPeerID(context: BrowserContext) {
@@ -186,13 +206,7 @@ async function testAddPeerID(context: BrowserContext) {
     page2.getByText(page1Name).click(),
   ]);
 
-  const msg1 = "Hello";
-  await sendMsg(page1, msg1);
-  assertOne(await page2.getByText(msg1, { exact: true }).all());
-
-  const msg2 = "Hi";
-  await sendMsg(page2, msg2);
-  assertOne(await page1.getByText(msg2, { exact: true }).all());
+  pagesSendText(page1, page2);
 }
 
 (async () => {
