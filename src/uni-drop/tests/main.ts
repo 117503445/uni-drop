@@ -215,9 +215,50 @@ async function testAddPeerID(context: BrowserContext) {
     page2.getByText(page1Name).click(),
   ]);
 
-  pagesSendText(page1, page2);
+  await pagesSendText(page1, page2);
 }
 
+async function testAddPin(context: BrowserContext) {
+  const [page1, page2] = await Promise.all([
+    getPage(context),
+    getPage(context),
+  ]);
+
+  await page1.getByText("me").click();
+
+  const meta = await page1.locator("#me-meta").getAttribute("test-mata");
+  if (!meta) {
+    throw new Error("meta not found");
+  }
+  console.log(`meta = ${meta}`);
+
+  const pin = JSON.parse(meta)["pin"];
+  if (!pin) {
+    throw new Error("pin not found");
+  }
+
+  await page2.getByText("Add").click();
+  await page2.getByPlaceholder("Add friend by pin").click();
+  await page2.getByPlaceholder("Add friend by pin").fill(pin);
+  await page2.getByText("AddFriendByPin").click();
+
+  const [page1Name, page2Name] = await Promise.all([
+    getPeerName(page1),
+    getPeerName(page2),
+  ]);
+
+  console.log(`page1Name = ${page1Name}, page2Name = ${page2Name}`);
+
+  await Promise.all([
+    page1.getByText(page2Name).click(),
+    page2.getByText(page1Name).click(),
+  ]);
+
+  await pagesSendText(page1, page2);
+
+  // sleep 30s
+  // await new Promise((resolve) => setTimeout(resolve, 30000));
+}
 (async () => {
   if (!fs.existsSync(".env.development.local.backup")) {
     if (!fs.existsSync(".env.development.local")) {
@@ -231,12 +272,17 @@ async function testAddPeerID(context: BrowserContext) {
   }
 
   const cases = [
-    new TestCase("Basic", testBasic),
-    // new TestCase(
-    //   "AddPeerID",
-    //   testAddPeerID,
-    //   new Map([["VITE_DISABLE_HEARTBEAT", "true"]]),
-    // ),
+    // new TestCase("Basic", testBasic),
+    new TestCase(
+      "AddPeerID",
+      testAddPeerID,
+      new Map([["VITE_DISABLE_HEARTBEAT", "true"]]),
+    ),
+    new TestCase(
+      "AddPin",
+      testAddPin,
+      new Map([["VITE_DISABLE_HEARTBEAT", "true"]]),
+    ),
   ];
   for (const c of cases) {
     await c.run();

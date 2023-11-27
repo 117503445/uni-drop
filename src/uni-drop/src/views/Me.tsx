@@ -6,15 +6,15 @@ export default function Me(props: { peerID: string }) {
   const [pin, setPin] = useState("");
   const timer = useRef<NodeJS.Timeout | null>(null);
 
+  const url = new URL(window.location.href);
+  url.hash = `/from-friend/${props.peerID}`;
+
   const [qrcode, setQrcode] = useState("");
   useEffect(() => {
     console.log("AddFriend peerID", props.peerID);
     if (!props.peerID) {
       return;
     }
-
-    const url = new URL(window.location.href);
-    url.hash = `/from-friend/${props.peerID}`;
 
     QRCode.toDataURL(url.toString()).then((dataURL) => {
       console.log(dataURL);
@@ -52,7 +52,14 @@ export default function Me(props: { peerID: string }) {
   }, [props.peerID]);
 
   return (
-    <div>
+    <div
+      id="me-meta"
+      test-mata={JSON.stringify({
+        peerID: props.peerID,
+        pin,
+        url
+      })}
+    >
       <span>peerid: {props.peerID}</span>
       <br />
       <span>pin: {pin}</span>
