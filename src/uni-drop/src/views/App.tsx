@@ -55,6 +55,57 @@ function App() {
     };
   }, [enableVConsole]);
 
+  const enablePageSpy = useSelector(
+    (state: RootState) => state.settings.enablePageSpy,
+  );
+  const importPageSpyScript = useRef<HTMLScriptElement | null>(null);
+  const newPageSpyScript = useRef<HTMLScriptElement | null>(null);
+
+  useEffect(() => {
+    if (enablePageSpy) {
+      if (importPageSpyScript.current == null) {
+        importPageSpyScript.current = document.createElement("script");
+        importPageSpyScript.current.src =
+          "https://page-spy-web.be.wizzstudio.com:30000/page-spy/index.min.js";
+        importPageSpyScript.current.crossOrigin = "anonymous";
+        document.head.appendChild(importPageSpyScript.current);
+
+        newPageSpyScript.current = document.createElement("script");
+        newPageSpyScript.current.text = `(async () => {
+          while (true) {
+              try {
+                  window.$pageSpy = new PageSpy({
+                      project: "uni-drop"
+                  });
+                  break;
+              } catch (e) {
+                  console.log(e);
+              }
+              await new Promise(resolve => setTimeout(resolve, 500));
+          }
+      })();`;
+        document.head.appendChild(newPageSpyScript.current);
+      }
+    } else {
+      if (importPageSpyScript.current != null) {
+        document.head.removeChild(importPageSpyScript.current);
+        importPageSpyScript.current = null;
+      }
+      if (newPageSpyScript.current != null) {
+        document.head.removeChild(newPageSpyScript.current);
+        newPageSpyScript.current = null;
+      }
+    }
+    return () => {
+      if (importPageSpyScript.current != null) {
+        document.head.removeChild(importPageSpyScript.current);
+      }
+      if (newPageSpyScript.current != null) {
+        document.head.removeChild(newPageSpyScript.current);
+      }
+    };
+  }, [enablePageSpy]);
+
   const [currentUrl, setCurrentUrl] = useState(window.location.href);
   useEffect(() => {
     const handleUrlChange = () => {
