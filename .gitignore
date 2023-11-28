@@ -2,3 +2,4 @@ vsc_extensions
 .pnpm-store
 dev-data
 .VSCodeCounter
+*.map
