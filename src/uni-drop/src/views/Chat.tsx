@@ -3,7 +3,12 @@ import "./global.css";
 import fileIcon from "@/assets/file.svg";
 import imageIcon from "@/assets/image.svg";
 import { useState, useRef, useEffect } from "react";
-import { Message, MessageContent, MessageType } from "../utils/model";
+import {
+  FileMessageContent,
+  Message,
+  MessageContent,
+  TextMessageContent,
+} from "../utils/model";
 import MessageBubble from "../components/MessageBubble";
 import { idToName } from "../utils/common";
 import RightTopBar from "../components/RightTopBar";
@@ -110,11 +115,9 @@ export default function Chat(props: {
                 if (!file) {
                   return;
                 }
-
-                const content = new MessageContent(MessageType.FILE);
+                const blob = new Blob([file], { type: file.type });
+                const content = new FileMessageContent(blob, file.name, false);
                 console.log("select file");
-                await content.setData(file);
-                console.log("select file setData done");
 
                 props.sendMessages(content);
               }}
@@ -142,11 +145,9 @@ export default function Chat(props: {
                 if (!file) {
                   return;
                 }
-
-                const content = new MessageContent(MessageType.IMAGE);
+                const blob = new Blob([file], { type: file.type });
+                const content = new FileMessageContent(blob, file.name, true);
                 console.log("select image");
-                await content.setData(file);
-                console.log("select image setData done");
 
                 props.sendMessages(content);
               }}
@@ -194,9 +195,8 @@ export default function Chat(props: {
                 //   );
                 // }
 
-                const content = new MessageContent(MessageType.TEXT);
+                const content = new TextMessageContent(postContent);
                 // await content.setData(data);
-                await content.setData(postContent);
                 props.sendMessages(content);
                 setPostContent("");
               }

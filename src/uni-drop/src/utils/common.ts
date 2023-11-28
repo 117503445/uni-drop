@@ -1,5 +1,4 @@
-import { faker } from "@faker-js/faker/locale/en_US";
-
+import fakeNames from "./fake-names.json";
 // https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
 const cyrb53 = (str: string, seed = 0) => {
   let h1 = 0xdeadbeef ^ seed,
@@ -23,7 +22,7 @@ export function idToName(id: string | null | undefined) {
     return "";
   }
   const seed = cyrb53(id);
-  // console.log(`seed = ${seed}`);
-  faker.seed(seed);
-  return faker.person.firstName();
+  const index = seed % fakeNames.length;
+
+  return fakeNames[index];
 }

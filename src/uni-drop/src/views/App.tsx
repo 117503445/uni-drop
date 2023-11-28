@@ -1,21 +1,17 @@
 import "./global.css";
+
 import settingIcon from "@/assets/setting.svg";
 import githubIcon from "@/assets/github.svg";
 import addIcon from "@/assets/add.svg";
 import qrcodeIcon from "@/assets/qrcode.svg";
 
 import { createHashRouter, RouterProvider } from "react-router-dom";
-
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
-// import Chat from "./Chat.js";
+
 const Chat = lazy(() => import("./Chat.js"));
-// import AddFriend from "./AddFriend.js";
 const AddFriend = lazy(() => import("./AddFriend.js"));
-// import Setting from "./Setting.js";
 const Setting = lazy(() => import("./Setting.js"));
-// import FromFriend from "./FromFriend.js";
 const FromFriend = lazy(() => import("./FromFriend.js"));
-// import Me from "./Me.js";
 const Me = lazy(() => import("./Me.js"));
 
 import { idToName } from "../utils/common.js";
@@ -25,87 +21,9 @@ import {
   UniPeersMockManager,
   UniPeersService,
 } from "../utils/peer.js";
-import { Message, MessageContent, MessageType } from "../utils/model.js";
-import type { RootState } from "../store/store.js";
-import { useSelector } from "react-redux";
-import VConsole from "vconsole";
+import { Message, MessageContent, TextMessageContent } from "../utils/model.js";
 
 function App() {
-  const enableVConsole = useSelector(
-    (state: RootState) => state.settings.enableVConsole,
-  );
-
-  const vconsole = useRef<VConsole | null>(null);
-
-  useEffect(() => {
-    if (enableVConsole) {
-      if (vconsole.current == null) {
-        vconsole.current = new VConsole();
-      }
-    } else {
-      if (vconsole.current != null) {
-        vconsole.current.destroy();
-        vconsole.current = null;
-      }
-    }
-    return () => {
-      if (vconsole.current != null) {
-        vconsole.current.destroy();
-      }
-    };
-  }, [enableVConsole]);
-
-  const enablePageSpy = useSelector(
-    (state: RootState) => state.settings.enablePageSpy,
-  );
-  const importPageSpyScript = useRef<HTMLScriptElement | null>(null);
-  const newPageSpyScript = useRef<HTMLScriptElement | null>(null);
-
-  useEffect(() => {
-    if (enablePageSpy) {
-      if (importPageSpyScript.current == null) {
-        importPageSpyScript.current = document.createElement("script");
-        importPageSpyScript.current.src =
-          "https://page-spy-web.be.wizzstudio.com:30000/page-spy/index.min.js";
-        importPageSpyScript.current.crossOrigin = "anonymous";
-        document.head.appendChild(importPageSpyScript.current);
-
-        newPageSpyScript.current = document.createElement("script");
-        newPageSpyScript.current.text = `(async () => {
-          while (true) {
-              try {
-                  window.$pageSpy = new PageSpy({
-                      project: "uni-drop"
-                  });
-                  break;
-              } catch (e) {
-                  console.log(e);
-              }
-              await new Promise(resolve => setTimeout(resolve, 500));
-          }
-      })();`;
-        document.head.appendChild(newPageSpyScript.current);
-      }
-    } else {
-      if (importPageSpyScript.current != null) {
-        document.head.removeChild(importPageSpyScript.current);
-        importPageSpyScript.current = null;
-      }
-      if (newPageSpyScript.current != null) {
-        document.head.removeChild(newPageSpyScript.current);
-        newPageSpyScript.current = null;
-      }
-    }
-    return () => {
-      if (importPageSpyScript.current != null) {
-        document.head.removeChild(importPageSpyScript.current);
-      }
-      if (newPageSpyScript.current != null) {
-        document.head.removeChild(newPageSpyScript.current);
-      }
-    };
-  }, [enablePageSpy]);
-
   const [currentUrl, setCurrentUrl] = useState(window.location.href);
   useEffect(() => {
     const handleUrlChange = () => {
@@ -160,7 +78,7 @@ function App() {
     } else {
       manager = new UniPeersMockManager(setpeerID, setpeersID, setMessages);
 
-      manager.send("peer1", new MessageContent(MessageType.TEXT, "hello"));
+      manager.send("peer1", new TextMessageContent("hello"));
       setSelectedPeerID("peer1");
     }
 
@@ -329,6 +247,7 @@ function App() {
 
               {/* add button */}
               <button
+                id="btn-add"
                 className="ml-auto flex min-h-full items-center rounded-md bg-white fill-none px-2 shadow-md sm:px-2"
                 onClick={() => {
                   window.location.hash = "/add-friend";
