@@ -7,8 +7,8 @@ program.option("--url <url>", "the url of frontend", "http://localhost:5173");
 program.parse();
 const url = program.opts()["url"];
 
-fs.mkdirSync("./tests/traces", { recursive: true });
-fs.mkdirSync("./tests/downloads", { recursive: true });
+fs.mkdirSync("./tests/e2e/traces", { recursive: true });
+fs.mkdirSync("./tests/e2e/downloads", { recursive: true });
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -67,7 +67,7 @@ class TestCase {
       console.log(error);
       exit(1);
     } finally {
-      await context.tracing.stop({ path: `./tests/traces/${this.name}.zip` });
+      await context.tracing.stop({ path: `./tests/e2e/traces/${this.name}.zip` });
       context.close();
       browser.close();
     }
@@ -200,12 +200,12 @@ async function testBasic(context: BrowserContext) {
   const download = await downloadPromise;
 
   // Wait for the download process to complete and save the downloaded file somewhere.
-  await download.saveAs("./tests/downloads/" + download.suggestedFilename());
+  await download.saveAs("./tests/e2e/downloads/" + download.suggestedFilename());
 
   // check if the file is the same
   const logo1 = await fs.promises.readFile("./public/logo.jpg");
   const logo2 = await fs.promises.readFile(
-    "./tests/downloads/" + download.suggestedFilename(),
+    "./tests/e2e/downloads/" + download.suggestedFilename(),
   );
   assert(logo1.equals(logo2), "File not the same");
 

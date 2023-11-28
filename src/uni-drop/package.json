@@ -8,9 +8,10 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "playwright": "tsc --downlevelIteration ./tests/main.ts && mv tests/main.js tests/main.cjs && node tests/main.cjs",
+    "playwright": "tsc --downlevelIteration ./tests/e2e/main.ts && mv tests/e2e/main.js tests/main.cjs && node tests/e2e/main.cjs",
     "prettier": "prettier . --write",
-    "check": "pnpm run lint && pnpm run prettier && pnpm run build"
+    "check": "pnpm run lint && pnpm run prettier && pnpm run build",
+    "test": "pnpm exec vitest run"
   },
   "dependencies": {
     "@faker-js/faker": "^8.3.1",
@@ -45,6 +46,7 @@
     "rollup-plugin-visualizer": "^5.9.3",
     "tailwindcss": "^3.3.5",
     "typescript": "^5.3.2",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "vitest": "^0.34.6"
   }
 }

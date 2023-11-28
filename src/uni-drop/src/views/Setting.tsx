@@ -29,10 +29,10 @@ export default function Setting() {
         ></input>
       </div>
       <div>
-        <label>pagesky</label>
+        <label>pagespy</label>
         <input
           type="checkbox"
-          name="pagesky"
+          name="pagespy"
           checked={enablePageSpy}
           disabled={enablePageSpy}
           onChange={(e) => {
