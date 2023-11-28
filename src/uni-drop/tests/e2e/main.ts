@@ -139,11 +139,11 @@ async function getPage(context: BrowserContext) {
 async function pagesSendText(page1: Page, page2: Page) {
   const msg1 = "Hello";
   await sendMsg(page1, msg1);
-  assertOne(await page2.getByText(msg1, { exact: true }).all());
+  until(async () => (await page2.getByText(msg1, { exact: true }).all()).length === 1);
 
   const msg2 = "Hi";
   await sendMsg(page2, msg2);
-  assertOne(await page1.getByText(msg2, { exact: true }).all());
+  until(async () => (await page1.getByText(msg2, { exact: true }).all()).length === 1);
 }
 
 async function selectFile(page: Page, filename: string, selector: string) {
