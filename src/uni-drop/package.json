@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "playwright": "tsc --downlevelIteration ./tests/e2e/main.ts && mv tests/e2e/main.js tests/main.cjs && node tests/e2e/main.cjs",
+    "playwright": "tsc --downlevelIteration ./tests/e2e/main.ts && mv tests/e2e/main.js tests/e2e/main.cjs && node tests/e2e/main.cjs",
     "prettier": "prettier . --write",
     "check": "pnpm run lint && pnpm run prettier && pnpm run build",
     "test": "pnpm exec vitest run",
