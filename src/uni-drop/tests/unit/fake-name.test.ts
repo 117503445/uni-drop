@@ -1,5 +1,13 @@
 import { expect, test } from "vitest";
 
-test("adds 1 + 2 to equal 3", () => {
-  expect(1 + 2).toBe(3);
+import { idToName } from "../../src/utils/common";
+
+test("idToName should always equal", () => {
+  const cases = [
+    "c4b6ca37-2012-48ca-ace7-966c0667a2e7",
+    "e4b6ca37-2012-48ca-ace7-966c0667a2e7",
+  ];
+  cases.forEach((id) => {
+    expect(idToName(id)).toBe(idToName(id));
+  });
 });

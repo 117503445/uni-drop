@@ -11,10 +11,10 @@
     "playwright": "tsc --downlevelIteration ./tests/e2e/main.ts && mv tests/e2e/main.js tests/main.cjs && node tests/e2e/main.cjs",
     "prettier": "prettier . --write",
     "check": "pnpm run lint && pnpm run prettier && pnpm run build",
-    "test": "pnpm exec vitest run"
+    "test": "pnpm exec vitest run",
+    "gen-fake-names": "tsc --downlevelIteration scripts/gen-fake-names.ts && mv scripts/gen-fake-names.js scripts/gen-fake-names.cjs && node scripts/gen-fake-names.cjs"
   },
   "dependencies": {
-    "@faker-js/faker": "^8.3.1",
     "@reduxjs/toolkit": "^1.9.7",
     "peerjs": "^1.5.1",
     "public-ip": "^6.0.1",
@@ -27,6 +27,7 @@
     "vconsole": "^3.15.1"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.3.1",
     "@types/node": "^20.10.0",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18.2.38",

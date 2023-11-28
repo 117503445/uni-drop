@@ -67,7 +67,9 @@ class TestCase {
       console.log(error);
       exit(1);
     } finally {
-      await context.tracing.stop({ path: `./tests/e2e/traces/${this.name}.zip` });
+      await context.tracing.stop({
+        path: `./tests/e2e/traces/${this.name}.zip`,
+      });
       context.close();
       browser.close();
     }
@@ -200,7 +202,9 @@ async function testBasic(context: BrowserContext) {
   const download = await downloadPromise;
 
   // Wait for the download process to complete and save the downloaded file somewhere.
-  await download.saveAs("./tests/e2e/downloads/" + download.suggestedFilename());
+  await download.saveAs(
+    "./tests/e2e/downloads/" + download.suggestedFilename(),
+  );
 
   // check if the file is the same
   const logo1 = await fs.promises.readFile("./public/logo.jpg");
