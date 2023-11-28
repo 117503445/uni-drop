@@ -27,14 +27,6 @@ async function until(condition: () => Promise<boolean>, timeout = 10000) {
   throw new Error(`Condition not satisfied`);
 }
 
-interface Lengthable {
-  length: number;
-}
-
-function assertOne(array: Lengthable) {
-  assert(array.length === 1, `Expected 1 element, found ${array.length}`);
-}
-
 class TestCase {
   constructor(
     public name: string,
@@ -67,6 +59,7 @@ class TestCase {
       console.log(error);
       exit(1);
     } finally {
+      console.log(`Stopping tracing for ${this.name}`);
       await context.tracing.stop({
         path: `./tests/e2e/traces/${this.name}.zip`,
       });
@@ -137,13 +130,22 @@ async function getPage(context: BrowserContext) {
 }
 
 async function pagesSendText(page1: Page, page2: Page) {
+  console.log("pagesSendText start");
   const msg1 = "Hello";
   await sendMsg(page1, msg1);
-  until(async () => (await page2.getByText(msg1, { exact: true }).all()).length === 1);
+  await until(
+    async () =>
+      (await page2.getByText(msg1, { exact: true }).all()).length === 1,
+  );
 
   const msg2 = "Hi";
   await sendMsg(page2, msg2);
-  until(async () => (await page1.getByText(msg2, { exact: true }).all()).length === 1);
+  await until(
+    async () =>
+      (await page1.getByText(msg2, { exact: true }).all()).length === 1,
+  );
+
+  console.log("pagesSendText passed");
 }
 
 async function selectFile(page: Page, filename: string, selector: string) {
@@ -189,16 +191,21 @@ async function testBasic(context: BrowserContext) {
     page2.getByText(page1Name).click(),
   ]);
 
-  pagesSendText(page1, page2);
+  await pagesSendText(page1, page2);
 
-  selectFile(page1, "./public/logo.jpg", '//*[@id="btn-file"]');
-
+  console.log("filetest start");
+  await selectFile(page1, "./public/logo.jpg", '//*[@id="btn-file"]');
   await until(
     async () => (await page2.locator(".msg-bubble-file").count()) === 1,
   );
+
   // Start waiting for download before clicking. Note no await.
   const downloadPromise = page2.waitForEvent("download");
-  await page2.getByText("logo.jpg").click();
+  await page2
+    .getByText("logo.jpg", {
+      exact: false,
+    })
+    .click();
   const download = await downloadPromise;
 
   // Wait for the download process to complete and save the downloaded file somewhere.
@@ -213,7 +220,8 @@ async function testBasic(context: BrowserContext) {
   );
   assert(logo1.equals(logo2), "File not the same");
 
-  selectFile(page1, "./public/logo.jpg", '//*[@id="btn-image"]');
+  console.log("imagetest start");
+  await selectFile(page1, "./public/logo.jpg", '//*[@id="btn-image"]');
   await until(
     async () => (await page2.locator(".msg-bubble-image").count()) === 1,
   );
@@ -232,7 +240,7 @@ async function testAddPeerID(context: BrowserContext) {
 
   console.log(`page1Id = ${page1Id}, page2Id = ${page2Id}`);
 
-  await page1.getByText("Add").click();
+  await page1.locator("#btn-add").click();
   await page1.getByPlaceholder("Press Enter to submit PeerID").click();
   await page1.getByPlaceholder("Press Enter to submit PeerID").fill(page2Id);
   await page1.keyboard.press("Enter");
@@ -259,13 +267,13 @@ async function testAddPin(context: BrowserContext) {
   ]);
 
   await page1.getByText("(me)").click();
-
   const pin = await getPin(page1);
 
-  await page2.getByText("Add").click();
+  await page2.locator("#btn-add").click();
   await page2.getByPlaceholder("Press Enter to submit Pin").click();
   await page2.getByPlaceholder("Press Enter to submit Pin").fill(pin);
   await page2.keyboard.press("Enter");
+  console.log("pin submitted");
 
   const [page1Name, page2Name] = await Promise.all([
     getPeerName(page1),

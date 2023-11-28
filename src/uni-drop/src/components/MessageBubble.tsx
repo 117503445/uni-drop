@@ -1,4 +1,9 @@
-import { Message, MessageType } from "../utils/model";
+import {
+  Message,
+  TextMessageContent,
+  FileMessageContent,
+} from "../utils/model";
+import download from "js-file-download";
 
 function MessageBubble(props: { peerID: string; message: Message }) {
   const msg = props.message;
@@ -14,40 +19,42 @@ function MessageBubble(props: { peerID: string; message: Message }) {
   }
 
   let inner: JSX.Element;
+  const content = msg.content;
 
-  switch (msg.content.type) {
-    case MessageType.TEXT:
-      inner = (
-        <p className="msg-bubble-text max-w-[30rem] break-all">
-          {msg.content.data}
-        </p>
-      );
-      break;
-
-    case MessageType.FILE:
-      inner = (
-        <a
-          // className="rounded-md bg-yellow-200 "
-          className="msg-bubble-file"
-          href={msg.content.data}
-          download={msg.content.filename}
-        >
-          {msg.content.filename}
-        </a>
-      );
-      break;
-    case MessageType.IMAGE:
+  if (content instanceof TextMessageContent) {
+    inner = (
+      <p className="msg-bubble-text max-w-[30rem] break-all">{content.text}</p>
+    );
+  } else if (content instanceof FileMessageContent) {
+    if (content.isPriview) {
+      // const blob = new Blob([content.file], { type: "image/png" });
       inner = (
         <div className="msg-bubble-image">
           {" "}
-          <p className="rounded-md ">{msg.content.filename}</p>
-          <img className="rounded-md " src={msg.content.data} />
+          <p className="rounded-md ">{content.filename}</p>
+          <img
+            className="rounded-md "
+            src={URL.createObjectURL(content.file)}
+          />
         </div>
       );
-      break;
-    default:
-      inner = <p>Unknown message type</p>;
-      break;
+    } else {
+      inner = (
+        <button
+          className="msg-bubble-file"
+          onClick={() => {
+            if (!(content instanceof FileMessageContent)) {
+              throw new Error("content is not FileMessageContent");
+            }
+            download(content.file, content.filename);
+          }}
+        >
+          Download {content.filename}
+        </button>
+      );
+    }
+  } else {
+    inner = <p>Unknown message type</p>;
   }
 
   return (

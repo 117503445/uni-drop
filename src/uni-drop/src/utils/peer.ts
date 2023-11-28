@@ -1,7 +1,13 @@
-import { DataConnection, Peer, PeerOptions } from "peerjs";
+import { DataConnection, Peer, PeerJSOption } from "peerjs";
 import { publicIpv4 } from "public-ip";
 import React from "react";
-import { Message, MessageContent, MessageType } from "./model";
+import {
+  Message,
+  MessageContent,
+  MessagePoco,
+  messageToPoco,
+  pocoToMessage,
+} from "./model";
 
 class UniPeerState {
   // is the peer found by discovery currently
@@ -239,31 +245,11 @@ class UniPeer {
         return;
       }
 
-      let msg: Message;
-      try {
-        const payload = data as {
-          from: string;
-          to: string;
-          createTime: number;
-          type: MessageType;
-          data: string;
-          filename: string;
-        };
-        const content = new MessageContent(
-          payload.type,
-          payload.data,
-          payload.filename,
-        );
-        msg = new Message(
-          payload.from,
-          payload.to,
-          content,
-          payload.createTime,
-        );
-      } catch (error) {
-        console.error(error);
-        return;
-      }
+      const poco = data as MessagePoco;
+      console.log(`received poco: ${poco}`);
+
+      const msg = pocoToMessage(poco);
+      console.log(`received msg: ${msg}`);
 
       if (msg.to != this.peer.id) {
         console.warn(`received msg.to is not my peer id: ${msg.to}`);
@@ -283,23 +269,15 @@ class UniPeer {
   }
 
   // send content to this UniPeer
-  send(msg: Message) {
+  async send(msg: Message) {
     // const msg = new Message(this.peer.id, this.id, content);
     if (this.connection == undefined) {
       console.warn("DataConnection not set");
       return;
     }
 
-    const payload = {
-      from: msg.from,
-      to: msg.to,
-      createTime: msg.createTime,
-      type: msg.content.type,
-      data: msg.content.data,
-      filename: msg.content.filename,
-    };
     console.info(`-> peer ${this.id}: ${msg}`);
-    this.connection.send(payload);
+    this.connection.send(await messageToPoco(msg));
   }
 
   close() {
@@ -416,8 +394,9 @@ export class UniPeersManager extends UniPeersService {
     // }
 
     const DEBUG_LEVEL = 0;
+    // const DEBUG_LEVEL = 3;
 
-    const peerOptions: PeerOptions = {
+    const peerOptions: PeerJSOption = {
       debug: DEBUG_LEVEL,
     };
     if (import.meta.env.DEV) {
@@ -501,7 +480,7 @@ export class UniPeersManager extends UniPeersService {
     }
   }
 
-  send(id: string, content: MessageContent) {
+  async send(id: string, content: MessageContent) {
     if (this.peerpool == undefined) {
       console.warn("peerpool not set");
       return;
@@ -514,7 +493,7 @@ export class UniPeersManager extends UniPeersService {
     this.setMessages([...this.messages]);
     const peer = this.peerpool.findPeer(id);
     if (peer != null) {
-      peer.send(msg);
+      await peer.send(msg);
     } else {
       console.warn("peer not found");
     }
@@ -584,7 +563,7 @@ export class UniPeersMockManager extends UniPeersService {
     this.setpeersID(this.peersID);
   }
 
-  send(id: string, content: MessageContent): void {
+  async send(id: string, content: MessageContent): Promise<void> {
     this.messages.push(new Message("mock-peer", id, content));
     console.info(`-> peer ${id}: ${content}`);
     this.messages.push(new Message(id, "mock-peer", content));

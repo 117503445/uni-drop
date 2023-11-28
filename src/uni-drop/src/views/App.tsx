@@ -21,7 +21,7 @@ import {
   UniPeersMockManager,
   UniPeersService,
 } from "../utils/peer.js";
-import { Message, MessageContent, MessageType } from "../utils/model.js";
+import { Message, MessageContent, TextMessageContent } from "../utils/model.js";
 
 function App() {
   const [currentUrl, setCurrentUrl] = useState(window.location.href);
@@ -78,7 +78,7 @@ function App() {
     } else {
       manager = new UniPeersMockManager(setpeerID, setpeersID, setMessages);
 
-      manager.send("peer1", new MessageContent(MessageType.TEXT, "hello"));
+      manager.send("peer1", new TextMessageContent("hello"));
       setSelectedPeerID("peer1");
     }
 
@@ -247,6 +247,7 @@ function App() {
 
               {/* add button */}
               <button
+                id="btn-add"
                 className="ml-auto flex min-h-full items-center rounded-md bg-white fill-none px-2 shadow-md sm:px-2"
                 onClick={() => {
                   window.location.hash = "/add-friend";
