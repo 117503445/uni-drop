@@ -15,13 +15,11 @@ export default function Me(props: { peerID: string }) {
 
   const [qrcode, setQrcode] = useState("");
   useEffect(() => {
-    console.log("AddFriend peerID", props.peerID);
     if (!props.peerID) {
       return;
     }
 
     QRCode.toDataURL(url.toString()).then((dataURL) => {
-      console.log(dataURL);
       setQrcode(dataURL);
     });
   }, [url, props.peerID]);

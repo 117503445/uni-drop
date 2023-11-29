@@ -207,20 +207,24 @@ function App() {
 
             {/* peers */}
             <div className="mb-[2rem] flex flex-col overflow-clip overflow-y-auto">
-              {peersID.map((id) => (
-                <div
-                  className={`mx-auto my-1.5 flex max-h-[3.5rem] min-h-[3.5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-sm hover:bg-[#f3f3f3] ${
-                    selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
-                  } items-center hover:shadow-lg`}
-                  key={id}
-                  onClick={() => {
-                    setSelectedPeerID(id);
-                    window.location.hash = `/chat/${id}`;
-                  }}
-                >
-                  <span className="mx-auto">{idToName(id)}</span>
-                </div>
-              ))}
+              {peersID.length > 0 ? (
+                peersID.map((id) => (
+                  <div
+                    className={`mx-auto my-1.5 flex max-h-[3.5rem] min-h-[3.5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-sm hover:bg-[#f3f3f3] ${
+                      selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
+                    } items-center hover:shadow-lg`}
+                    key={id}
+                    onClick={() => {
+                      setSelectedPeerID(id);
+                      window.location.hash = `/chat/${id}`;
+                    }}
+                  >
+                    <span className="mx-auto">{idToName(id)}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="m-auto">Looking for peers on same LAN ...</div>
+              )}
             </div>
 
             {/* bottom toolbox */}

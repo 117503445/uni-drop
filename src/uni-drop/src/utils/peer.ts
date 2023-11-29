@@ -564,8 +564,9 @@ export class UniPeersMockManager extends UniPeersService {
   }
 
   async send(id: string, content: MessageContent): Promise<void> {
-    this.messages.push(new Message("mock-peer", id, content));
-    console.info(`-> peer ${id}: ${content}`);
+    const msg = new Message("mock-peer", id, content);
+    this.messages.push(msg);
+    console.info(`-> peer ${id}: ${msg}`);
     this.messages.push(new Message(id, "mock-peer", content));
     this.setMessages([...this.messages]);
   }
