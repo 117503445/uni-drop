@@ -12,12 +12,12 @@ export class Message {
     createTime?: number,
     id?: string,
   ) {
-    if (!from || !to || !content) {
-      throw new Error("from, to and content are required");
+    if (from.length === 0 || to.length === 0) {
+      throw new Error("from, to are required");
     }
 
-    this.id = id || Math.random().toString(36).substring(2, 9);
-    this.createTime = createTime || Date.now();
+    this.id = id ?? Math.random().toString(36).substring(2, 9);
+    this.createTime = createTime ?? Date.now();
     this.from = from;
     this.to = to;
     this.content = content;
@@ -32,19 +32,19 @@ export class Message {
 }
 
 export class MessagePoco {
-  id: string = "";
-  createTime: number = 0;
-  from: string = "";
-  to: string = "";
+  id = "";
+  createTime = 0;
+  from = "";
+  to = "";
 
-  contentType: MessageType = MessageType.TEXT;
+  contentType: MessageType | null = null;
 
   text: string | null = null;
 
   file: ArrayBuffer | null = null;
   filetype: string | null = null;
   filename: string | null = null;
-  isPriview: boolean = false;
+  isPriview = false;
 }
 
 enum MessageType {
@@ -100,15 +100,13 @@ export async function messageToPoco(message: Message) {
 
   if (message.content instanceof TextMessageContent) {
     poco.contentType = MessageType.TEXT;
-    poco.text = (message.content as TextMessageContent).text;
+    poco.text = message.content.text;
   } else if (message.content instanceof FileMessageContent) {
     poco.contentType = MessageType.FILE;
-    poco.file = await (
-      message.content as FileMessageContent
-    ).file.arrayBuffer();
-    poco.filetype = (message.content as FileMessageContent).file.type;
-    poco.filename = (message.content as FileMessageContent).filename;
-    poco.isPriview = (message.content as FileMessageContent).isPriview;
+    poco.file = await message.content.file.arrayBuffer();
+    poco.filetype = message.content.file.type;
+    poco.filename = message.content.filename;
+    poco.isPriview = message.content.isPriview;
   } else {
     throw new Error("unknown message content type");
   }
@@ -118,11 +116,21 @@ export async function messageToPoco(message: Message) {
 export function pocoToMessage(poco: MessagePoco): Message {
   let content: MessageContent;
   if (poco.contentType === MessageType.TEXT) {
-    content = new TextMessageContent(poco.text!);
+    if (poco.text === null) {
+      throw new Error("text is null");
+    }
+    content = new TextMessageContent(poco.text);
   } else if (poco.contentType === MessageType.FILE) {
+    if (
+      poco.file === null ||
+      poco.filetype === null ||
+      poco.filename === null
+    ) {
+      throw new Error("file, filetype, filename are required");
+    }
     content = new FileMessageContent(
-      new Blob([poco.file!], { type: poco.filetype! }),
-      poco.filename!,
+      new Blob([poco.file], { type: poco.filetype }),
+      poco.filename,
       poco.isPriview,
     );
   } else {

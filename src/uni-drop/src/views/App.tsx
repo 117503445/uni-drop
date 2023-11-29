@@ -87,9 +87,7 @@ function App() {
       setpeerID("");
       setpeersID([]);
       setMessages([]);
-      if (manager != null) {
         manager.close();
-      }
     };
   }, []);
 

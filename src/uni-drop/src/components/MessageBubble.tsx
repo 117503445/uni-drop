@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import {
   Message,
   TextMessageContent,
@@ -15,7 +16,7 @@ function MessageBubble(props: { peerID: string; message: Message }) {
   } else {
     color = "bg-[#f2f2f2]";
     console.error("peerID != msg.from && peerID != msg.to");
-    console.log(`peerID: ${props.peerID}, msg: ${msg}`);
+    console.log(`peerID: ${props.peerID}, msg: ${msg.toString()}`);
   }
 
   let inner: JSX.Element;

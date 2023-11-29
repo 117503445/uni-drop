@@ -1,8 +1,8 @@
 import returnIcon from "@/assets/return.svg";
 
-type Props = {
+interface Props {
   children?: React.ReactNode;
-};
+}
 
 export default function RightTopBar(props: Props) {
   return (

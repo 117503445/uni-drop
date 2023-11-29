@@ -21,14 +21,14 @@ export default function AddFriend(props: {
         "Content-Type": "application/json",
       },
     });
-    const data = await res.json();
-    const peerID = data.data.peerID;
-    if (peerID == null) {
+    const response = (await res.json()) as { data: { peerID: string } };
+    const peerID = response.data.peerID;
+    if (peerID.length == 0) {
       alert("peerID not found");
       return;
     }
     console.log("peerID found", peerID);
-    props.addPeer(data.data.peerID);
+    props.addPeer(peerID);
   };
 
   const submitId = () => {
@@ -58,17 +58,23 @@ export default function AddFriend(props: {
             className="mr-[1rem] w-[16rem] rounded-md border-2 border-gray-300 p-[0.5rem]"
             placeholder="Press Enter to submit Pin"
             value={pinContent}
-            onChange={(e) => setPinContent(e.target.value)}
-            onKeyUp={async (e) => {
+            onChange={(e) => {
+              setPinContent(e.target.value);
+            }}
+            onKeyUp={(e) => {
               if (e.key == "Enter") {
-                await submitPin();
+                submitPin().catch((e) => {
+                  console.error(e);
+                });
               }
             }}
           ></input>
           <button
             className="min-h-max w-[5rem] rounded-md border-2 border-gray-300"
-            onClick={async () => {
-              await submitPin();
+            onClick={ () => {
+              submitPin().catch((e) => {
+                console.error(e);
+              });
             }}
           >
             Submit
@@ -82,7 +88,9 @@ export default function AddFriend(props: {
             className="mr-[1rem] w-[16rem] rounded-md border-2 border-gray-300 p-[0.5rem]"
             placeholder="Press Enter to submit PeerID"
             value={idContent}
-            onChange={(e) => setIdContent(e.target.value)}
+            onChange={(e) => {
+              setIdContent(e.target.value);
+            }}
             onKeyUp={(e) => {
               if (e.key == "Enter") {
                 submitId();

@@ -5,7 +5,12 @@ import App from "./views/App.tsx";
 import { store } from "./store/store.tsx";
 import { Provider } from "react-redux";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+const root = document.getElementById("root");
+if (root === null) {
+  throw new Error("root element not found");
+}
+
+ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <Provider store={store}>
       <App />

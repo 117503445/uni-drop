@@ -11,13 +11,13 @@ import {
 
 class UniPeerState {
   // is the peer found by discovery currently
-  isDiscovery: boolean = false;
+  isDiscovery = false;
 
   // is the peer has chat history
-  isHistory: boolean = false;
+  isHistory = false;
 
   // user manually add peer, or peer manually add my peer
-  isManual: boolean = false;
+  isManual = false;
 
   isOnlyDiscovery(): boolean {
     return this.isDiscovery && !this.isHistory && !this.isManual;
@@ -38,7 +38,7 @@ class Peerpool {
   // this peer
   private peer: Peer;
 
-  private peers: Map<UniPeer, UniPeerState> = new Map();
+  private peers = new Map<UniPeer, UniPeerState>();
 
   private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
 
@@ -181,12 +181,12 @@ class UniPeer {
   private connection: DataConnection | undefined = undefined;
   private msgReceiver: (msg: Message) => void;
 
-  private closing: boolean = false;
+  private closing = false;
 
   constructor(
     peer: Peer,
     id: string,
-    msgReceiver: (msg: Message) => void = () => {},
+    msgReceiver: (msg: Message) => void,
     connection: DataConnection | undefined = undefined,
   ) {
     this.peer = peer;
@@ -234,7 +234,7 @@ class UniPeer {
       }
     });
     connection.on("error", (error) => {
-      console.error(`connection to peer ${this.id} error: ${error}`);
+      console.error(`connection to peer ${this.id} error: ${error.message}`);
     });
     connection.on("iceStateChanged", (state) => {
       console.info(`connection to peer ${this.id} iceStateChanged: ${state}`);
@@ -246,10 +246,8 @@ class UniPeer {
       }
 
       const poco = data as MessagePoco;
-      console.log(`received poco: ${poco}`);
-
       const msg = pocoToMessage(poco);
-      console.log(`received msg: ${msg}`);
+      console.log(`received msg: ${msg.toString()}`);
 
       if (msg.to != this.peer.id) {
         console.warn(`received msg.to is not my peer id: ${msg.to}`);
@@ -276,7 +274,7 @@ class UniPeer {
       return;
     }
 
-    console.info(`-> peer ${this.id}: ${msg}`);
+    console.info(`-> peer ${this.id}: ${msg.toString()}`);
     this.connection.send(await messageToPoco(msg));
   }
 
@@ -298,8 +296,8 @@ class UniDiscovery {
     this.id = id;
   }
   async heartbeat(): Promise<string[]> {
-    let ipv4: string = "";
-    const ipv6: string = "";
+    let ipv4 = "";
+    const ipv6 = "";
 
     if (import.meta.env.DEV) {
       ipv4 = "127.0.0.1";
@@ -319,8 +317,10 @@ class UniDiscovery {
       }),
       signal: AbortSignal.timeout(300),
     });
-    const data = await res.json();
-    return data["data"]["peerIDs"];
+
+    const response = (await res.json()) as { data: { peerIDs: string[] } };
+
+    return response.data.peerIDs;
   }
   async ping(): Promise<boolean> {
     try {
@@ -415,7 +415,7 @@ export class UniPeersManager extends UniPeersService {
         this.peer,
         this.setpeersID,
         (peerID: string, msg: Message) => {
-          console.info(`<- peer ${peerID}: ${msg}`);
+          console.info(`<- peer ${peerID}: ${msg.toString()}`);
           this.messages.push(msg);
 
           this.setMessages([...this.messages]);
@@ -436,7 +436,9 @@ export class UniPeersManager extends UniPeersService {
       }
       if (import.meta.env.VITE_DISABLE_HEARTBEAT != "true") {
         this.heartbeatTimer = setInterval(() => {
-          this.heartbeat();
+          this.heartbeat().catch((error) => {
+            console.error(error);
+          });
         }, heartbeatInterval);
       }
     });
@@ -508,7 +510,7 @@ export class UniPeersManager extends UniPeersService {
   }
 
   async getPeerId(): Promise<string> {
-    if (this.peer.id == null) {
+    if (this.peer.id.length == 0) {
       // wait until peer id is set
       console.warn("Waiting for peer id to be set");
       return new Promise((resolve) => {
@@ -563,18 +565,22 @@ export class UniPeersMockManager extends UniPeersService {
     this.setpeersID(this.peersID);
   }
 
-  async send(id: string, content: MessageContent): Promise<void> {
+  send(id: string, content: MessageContent) {
     const msg = new Message("mock-peer", id, content);
     this.messages.push(msg);
-    console.info(`-> peer ${id}: ${msg}`);
+    console.info(`-> peer ${id}: ${msg.toString()}`);
     this.messages.push(new Message(id, "mock-peer", content));
     this.setMessages([...this.messages]);
   }
 
-  close(): void {}
+  close() {
+    console.info(`closing peer mock-peer`);
+  }
 
   async getPeerId(): Promise<string> {
-    return "mock-peer";
+    return new Promise((resolve) => {
+      resolve("mock-peer");
+    });
   }
 
   addPeer(id: string): void {

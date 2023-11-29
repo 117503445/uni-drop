@@ -7,8 +7,14 @@ export default function CopyButton(props: { text: string }) {
         className="max-h-[1rem] max-w-[1rem]"
         src={copyIcon}
         onClick={() => {
-          navigator.clipboard.writeText(props.text);
-          alert("copied successfully");
+          navigator.clipboard
+            .writeText(props.text)
+            .then(() => {
+              alert("copied successfully");
+            })
+            .catch(() => {
+              alert("failed to copy");
+            });
         }}
       ></img>
     </button>
