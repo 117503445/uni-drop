@@ -1,5 +1,4 @@
 import "./global.css";
-
 import settingIcon from "@/assets/setting.svg";
 import githubIcon from "@/assets/github.svg";
 import addIcon from "@/assets/add.svg";
@@ -184,8 +183,8 @@ function App() {
   ]);
 
   return (
-    <div>
-      <div className="flex h-screen w-screen items-center justify-center">
+    <div className="h-full w-full">
+      <div className="flex h-full w-full items-center justify-center">
         <div className="flex h-full w-full max-w-[75rem] overflow-hidden rounded-[1rem] sm:h-[calc(100%-5rem)] sm:w-[calc(100%-5rem)] sm:border-2 sm:shadow-md">
           {/* left side */}
           <div
