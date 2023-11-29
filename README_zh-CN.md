@@ -20,6 +20,14 @@
 - 使用主流浏览器 (Chrome, Firefox 等)
 - 设备可以连接公网
 
+### 节点初始化
+
+网页被打开后，会自动初始化节点。完成初始化后，会显示节点的名称。
+
+如下图所示，节点名称为 `Regan`。
+
+![name](./docs/assets/name.png)
+
 ### 节点发现
 
 可以使用多种方式，建立不同设备之间的连接。
@@ -27,6 +35,8 @@
 #### 局域网
 
 当设备处于同一局域网时，可以使用局域网发现节点。
+
+设备A 和 设备B 都打开 [https://www.unidrop.top](https://www.unidrop.top)，等待 10 秒左右，设备A 和 设备B 会自动发现对方。
 
 #### 二维码
 
@@ -38,22 +48,16 @@
 
 设备A 点击 ME，将 Pin 码发送给设备 B
 
-设备B 点击 Add，
+设备B 点击 Add，输入 Pin 码
 
 #### URL
 
+设备A 点击 ME，将 URL 发送给设备 B
+
+设备B 打开 URL
+
 #### PeerID
 
-build docker
+设备A 点击 ME，将 PeerID 发送给设备 B
 
-```sh
-cd ./src/peer-discovery
-docker build -t 117503445/peer-discovery .
-docker run --rm -p 8080:8080 117503445/peer-discovery
-docker tag 117503445/peer-discovery registry.cn-hangzhou.aliyuncs.com/117503445-mirror/peer-discovery && docker push registry.cn-hangzhou.aliyuncs.com/117503445-mirror/peer-discovery
-```
-
-```sh
-docker exec -it uni-drop-test pnpm run playwright
-docker exec -it uni-drop-test pnpm run playwright --url https://www.unidrop.top
-```
+设备B 点击 Add，输入 PeerID
