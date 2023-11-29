@@ -61,3 +61,7 @@
 设备A 点击 ME，将 PeerID 发送给设备 B
 
 设备B 点击 Add，输入 PeerID
+
+## 致谢
+
+[ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) 提供了 UI 设计的灵感和一些 svg 图标。
