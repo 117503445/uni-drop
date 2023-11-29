@@ -141,7 +141,7 @@ export default function Chat(props: {
               ref={fileInputRef}
               // TODO: multiple
               style={{ display: "none" }}
-              onChange={ (event: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = selectFile(event);
                 if (!file) {
                   return;
@@ -171,7 +171,7 @@ export default function Chat(props: {
               // TODO: multiple
               style={{ display: "none" }}
               accept="image/*"
-              onChange={ (event: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = selectFile(event);
                 if (!file) {
                   return;
@@ -194,7 +194,9 @@ export default function Chat(props: {
             className="h-full w-full resize-none py-2 text-sm  outline-none "
             placeholder="Type message here"
             value={postContent}
-            onChange={(e) => { setPostContent(e.target.value); }}
+            onChange={(e) => {
+              setPostContent(e.target.value);
+            }}
             disabled={props.selectedPeerID == null}
             onKeyDown={(e) => {
               if (e.key === "Enter" && postContent.length == 0) {
