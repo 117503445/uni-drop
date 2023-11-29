@@ -42,15 +42,38 @@ class Peerpool {
 
   private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
 
+  private peersConnState = new Map<string, boolean>();
+  private setPeersConnState: React.Dispatch<
+    React.SetStateAction<Map<string, boolean>>
+  >;
+
   private msgReceiver: (peerID: string, msg: Message) => void;
+
+  private connStateChangeListenerFunc = (peerid: string) => {
+    return (connected: boolean) => {
+      if (!this.peersConnState.has(peerid)) {
+        this.peersConnState.set(peerid, connected);
+        this.setPeersConnState(new Map(this.peersConnState));
+      } else {
+        if (this.peersConnState.get(peerid) != connected) {
+          this.peersConnState.set(peerid, connected);
+          this.setPeersConnState(new Map(this.peersConnState));
+        }
+      }
+    };
+  };
 
   constructor(
     peer: Peer,
     setpeersID: React.Dispatch<React.SetStateAction<string[]>>,
+    setPeersConnState: React.Dispatch<
+      React.SetStateAction<Map<string, boolean>>
+    >,
     msgReceiver: (peerID: string, msg: Message) => void,
   ) {
     this.peer = peer;
     this.setpeersID = setpeersID;
+    this.setPeersConnState = setPeersConnState;
     this.msgReceiver = msgReceiver;
   }
 
@@ -88,9 +111,14 @@ class Peerpool {
         console.info(`new peer found: [${p}], this.peer.id = ${this.peer.id}`);
         changed = true;
         this.peers.set(
-          new UniPeer(this.peer, p, (msg: Message) => {
-            this.msgReceiver(p, msg);
-          }),
+          new UniPeer(
+            this.peer,
+            p,
+            (msg: Message) => {
+              this.msgReceiver(p, msg);
+            },
+            this.connStateChangeListenerFunc(p),
+          ),
           new UniPeerState({ isDiscovery: true }),
         );
       }
@@ -123,6 +151,7 @@ class Peerpool {
         (msg: Message) => {
           this.msgReceiver(conn.peer, msg);
         },
+        this.connStateChangeListenerFunc(conn.peer),
         conn,
       ),
       new UniPeerState({ isManual: true }), // TODO: isManual and by another peer discovery should be separated
@@ -160,9 +189,14 @@ class Peerpool {
     }
     console.info(`add peer ${id}`);
     this.peers.set(
-      new UniPeer(this.peer, id, (msg: Message) => {
-        this.msgReceiver(id, msg);
-      }),
+      new UniPeer(
+        this.peer,
+        id,
+        (msg: Message) => {
+          this.msgReceiver(id, msg);
+        },
+        this.connStateChangeListenerFunc(id),
+      ),
       new UniPeerState({ isManual: true }),
     );
     this.setpeersID(this.getPeersId());
@@ -179,6 +213,8 @@ class UniPeer {
 
   // connection must be open
   private connection: DataConnection | undefined = undefined;
+
+  private connStateChangeListener: (connected: boolean) => void;
   private msgReceiver: (msg: Message) => void;
 
   private closing = false;
@@ -187,17 +223,20 @@ class UniPeer {
     peer: Peer,
     id: string,
     msgReceiver: (msg: Message) => void,
+    connStateChangeListener: (connected: boolean) => void,
     connection: DataConnection | undefined = undefined,
   ) {
     this.peer = peer;
     this.id = id;
     this.msgReceiver = msgReceiver;
+    this.connStateChangeListener = connStateChangeListener;
 
     if (connection == undefined) {
       this.connect();
     } else {
       // UniPeer connect to my peer
       this.setConnection(connection);
+      this.connStateChangeListener(true);
     }
   }
 
@@ -215,6 +254,7 @@ class UniPeer {
       console.info(`connection to peer ${this.id} opened`);
       if (this.connection == undefined) {
         this.connection = connection;
+        this.connStateChangeListener(true);
       } else {
         console.log(
           `peer ${this.id} connection opened, but connection already set`,
@@ -225,9 +265,11 @@ class UniPeer {
     connection.on("close", () => {
       console.info(`connection to peer ${this.id} closed`);
       if (this.connection == connection) {
+        this.connStateChangeListener(false);
         this.connection = undefined;
         if (!this.closing) {
           console.info(`reconnecting to peer ${this.id}`);
+          this.connect();
         } else {
           console.info(`peer ${this.id} closed`);
         }
@@ -338,7 +380,6 @@ export abstract class UniPeersService {
   abstract send(id: string, content: MessageContent): void;
   // user manually add peer
   abstract addPeer(id: string): void;
-  abstract getPeerId(): Promise<string>;
   abstract close(): void;
 }
 
@@ -355,9 +396,13 @@ export class UniPeersManager extends UniPeersService {
 
   private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
 
-  private discovery: UniDiscovery | undefined = undefined;
-
   private setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+
+  private setPeersConnState: React.Dispatch<
+    React.SetStateAction<Map<string, boolean>>
+  >;
+
+  private discovery: UniDiscovery | undefined = undefined;
 
   private messages: Message[] = [];
 
@@ -369,12 +414,16 @@ export class UniPeersManager extends UniPeersService {
     setpeerID: React.Dispatch<React.SetStateAction<string>>,
     setpeersID: React.Dispatch<React.SetStateAction<string[]>>,
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
+    setPeersConnState: React.Dispatch<
+      React.SetStateAction<Map<string, boolean>>
+    >,
   ) {
     super();
 
     this.setpeerID = setpeerID;
     this.setpeersID = setpeersID;
     this.setMessages = setMessages;
+    this.setPeersConnState = setPeersConnState;
 
     // TODO: use peerIDStore
     // let peerID = this.peerIDStore.getPeerID();
@@ -414,6 +463,7 @@ export class UniPeersManager extends UniPeersService {
       this.peerpool = new Peerpool(
         this.peer,
         this.setpeersID,
+        this.setPeersConnState,
         (peerID: string, msg: Message) => {
           console.info(`<- peer ${peerID}: ${msg.toString()}`);
           this.messages.push(msg);
@@ -534,8 +584,10 @@ export class UniPeersManager extends UniPeersService {
 export class UniPeersMockManager extends UniPeersService {
   private setpeerID: React.Dispatch<React.SetStateAction<string>>;
   private setpeersID: React.Dispatch<React.SetStateAction<string[]>>;
-
   private setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  private setPeersConnState: React.Dispatch<
+    React.SetStateAction<Map<string, boolean>>
+  >;
 
   private messages: Message[] = [];
 
@@ -553,14 +605,24 @@ export class UniPeersMockManager extends UniPeersService {
     setpeerID: React.Dispatch<React.SetStateAction<string>>,
     setpeersID: React.Dispatch<React.SetStateAction<string[]>>,
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
+    setPeersConnState: React.Dispatch<
+      React.SetStateAction<Map<string, boolean>>
+    >,
   ) {
     super();
     this.setpeerID = setpeerID;
     this.setpeersID = setpeersID;
 
     this.setMessages = setMessages;
+    this.setPeersConnState = setPeersConnState;
 
     this.setpeerID("mock-peer");
+
+    const m = new Map<string, boolean>();
+    for (const id of this.peersID) {
+      m.set(id, true);
+    }
+    this.setPeersConnState(m);
 
     this.setpeersID(this.peersID);
   }

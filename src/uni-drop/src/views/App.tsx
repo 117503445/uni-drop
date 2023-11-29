@@ -24,59 +24,31 @@ import {
 import { Message, MessageContent, TextMessageContent } from "../utils/model.js";
 
 function App() {
-  const [currentUrl, setCurrentUrl] = useState(window.location.href);
-  useEffect(() => {
-    const handleUrlChange = () => {
-      setCurrentUrl(window.location.href);
-    };
-    window.addEventListener("popstate", handleUrlChange);
-    return () => {
-      window.removeEventListener("popstate", handleUrlChange);
-    };
-  }, []);
-
-  // useEffect(() => {
-  //   console.log('URL changed:', currentUrl.split("#")[1]);
-  // }, [currentUrl]);
-
-  const curHashURL = () => {
-    const splits = currentUrl.split("#");
-    switch (splits.length) {
-      case 1:
-        return "/";
-      case 2:
-        return splits[1];
-      default:
-        console.warn("invalid url", currentUrl);
-        return currentUrl;
-    }
-  };
-
   const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
   const [peerID, setpeerID] = useState("");
   const [peersID, setpeersID] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [peersConnState, setPeersConnState] = useState<Map<string, boolean>>(
+    new Map(),
+  );
   const managerRef = useRef<UniPeersService | null>(null);
-
-  const sendMessages = (content: MessageContent) => {
-    if (selectedPeerID == null) {
-      console.warn("no peer selected");
-      return;
-    }
-    if (managerRef.current == null) {
-      console.warn("manager is null");
-      return;
-    }
-    console.log("send to", selectedPeerID);
-    managerRef.current.send(selectedPeerID, content);
-  };
 
   useEffect(() => {
     let manager: UniPeersService;
     if (import.meta.env.VITE_MOCK_API != "true") {
-      manager = new UniPeersManager(setpeerID, setpeersID, setMessages);
+      manager = new UniPeersManager(
+        setpeerID,
+        setpeersID,
+        setMessages,
+        setPeersConnState,
+      );
     } else {
-      manager = new UniPeersMockManager(setpeerID, setpeersID, setMessages);
+      manager = new UniPeersMockManager(
+        setpeerID,
+        setpeersID,
+        setMessages,
+        setPeersConnState,
+      );
 
       manager.send("peer1", new TextMessageContent("hello"));
       setSelectedPeerID("peer1");
@@ -91,10 +63,62 @@ function App() {
     };
   }, []);
 
+  const [currentUrl, setCurrentUrl] = useState(window.location.href);
+  useEffect(() => {
+    const handleUrlChange = () => {
+      setCurrentUrl(window.location.href);
+    };
+    window.addEventListener("popstate", handleUrlChange);
+    return () => {
+      window.removeEventListener("popstate", handleUrlChange);
+    };
+  }, []);
+
+  const curHashURL = () => {
+    const splits = currentUrl.split("#");
+    switch (splits.length) {
+      case 1:
+        return "/";
+      case 2:
+        return splits[1];
+      default:
+        console.warn("invalid url", currentUrl);
+        return currentUrl;
+    }
+  };
+
+  const sendMessages = (content: MessageContent) => {
+    if (selectedPeerID == null) {
+      console.warn("no peer selected");
+      return;
+    }
+    if (managerRef.current == null) {
+      console.warn("manager is null");
+      return;
+    }
+    console.log("send to", selectedPeerID);
+    managerRef.current.send(selectedPeerID, content);
+  };
+
   const chat = (
     <Chat
       peerID={peerID}
       selectedPeerID={selectedPeerID}
+      connState={(() => {
+        if (selectedPeerID == null) {
+          return false;
+        }
+        const state = peersConnState.get(selectedPeerID);
+        if (state == null) {
+          console.log(
+            `selectedPeerID = ${selectedPeerID}, peersConnState = ${JSON.stringify(
+              peersConnState,
+            )}`,
+          );
+          throw new Error("peersConnState.has(selectedPeerID) == false");
+        }
+        return state;
+      })()}
       messages={messages.filter(
         (msg) => msg.from == selectedPeerID || msg.to == selectedPeerID,
       )}

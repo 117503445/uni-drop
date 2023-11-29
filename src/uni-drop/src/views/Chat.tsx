@@ -16,6 +16,7 @@ import RightTopBar from "../components/RightTopBar";
 export default function Chat(props: {
   peerID: string;
   selectedPeerID: string | null;
+  connState: boolean;
   messages: Message[];
   sendMessages: (content: MessageContent) => void;
 }) {
@@ -80,7 +81,18 @@ export default function Chat(props: {
     <div className="flex h-full w-full flex-col">
       {/* top */}
       <RightTopBar>
-        <span className="m-auto text-xl">{idToName(props.selectedPeerID)}</span>
+        <div
+          className={`m-auto flex flex-row items-center justify-center ${
+            props.selectedPeerID == null ? "hidden" : ""
+          }`}
+        >
+          <div
+            className={`h-2 w-2 rounded-full ${
+              props.connState ? "bg-green-300" : "bg-red-300"
+            } mr-[1rem]`}
+          ></div>
+          <span className="text-xl">{idToName(props.selectedPeerID)}</span>
+        </div>
       </RightTopBar>
 
       {/* middle */}
