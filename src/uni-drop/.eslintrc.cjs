@@ -7,7 +7,7 @@ module.exports = {
     "plugin:@typescript-eslint/stylistic-type-checked",
     "plugin:react-hooks/recommended",
     "plugin:react/recommended",
-    "plugin:react/jsx-runtime"
+    "plugin:react/jsx-runtime",
   ],
   ignorePatterns: ["dist", ".eslintrc.cjs"],
   parser: "@typescript-eslint/parser",
@@ -19,15 +19,15 @@ module.exports = {
     ],
   },
   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
+    ecmaVersion: "latest",
+    sourceType: "module",
+    project: ["./tsconfig.json", "./tsconfig.node.json"],
     tsconfigRootDir: __dirname,
   },
   settings: {
     react: {
-      version: "detect"
-    }
+      version: "detect",
+    },
   },
-  ignorePatterns: ["tests"]
+  ignorePatterns: ["tests"],
 };

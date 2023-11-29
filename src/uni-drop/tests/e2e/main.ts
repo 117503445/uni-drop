@@ -283,7 +283,7 @@ async function testAddPin(context: BrowserContext) {
     getPage(context),
   ]);
 
-  await page1.getByText("(me)").click();
+  await page1.locator("#div-me").click();
   const pin = await getPinFromMeta(page1);
 
   await page2.locator("#btn-add").click();
@@ -310,7 +310,7 @@ async function testAddPin(context: BrowserContext) {
 async function testAddQRCode(context: BrowserContext) {
   const page1 = await getPage(context);
 
-  await page1.getByText("(me)").click();
+  await page1.locator("#div-me").click();
 
   const url = await getURLFromMeta(page1);
 

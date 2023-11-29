@@ -1,6 +1,7 @@
 import "./global.css";
 
 import { setPageSpy, setVConsole } from "../store/settingStore";
+import RightTopBar from "../components/RightTopBar";
 
 import type { RootState } from "../store/store";
 import { useSelector, useDispatch } from "react-redux";
@@ -50,6 +51,9 @@ export default function Setting() {
 
   return (
     <div>
+      <RightTopBar>
+        <span className="m-auto text-xl">Settings</span>
+      </RightTopBar>
       <div>
         <label>vconsole</label>
         <input

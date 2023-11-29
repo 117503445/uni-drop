@@ -1,5 +1,4 @@
 import "./global.css";
-
 import settingIcon from "@/assets/setting.svg";
 import githubIcon from "@/assets/github.svg";
 import addIcon from "@/assets/add.svg";
@@ -24,6 +23,47 @@ import {
 import { Message, MessageContent, TextMessageContent } from "../utils/model.js";
 
 function App() {
+  const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
+  const [peerID, setpeerID] = useState("");
+  const [peersID, setpeersID] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [peersConnState, setPeersConnState] = useState<Map<string, boolean>>(
+    new Map(),
+  );
+  const managerRef = useRef<UniPeersService | null>(null);
+
+  // TODO: combine peersID and peersConnState
+
+  useEffect(() => {
+    let manager: UniPeersService;
+    if (import.meta.env.VITE_MOCK_API != "true") {
+      manager = new UniPeersManager(
+        setpeerID,
+        setpeersID,
+        setMessages,
+        setPeersConnState,
+      );
+    } else {
+      manager = new UniPeersMockManager(
+        setpeerID,
+        setpeersID,
+        setMessages,
+        setPeersConnState,
+      );
+
+      manager.send("peer1", new TextMessageContent("hello"));
+      setSelectedPeerID("peer1");
+    }
+
+    managerRef.current = manager;
+    return function cleanup() {
+      setpeerID("");
+      setpeersID([]);
+      setMessages([]);
+      manager.close();
+    };
+  }, []);
+
   const [currentUrl, setCurrentUrl] = useState(window.location.href);
   useEffect(() => {
     const handleUrlChange = () => {
@@ -34,10 +74,6 @@ function App() {
       window.removeEventListener("popstate", handleUrlChange);
     };
   }, []);
-
-  // useEffect(() => {
-  //   console.log('URL changed:', currentUrl.split("#")[1]);
-  // }, [currentUrl]);
 
   const curHashURL = () => {
     const splits = currentUrl.split("#");
@@ -52,12 +88,6 @@ function App() {
     }
   };
 
-  const [selectedPeerID, setSelectedPeerID] = useState<string | null>(null);
-  const [peerID, setpeerID] = useState("");
-  const [peersID, setpeersID] = useState<string[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const managerRef = useRef<UniPeersService | null>(null);
-
   const sendMessages = (content: MessageContent) => {
     if (selectedPeerID == null) {
       console.warn("no peer selected");
@@ -71,30 +101,23 @@ function App() {
     managerRef.current.send(selectedPeerID, content);
   };
 
-  useEffect(() => {
-    let manager: UniPeersService;
-    if (import.meta.env.VITE_MOCK_API != "true") {
-      manager = new UniPeersManager(setpeerID, setpeersID, setMessages);
-    } else {
-      manager = new UniPeersMockManager(setpeerID, setpeersID, setMessages);
-
-      manager.send("peer1", new TextMessageContent("hello"));
-      setSelectedPeerID("peer1");
+  const connState = (peerID: string | null) => {
+    if (peerID == null) {
+      return false;
     }
 
-    managerRef.current = manager;
-    return function cleanup() {
-      setpeerID("");
-      setpeersID([]);
-      setMessages([]);
-        manager.close();
-    };
-  }, []);
+    const state = peersConnState.get(peerID);
+    if (state == null) {
+      return false;
+    }
+    return state;
+  };
 
   const chat = (
     <Chat
       peerID={peerID}
       selectedPeerID={selectedPeerID}
+      connState={connState(selectedPeerID)}
       messages={messages.filter(
         (msg) => msg.from == selectedPeerID || msg.to == selectedPeerID,
       )}
@@ -160,8 +183,8 @@ function App() {
   ]);
 
   return (
-    <div>
-      <div className="flex h-screen w-screen items-center justify-center">
+    <div className="h-full w-full">
+      <div className="flex h-full w-full items-center justify-center">
         <div className="flex h-full w-full max-w-[75rem] overflow-hidden rounded-[1rem] sm:h-[calc(100%-5rem)] sm:w-[calc(100%-5rem)] sm:border-2 sm:shadow-md">
           {/* left side */}
           <div
@@ -180,6 +203,7 @@ function App() {
 
             {/* me */}
             <div
+              id="div-me"
               className="mx-auto my-[2rem] flex max-h-[5rem] min-h-[5rem] w-[100%] cursor-pointer items-center rounded-xl bg-white py-2 shadow-md"
               onClick={() => {
                 window.location.hash = "/me";
@@ -208,8 +232,10 @@ function App() {
               {peersID.length > 0 ? (
                 peersID.map((id) => (
                   <div
-                    className={`mx-auto my-1.5 flex max-h-[3.5rem] min-h-[3.5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-sm hover:bg-[#f3f3f3] ${
-                      selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
+                    className={`mx-auto my-1.5 max-h-[3.5rem] min-h-[3.5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-sm hover:bg-[#f3f3f3] ${
+                      selectedPeerID == id
+                        ? "border-[0.125rem] border-[#1d93ab]"
+                        : ""
                     } items-center hover:shadow-lg`}
                     key={id}
                     onClick={() => {
@@ -217,7 +243,16 @@ function App() {
                       window.location.hash = `/chat/${id}`;
                     }}
                   >
-                    <span className="mx-auto">{idToName(id)}</span>
+                    <div className={`m-auto flex h-full flex-row items-center`}>
+                      <div
+                        className={`h-2 w-2 ${
+                          selectedPeerID == id ? "ml-[4.875rem]" : "ml-[5rem]"
+                        } mr-[1rem] rounded-full ${
+                          connState(id) ? "bg-green-300" : "bg-red-300"
+                        } `}
+                      ></div>
+                      <span>{idToName(id)}</span>
+                    </div>
                   </div>
                 ))
               ) : (

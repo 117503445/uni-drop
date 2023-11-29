@@ -71,7 +71,7 @@ export default function AddFriend(props: {
           ></input>
           <button
             className="min-h-max w-[5rem] rounded-md border-2 border-gray-300"
-            onClick={ () => {
+            onClick={() => {
               submitPin().catch((e) => {
                 console.error(e);
               });

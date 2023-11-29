@@ -10,16 +10,19 @@
       src="https://analytics.eu.umami.is/script.js"
       data-website-id="86600bc1-06d8-4e10-9d8f-dd888f8a369d"
     ></script>
-    <!-- <script crossorigin="anonymous" src="https://page-spy-web.be.wizzstudio.com:30000/page-spy/index.min.js"></script>
-  <script>
-    window.$pageSpy = new PageSpy({
-      project: "uni-drop"
-    });
-  </script> -->
   </head>
 
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+
   <body>
-    <div id="root"></div>
+    <div id="root" style="width: 100%; height: 100%"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

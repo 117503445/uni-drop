@@ -16,6 +16,7 @@ import RightTopBar from "../components/RightTopBar";
 export default function Chat(props: {
   peerID: string;
   selectedPeerID: string | null;
+  connState: boolean;
   messages: Message[];
   sendMessages: (content: MessageContent) => void;
 }) {
@@ -80,7 +81,22 @@ export default function Chat(props: {
     <div className="flex h-full w-full flex-col">
       {/* top */}
       <RightTopBar>
-        <span className="m-auto text-xl">{idToName(props.selectedPeerID)}</span>
+        <div
+          className={`m-auto flex flex-row items-center justify-center ${
+            props.selectedPeerID == null ? "hidden" : ""
+          }`}
+        >
+          <span className={`mr-[1rem] text-xl sm:hidden`}>
+            {" "}
+            {idToName(props.peerID)} (me) -{">"}{" "}
+          </span>
+          <div
+            className={`h-2 w-2 rounded-full ${
+              props.connState ? "bg-green-300" : "bg-red-300"
+            } mr-[1rem]`}
+          ></div>
+          <span className="text-xl">{idToName(props.selectedPeerID)}</span>
+        </div>
       </RightTopBar>
 
       {/* middle */}
@@ -141,7 +157,7 @@ export default function Chat(props: {
               ref={fileInputRef}
               // TODO: multiple
               style={{ display: "none" }}
-              onChange={ (event: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = selectFile(event);
                 if (!file) {
                   return;
@@ -171,7 +187,7 @@ export default function Chat(props: {
               // TODO: multiple
               style={{ display: "none" }}
               accept="image/*"
-              onChange={ (event: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = selectFile(event);
                 if (!file) {
                   return;
@@ -194,7 +210,9 @@ export default function Chat(props: {
             className="h-full w-full resize-none py-2 text-sm  outline-none "
             placeholder="Type message here"
             value={postContent}
-            onChange={(e) => { setPostContent(e.target.value); }}
+            onChange={(e) => {
+              setPostContent(e.target.value);
+            }}
             disabled={props.selectedPeerID == null}
             onKeyDown={(e) => {
               if (e.key === "Enter" && postContent.length == 0) {

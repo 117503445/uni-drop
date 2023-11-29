@@ -5,15 +5,12 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "vite.config.ts",
-    "scripts"
-  ]
+  "include": ["vite.config.ts", "scripts"]
 }
