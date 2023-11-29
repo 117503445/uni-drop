@@ -203,6 +203,7 @@ function App() {
 
             {/* me */}
             <div
+              id="div-me"
               className="mx-auto my-[2rem] flex max-h-[5rem] min-h-[5rem] w-[100%] cursor-pointer items-center rounded-xl bg-white py-2 shadow-md"
               onClick={() => {
                 window.location.hash = "/me";
@@ -242,11 +243,7 @@ function App() {
                       window.location.hash = `/chat/${id}`;
                     }}
                   >
-                    <div
-                      className={`m-auto flex h-full flex-row items-center  ${
-                        id == null ? "hidden" : ""
-                      }`}
-                    >
+                    <div className={`m-auto flex h-full flex-row items-center`}>
                       <div
                         className={`h-2 w-2 ${
                           selectedPeerID == id ? "ml-[4.875rem]" : "ml-[5rem]"

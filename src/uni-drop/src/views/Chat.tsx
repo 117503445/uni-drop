@@ -86,7 +86,10 @@ export default function Chat(props: {
             props.selectedPeerID == null ? "hidden" : ""
           }`}
         >
-          <span className={`text-xl mr-[1rem] sm:hidden`}> {idToName(props.peerID)} (me) -{">"} </span>
+          <span className={`mr-[1rem] text-xl sm:hidden`}>
+            {" "}
+            {idToName(props.peerID)} (me) -{">"}{" "}
+          </span>
           <div
             className={`h-2 w-2 rounded-full ${
               props.connState ? "bg-green-300" : "bg-red-300"
