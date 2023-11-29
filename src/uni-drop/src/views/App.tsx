@@ -32,6 +32,8 @@ function App() {
   );
   const managerRef = useRef<UniPeersService | null>(null);
 
+  // TODO: combine peersID and peersConnState
+
   useEffect(() => {
     let manager: UniPeersService;
     if (import.meta.env.VITE_MOCK_API != "true") {
@@ -99,25 +101,23 @@ function App() {
     managerRef.current.send(selectedPeerID, content);
   };
 
+  const connState = (peerID: string | null) => {
+    if (peerID == null) {
+      return false;
+    }
+
+    const state = peersConnState.get(peerID);
+    if (state == null) {
+      return false;
+    }
+    return state;
+  };
+
   const chat = (
     <Chat
       peerID={peerID}
       selectedPeerID={selectedPeerID}
-      connState={(() => {
-        if (selectedPeerID == null) {
-          return false;
-        }
-        const state = peersConnState.get(selectedPeerID);
-        if (state == null) {
-          console.log(
-            `selectedPeerID = ${selectedPeerID}, peersConnState = ${JSON.stringify(
-              peersConnState,
-            )}`,
-          );
-          throw new Error("peersConnState.has(selectedPeerID) == false");
-        }
-        return state;
-      })()}
+      connState={connState(selectedPeerID)}
       messages={messages.filter(
         (msg) => msg.from == selectedPeerID || msg.to == selectedPeerID,
       )}
@@ -231,8 +231,10 @@ function App() {
               {peersID.length > 0 ? (
                 peersID.map((id) => (
                   <div
-                    className={`mx-auto my-1.5 flex max-h-[3.5rem] min-h-[3.5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-sm hover:bg-[#f3f3f3] ${
-                      selectedPeerID == id ? "border-2 border-[#1d93ab]" : ""
+                    className={`mx-auto my-1.5 max-h-[3.5rem] min-h-[3.5rem] w-[100%] cursor-pointer rounded-xl bg-white py-2 shadow-sm hover:bg-[#f3f3f3] ${
+                      selectedPeerID == id
+                        ? "border-[0.125rem] border-[#1d93ab]"
+                        : ""
                     } items-center hover:shadow-lg`}
                     key={id}
                     onClick={() => {
@@ -240,7 +242,20 @@ function App() {
                       window.location.hash = `/chat/${id}`;
                     }}
                   >
-                    <span className="mx-auto">{idToName(id)}</span>
+                    <div
+                      className={`m-auto flex h-full flex-row items-center  ${
+                        id == null ? "hidden" : ""
+                      }`}
+                    >
+                      <div
+                        className={`h-2 w-2 ${
+                          selectedPeerID == id ? "ml-[4.875rem]" : "ml-[5rem]"
+                        } mr-[1rem] rounded-full ${
+                          connState(id) ? "bg-green-300" : "bg-red-300"
+                        } `}
+                      ></div>
+                      <span>{idToName(id)}</span>
+                    </div>
                   </div>
                 ))
               ) : (
