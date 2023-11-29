@@ -5,7 +5,7 @@ import { exit } from "process";
 
 program.option("--url <url>", "the url of frontend", "http://localhost:5173");
 program.parse();
-const url = program.opts()["url"];
+const url = program.opts().url;
 
 fs.mkdirSync("./tests/e2e/traces", { recursive: true });
 fs.mkdirSync("./tests/e2e/downloads", { recursive: true });
@@ -155,22 +155,39 @@ async function selectFile(page: Page, filename: string, selector: string) {
   await fileChooser.setFiles(filename);
 }
 
-async function getPin(page: Page) {
+async function getMeta(page: Page) {
   for (let i = 0; i < 10; i++) {
-    const meta = await page.locator("#me-meta").getAttribute("test-mata");
-    if (!meta) {
-      throw new Error("meta not found");
+    const meta = await page.locator("#me-meta").getAttribute("data-test-meta");
+    if (meta !== null && meta.length > 0) {
+      console.log(`meta = ${meta}`);
+      return meta;
     }
-    // console.log(`meta = ${meta}`);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error("Could not get meta");
+}
 
-    const pin = JSON.parse(meta)["pin"];
-    if (pin) {
+async function getPinFromMeta(page: Page) {
+  for (let i = 0; i < 10; i++) {
+    const meta = await page.locator("#me-meta").getAttribute("data-test-meta");
+    if (meta === null) {
+      continue;
+    }
+    const pin = JSON.parse(meta).pin;
+    if (pin !== null && pin.length > 0) {
       console.log(`pin = ${pin}`);
       return pin;
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
   throw new Error("Could not get pin");
+}
+
+async function getURLFromMeta(page: Page) {
+  const meta = await getMeta(page);
+  const url = JSON.parse(meta).url;
+  console.log(`url = ${url}`);
+  return url;
 }
 
 async function testBasic(context: BrowserContext) {
@@ -267,7 +284,7 @@ async function testAddPin(context: BrowserContext) {
   ]);
 
   await page1.getByText("(me)").click();
-  const pin = await getPin(page1);
+  const pin = await getPinFromMeta(page1);
 
   await page2.locator("#btn-add").click();
   await page2.getByPlaceholder("Press Enter to submit Pin").click();
@@ -295,18 +312,7 @@ async function testAddQRCode(context: BrowserContext) {
 
   await page1.getByText("(me)").click();
 
-  const meta = await page1.locator("#me-meta").getAttribute("test-mata");
-  if (!meta) {
-    throw new Error("meta not found");
-  }
-  console.log(`meta = ${meta}`);
-
-  // just use url
-  // TODO: use QRCode
-  const url = JSON.parse(meta)["url"];
-  if (!url) {
-    throw new Error("url not found");
-  }
+  const url = await getURLFromMeta(page1);
 
   const page2 = await context.newPage();
   await page2.goto(url);

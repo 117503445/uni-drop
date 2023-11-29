@@ -15,15 +15,17 @@ export default function Me(props: { peerID: string }) {
 
   const [qrcode, setQrcode] = useState("");
   useEffect(() => {
-    console.log("AddFriend peerID", props.peerID);
     if (!props.peerID) {
       return;
     }
 
-    QRCode.toDataURL(url.toString()).then((dataURL) => {
-      console.log(dataURL);
-      setQrcode(dataURL);
-    });
+    QRCode.toDataURL(url.toString())
+      .then((dataURL) => {
+        setQrcode(dataURL);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }, [url, props.peerID]);
 
   useEffect(() => {
@@ -40,13 +42,17 @@ export default function Me(props: { peerID: string }) {
         },
         body: JSON.stringify({ peerID: props.peerID }),
       });
-      const data = await res.json();
-      setPin(data.data.pinCode);
+      const response = (await res.json()) as { data: { pinCode: string } };
+      setPin(response.data.pinCode);
     };
-    call();
+    call().catch((err) => {
+      console.error(err);
+    });
 
-    timer.current = setInterval(async () => {
-      await call();
+    timer.current = setInterval(() => {
+      call().catch((err) => {
+        console.error(err);
+      });
     }, 10 * 1000);
     return () => {
       if (timer.current) {
@@ -58,7 +64,7 @@ export default function Me(props: { peerID: string }) {
   return (
     <div
       id="me-meta"
-      test-mata={JSON.stringify({
+      data-test-meta={JSON.stringify({
         peerID: props.peerID,
         pin,
         url,

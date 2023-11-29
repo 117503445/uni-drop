@@ -24,6 +24,37 @@ export default function Chat(props: {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
+  const submitText = () => {
+    if (postContent.length == 0) {
+      // console.warn("postContent.length == 0");
+      return;
+    } else if (postContent.length == 1) {
+      if (!postContent.startsWith("\n")) {
+        console.warn("postContent.length == 1 && postContent[0] != '\\n'");
+      }
+      // type 'enter' when textarea is empty
+      setPostContent("");
+      return;
+    }
+
+    // let data;
+    // pressdown 'w', pressdown 'enter', pressup 'w', pressup 'enter' still will cause '\n' in textarea
+    // if (postContent[postContent.length - 1] == "\n") {
+    //   data = postContent.slice(0, -1);
+    // } else {
+    //   data = postContent;
+    //   console.warn(
+    //     "postContent[postContent.length - 1] != '\\n'",
+    //     postContent,
+    //   );
+    // }
+
+    const content = new TextMessageContent(postContent);
+    // await content.setData(data);
+    props.sendMessages(content);
+    setPostContent("");
+  };
+
   const selectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const target: HTMLInputElement = event.target;
     const files = target.files;
@@ -94,10 +125,10 @@ export default function Chat(props: {
       {/* bottom */}
       <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
         {/* toolbox */}
-        <div className="my-[0.25rem] flex h-[2.5rem] w-full items-center px-[1rem] ">
+        <div className="my-[0.5rem] flex h-[2.5rem] w-full items-center">
           <button
             id="btn-file"
-            className="border-#[dedede] mr-[1rem] flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
+            className="border-#[dedede] mr-[0.5rem] flex h-[1.5rem] w-[2.5rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
             onClick={() => {
               if (fileInputRef.current != null) {
                 fileInputRef.current.click();
@@ -110,7 +141,7 @@ export default function Chat(props: {
               ref={fileInputRef}
               // TODO: multiple
               style={{ display: "none" }}
-              onChange={async (event: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={ (event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = selectFile(event);
                 if (!file) {
                   return;
@@ -126,7 +157,7 @@ export default function Chat(props: {
 
           <button
             id="btn-image"
-            className="border-#[dedede] flex h-[1.5rem] w-[2.25rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
+            className="border-#[dedede] flex h-[1.5rem] w-[2.5rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
             onClick={() => {
               if (imageInputRef.current != null) {
                 imageInputRef.current.click();
@@ -140,7 +171,7 @@ export default function Chat(props: {
               // TODO: multiple
               style={{ display: "none" }}
               accept="image/*"
-              onChange={async (event: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={ (event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = selectFile(event);
                 if (!file) {
                   return;
@@ -155,53 +186,33 @@ export default function Chat(props: {
           </button>
         </div>
         {/* input area */}
-        <div className="flex h-full w-full flex-col items-center justify-center ">
+        <div
+          tabIndex={0}
+          className="mb-[1.25rem] mt-1 flex h-full w-full flex-row items-center justify-center rounded-md border-2 px-3  outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
+        >
           <textarea
-            className="m-auto mt-1 h-[calc(100%-1.25rem)] w-[calc(100%-2rem)] resize-none rounded-md border-2 px-3 py-2 text-sm outline-none hover:border-[#1d93ab] focus:border-[#1d93ab] focus-visible:border-[#1d93ab]"
+            className="h-full w-full resize-none py-2 text-sm  outline-none "
             placeholder="Type message here"
             value={postContent}
-            onChange={(e) => setPostContent(e.target.value)}
+            onChange={(e) => { setPostContent(e.target.value); }}
             disabled={props.selectedPeerID == null}
             onKeyDown={(e) => {
               if (e.key === "Enter" && postContent.length == 0) {
                 e.preventDefault();
               }
             }}
-            onKeyUp={async (e) => {
+            onKeyUp={(e) => {
               if (e.key === "Enter") {
-                if (postContent.length == 0) {
-                  // console.warn("postContent.length == 0");
-                  return;
-                } else if (postContent.length == 1) {
-                  if (postContent[0] != "\n") {
-                    console.warn(
-                      "postContent.length == 1 && postContent[0] != '\\n'",
-                    );
-                  }
-                  // type 'enter' when textarea is empty
-                  setPostContent("");
-                  return;
-                }
-
-                // let data;
-                // pressdown 'w', pressdown 'enter', pressup 'w', pressup 'enter' still will cause '\n' in textarea
-                // if (postContent[postContent.length - 1] == "\n") {
-                //   data = postContent.slice(0, -1);
-                // } else {
-                //   data = postContent;
-                //   console.warn(
-                //     "postContent[postContent.length - 1] != '\\n'",
-                //     postContent,
-                //   );
-                // }
-
-                const content = new TextMessageContent(postContent);
-                // await content.setData(data);
-                props.sendMessages(content);
-                setPostContent("");
+                submitText();
               }
             }}
           ></textarea>
+          <button
+            className="h-[2rem] w-[4.5rem] rounded-md bg-[#1d93ab] text-white hover:brightness-90"
+            onClick={submitText}
+          >
+            Send
+          </button>
         </div>
       </div>
     </div>

@@ -1,27 +1,44 @@
-# React + TypeScript + Vite
+# uni-drop
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+frontend of [UniDrop](https://www.unidrop.top)
 
-Currently, two official plugins are available:
+## technology stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React
+- React Router
+- Redux Toolkit
 
-## Expanding the ESLint configuration
+- Vite
+- Vitest
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- TypeScript
+- Tailwind CSS
+- Playwright
 
-- Configure the top-level `parserOptions` property like this:
+- PeerJS
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
+- ESLint
+- Prettier
+
+## operations
+
+```sh
+# run
+pnpm run dev
+
+# build
+pnpm run build
+
+# test
+pnpm run test
+
+# check (ESLint + prettier + build)
+pnpm run check
+
+# generate fake names to ./src/utils/fake-names.json
+pnpm run gen-fake-names
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## Acknowledgements
+
+[ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) provides UI design inspiration and some svg icons.
