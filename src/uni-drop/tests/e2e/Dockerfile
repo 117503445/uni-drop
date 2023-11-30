@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     xvfb \
     fluxbox \
     x11vnc \
+    supervisor \
     && apt-get autoclean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/*
@@ -17,11 +18,11 @@ WORKDIR /workspace/
 
 RUN git clone https://github.com/novnc/noVNC.git
 
-ENV SCREEN_WIDTH 1360
-ENV SCREEN_HEIGHT 1020
-ENV SCREEN_DEPTH 24
-ENV DISPLAY :0
 
-EXPOSE 9900
+EXPOSE 6080
+
+ENV DISPLAY :0
+ENV GEOMETRY 1024x768x24
 
 WORKDIR /workspace/uni-drop
+ENTRYPOINT [ "/usr/bin/supervisord" ]

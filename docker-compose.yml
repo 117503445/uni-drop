@@ -21,17 +21,17 @@ services:
       start_period: 5m
   uni-drop-test:
     build:
-      context: ./src/uni-drop
-      dockerfile: Dockerfile_test_dev
+      context: ./src/uni-drop/tests/e2e
     container_name: uni-drop-test
     network_mode: host
     volumes:
         - './src/uni-drop:/workspace/uni-drop'
         - './dev-data/uni-drop-test/vsc_extensions:/root/.vscode-server/extensions'
+
+        - './src/uni-drop/tests/e2e/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf'
     stdin_open: true
     tty: true
-    entrypoint: ./tests/e2e/entrypoint.sh
-    # wait 1 minutes(TODO: why?), visit http://localhost:9900/vnc.html?host=localhost&port=9900
+    # visit http://localhost:6080/vnc.html?host=localhost&port=6080, wait 1 minutes(TODO: why?)
     depends_on:
       uni-drop-dev:
         condition: service_healthy
