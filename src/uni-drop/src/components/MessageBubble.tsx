@@ -41,7 +41,7 @@ function MessageBubble(props: { peerID: string; message: Message }) {
     if (splits.length <= 1) {
       return "file";
     }
-    return splits.pop() as string;
+    return splits.pop() ?? "file";
   };
 
   if (content instanceof TextMessageContent) {
@@ -86,9 +86,14 @@ function MessageBubble(props: { peerID: string; message: Message }) {
     };
 
     if (content.isPriview) {
-      // const blob = new Blob([content.file], { type: "image/png" });
       inner = (
-        <div className="msg-bubble-image">
+        <div
+          className="msg-bubble-image cursor-pointer"
+          onClick={() => {
+            // open image in new tab
+            window.open(URL.createObjectURL(content.file));
+          }}
+        >
           {" "}
           <p className="rounded-md ">
             {content.filename} | {filesize(content.file.size)}
@@ -101,12 +106,12 @@ function MessageBubble(props: { peerID: string; message: Message }) {
       );
     } else {
       inner = (
-        <div className="flex flex-row">
-          <div className="flex flex-col justify-center mr-2 ">
+        <div className="flex cursor-pointer flex-row" onClick={downloadFunc}>
+          <div className="mr-2 flex flex-col justify-center ">
             <span>{content.filename}</span>
             <span>{filesize(content.file.size)}</span>
           </div>
-          <div className="h-[3rem] w-[3rem] mb-2">
+          <div className="mb-2 h-[3rem] w-[3rem]">
             <FileIcon
               extension={(() => {
                 return getFileTypeByExtension(content.filename);

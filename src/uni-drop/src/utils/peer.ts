@@ -280,7 +280,7 @@ class UniPeer {
     });
     connection.on("iceStateChanged", (state) => {
       console.info(`connection to peer ${this.id} iceStateChanged: ${state}`);
-      if(state === 'disconnected'){
+      if (state === "disconnected") {
         connection.close();
       }
     });
