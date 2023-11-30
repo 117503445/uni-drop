@@ -24,9 +24,7 @@ If you use vscode, you can use the [Remote - Containers](https://marketplace.vis
 
 ## operations
 
-### manual build docker images
-
-peer-discovery
+### manual build peer-discovery docker images
 
 ```sh
 cd ./src/peer-discovery
