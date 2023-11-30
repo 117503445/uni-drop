@@ -83,14 +83,14 @@ export default function Me(props: { peerID: string }) {
 
         <div className="mb-[1rem]">
           <div className="mb-[0.5rem] mt-[1rem] text-lg">1. Pin</div>
-          <span>pin: {pin}</span>
+          <span>pin: {pin} </span>
           <CopyButton text={pin}></CopyButton>
         </div>
 
         <div className="mb-[1rem]">
           <hr className="m-[auto] w-11/12"></hr>
           <div className="mb-[0.5rem] mt-[1rem] text-lg">2. PeerID</div>
-          <span>peerid: {props.peerID}</span>
+          <span>peerid: {props.peerID} </span>
           <CopyButton text={props.peerID}></CopyButton>
         </div>
 
@@ -102,7 +102,7 @@ export default function Me(props: { peerID: string }) {
 
         <hr className="m-[auto] w-11/12"></hr>
         <div className="mb-[0.5rem] mt-[1rem] text-lg">4. URL Link</div>
-        <span>{url.toString()}</span>
+        <span>{url.toString()} </span>
         <CopyButton text={url.toString()}></CopyButton>
       </div>
     </div>
