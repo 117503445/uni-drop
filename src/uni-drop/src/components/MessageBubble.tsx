@@ -1,10 +1,12 @@
-import { JSX } from "react";
+import { useState } from "react";
 import {
   Message,
   TextMessageContent,
   FileMessageContent,
 } from "../utils/model";
 import download from "js-file-download";
+import ToolButton from "./ToolButton";
+import copyIcon from "@/assets/copy.svg";
 
 function MessageBubble(props: { peerID: string; message: Message }) {
   const msg = props.message;
@@ -22,24 +24,40 @@ function MessageBubble(props: { peerID: string; message: Message }) {
   let inner: JSX.Element;
   let toolbar: JSX.Element | null = null;
 
+  const [clicked, setClicked] = useState(false);
+
   const content = msg.content;
 
   if (content instanceof TextMessageContent) {
     inner = (
       <p className="msg-bubble-text max-w-[30rem] break-all">{content.text}</p>
     );
-    toolbar = (
-      <div className="flex flex-row justify-end">
-        <button
-          className="msg-bubble-toolbar-button"
-          onClick={() => {
-            navigator.clipboard.writeText(content.text);
-          }}
-        >
-          Copy
-        </button>
-      </div>
-    );
+    if (msg.to == props.peerID) {
+      toolbar = (
+        <div className="mt-[0.5rem] flex flex-row">
+          <ToolButton
+            onClick={() => {
+              navigator.clipboard.writeText(content.text).then(
+                () => {
+                  console.log("copy success");
+                  setClicked(true);
+                  setTimeout(() => {
+                    setClicked(false);
+                  }, 3000);
+                },
+                () => {
+                  alert("copy failed");
+                },
+              );
+            }}
+            icon={copyIcon}
+            disabled={clicked}
+          >
+            <div className={`${!clicked ? "hidden" : ""}`}>OK</div>
+          </ToolButton>
+        </div>
+      );
+    }
   } else if (content instanceof FileMessageContent) {
     if (content.isPriview) {
       // const blob = new Blob([content.file], { type: "image/png" });
@@ -79,9 +97,7 @@ function MessageBubble(props: { peerID: string; message: Message }) {
       >
         {inner}
       </div>
-      <div>
-        {toolbar}
-      </div>
+      <div>{toolbar}</div>
     </div>
   );
 }

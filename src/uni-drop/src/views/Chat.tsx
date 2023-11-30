@@ -119,7 +119,6 @@ export default function Chat(props: {
                     }`}
                     key={msg.id}
                   >
-                    {/* <p className="text-xs text-gray-500">{msg.from}</p> */}
                     <div
                       className={`flex flex-col ${
                         msg.from == props.peerID ? "items-end" : "items-start"
