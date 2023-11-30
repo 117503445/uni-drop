@@ -12,6 +12,7 @@ import {
 import MessageBubble from "../components/MessageBubble";
 import { idToName } from "../utils/common";
 import RightTopBar from "../components/RightTopBar";
+import ToolButton from "../components/ToolButton";
 
 export default function Chat(props: {
   peerID: string;
@@ -141,17 +142,16 @@ export default function Chat(props: {
       {/* bottom */}
       <div className="flex h-[8rem] w-full flex-col items-center justify-between border-t-2 px-5">
         {/* toolbox */}
-        <div className="my-[0.5rem] flex h-[2.5rem] w-full items-center">
-          <button
+        <div className="my-[0.5rem] flex h-[2.5rem] w-full items-center space-x-3">
+          <ToolButton
             id="btn-file"
-            className="border-#[dedede] mr-[0.5rem] flex h-[1.5rem] w-[2.5rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
+            icon={fileIcon}
             onClick={() => {
               if (fileInputRef.current != null) {
                 fileInputRef.current.click();
               }
             }}
           >
-            <img className="h-4 w-4" src={fileIcon}></img>
             <input
               type="file"
               ref={fileInputRef}
@@ -169,18 +169,17 @@ export default function Chat(props: {
                 props.sendMessages(content);
               }}
             />
-          </button>
+          </ToolButton>
 
-          <button
+          <ToolButton
             id="btn-image"
-            className="border-#[dedede] flex h-[1.5rem] w-[2.5rem] items-center justify-center rounded-xl border-2 bg-white fill-none shadow-sm"
+            icon={imageIcon}
             onClick={() => {
               if (imageInputRef.current != null) {
                 imageInputRef.current.click();
               }
             }}
           >
-            <img className="h-4 w-4" src={imageIcon}></img>
             <input
               type="file"
               ref={imageInputRef}
@@ -199,7 +198,7 @@ export default function Chat(props: {
                 props.sendMessages(content);
               }}
             />
-          </button>
+          </ToolButton>
         </div>
         {/* input area */}
         <div

@@ -20,11 +20,25 @@ function MessageBubble(props: { peerID: string; message: Message }) {
   }
 
   let inner: JSX.Element;
+  let toolbar: JSX.Element | null = null;
+
   const content = msg.content;
 
   if (content instanceof TextMessageContent) {
     inner = (
       <p className="msg-bubble-text max-w-[30rem] break-all">{content.text}</p>
+    );
+    toolbar = (
+      <div className="flex flex-row justify-end">
+        <button
+          className="msg-bubble-toolbar-button"
+          onClick={() => {
+            navigator.clipboard.writeText(content.text);
+          }}
+        >
+          Copy
+        </button>
+      </div>
     );
   } else if (content instanceof FileMessageContent) {
     if (content.isPriview) {
@@ -59,10 +73,15 @@ function MessageBubble(props: { peerID: string; message: Message }) {
   }
 
   return (
-    <div
-      className={`flex flex-col rounded-lg border-2 border-[#dedede] p-2 ${color} `}
-    >
-      {inner}
+    <div>
+      <div
+        className={`flex flex-col rounded-lg border-2 border-[#dedede] p-2 ${color} `}
+      >
+        {inner}
+      </div>
+      <div>
+        {toolbar}
+      </div>
     </div>
   );
 }
