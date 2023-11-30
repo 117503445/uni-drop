@@ -1,5 +1,7 @@
 # UniDrop
 
+[English](./README.md) | 简体中文
+
 `UniDrop` 指 "Universal AirDrop"，可以在不同设备之间便捷地传输文本、图片、文件。
 
 ![cover](./docs/assets/cover.png)
@@ -48,6 +50,8 @@
 设备B 扫描 设备A 展示的二维码
 
 #### Pin
+
+Pin 码是 4 位数字，可以很方便的说出来或者输入。
 
 设备A 点击 me，将 Pin 码发送给设备 B
 

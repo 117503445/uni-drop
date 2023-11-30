@@ -52,11 +52,11 @@ Run `docker compose up -d` to start the service. Once the service has started, y
 
 Create a new `. /src/uni-drop/.env.production.local` file and configure `VITE_BE_HOST` to be the address of the `peer-discovery` service.
 
-Build the front-end code
+Build the front-end dist
 
 ```sh
 docker build -t unidrop-fe-builder ./src/uni-drop
 docker run --rm -v $(pwd)/src/uni-drop:/workspace/uni-drop unidrop-fe-builder
 ```
 
-Upon completion, the frontend code will be generated in the directory `./src/uni-drop/dist`. You can deploy the frontend code using Nginx, Caddy, Cloudflare Pages, or any other suitable platform.
+Upon completion, the frontend dist will be generated in the directory `./src/uni-drop/dist`. You can deploy the frontend dist using Nginx, Caddy, Cloudflare Pages, or any other suitable platform.
