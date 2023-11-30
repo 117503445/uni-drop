@@ -8,7 +8,8 @@ import download from "js-file-download";
 import ToolButton from "./ToolButton";
 import copyIcon from "@/assets/copy.svg";
 import downloadIcon from "@/assets/download.svg";
-import {filesize} from "filesize";
+import { filesize } from "filesize";
+import { DefaultExtensionType, FileIcon, defaultStyles } from "react-file-icon";
 
 function MessageBubble(props: { peerID: string; message: Message }) {
   const msg = props.message;
@@ -16,7 +17,11 @@ function MessageBubble(props: { peerID: string; message: Message }) {
   if (msg.from == props.peerID) {
     color = "bg-[#e7f8ff]";
   } else if (msg.to == props.peerID) {
-    color = "bg-[#f2f2f2]";
+    if (msg.content instanceof FileMessageContent && !msg.content.isPriview) {
+      color = "bg-white";
+    } else {
+      color = "bg-[#f2f2f2]";
+    }
   } else {
     color = "bg-[#f2f2f2]";
     console.error("peerID != msg.from && peerID != msg.to");
@@ -30,6 +35,14 @@ function MessageBubble(props: { peerID: string; message: Message }) {
   const [isHovered, setIsHovered] = useState(false);
 
   const content = msg.content;
+
+  const getFileTypeByExtension = (filename: string) => {
+    const splits = filename.split(".");
+    if (splits.length <= 1) {
+      return "file";
+    }
+    return splits.pop() as string;
+  };
 
   if (content instanceof TextMessageContent) {
     inner = (
@@ -77,7 +90,9 @@ function MessageBubble(props: { peerID: string; message: Message }) {
       inner = (
         <div className="msg-bubble-image">
           {" "}
-          <p className="rounded-md ">{content.filename} | {filesize(content.file.size)}</p>
+          <p className="rounded-md ">
+            {content.filename} | {filesize(content.file.size)}
+          </p>
           <img
             className="rounded-md "
             src={URL.createObjectURL(content.file)}
@@ -86,9 +101,29 @@ function MessageBubble(props: { peerID: string; message: Message }) {
       );
     } else {
       inner = (
-        <button className="msg-bubble-file" onClick={downloadFunc}>
-          [File] {content.filename} | {filesize(content.file.size)}
-        </button>
+        <div className="flex flex-row">
+          <div className="flex flex-col justify-center mr-2 ">
+            <span>{content.filename}</span>
+            <span>{filesize(content.file.size)}</span>
+          </div>
+          <div className="h-[3rem] w-[3rem] mb-2">
+            <FileIcon
+              extension={(() => {
+                return getFileTypeByExtension(content.filename);
+              })()}
+              {...(() => {
+                const fileType = getFileTypeByExtension(content.filename);
+                if (fileType in defaultStyles) {
+                  const fileIconProps =
+                    defaultStyles[fileType as DefaultExtensionType];
+                  return fileIconProps;
+                } else {
+                  return "";
+                }
+              })()}
+            ></FileIcon>
+          </div>
+        </div>
       );
     }
     toolbar = (
