@@ -1,6 +1,6 @@
 # deploy
 
-If you just want to deploy locally, refer to the [develop document](. /develop.md). This document is for production.
+If you just want to deploy locally, refer to the [develop document](./develop.md). This document is for production.
 
 ## peer-discovery
 

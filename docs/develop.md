@@ -7,7 +7,7 @@ prerequisites
 - Linux (ArchLinux, Ubuntu, WSL2...
 - Latest version of Docker
 
-use `docker compose` to start the development environment
+use `Docker Compose` to start the development environment
 
 ```sh
 docker compose up -d
