@@ -106,7 +106,10 @@ function MessageBubble(props: { peerID: string; message: Message }) {
       );
     } else {
       inner = (
-        <div className="flex cursor-pointer flex-row" onClick={downloadFunc}>
+        <div
+          className="msg-bubble-file flex cursor-pointer flex-row"
+          onClick={downloadFunc}
+        >
           <div className="mr-2 flex flex-col justify-center ">
             <span>{content.filename}</span>
             <span>{filesize(content.file.size)}</span>
