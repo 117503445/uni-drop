@@ -119,13 +119,7 @@ export default function Chat(props: {
                     }`}
                     key={msg.id}
                   >
-                    <div
-                      className={`flex flex-col ${
-                        msg.from == props.peerID ? "items-end" : "items-start"
-                      } mb-[0.5rem] mt-[1rem]`}
-                    >
-                      <MessageBubble message={msg} peerID={props.peerID} />
-                    </div>
+                    <MessageBubble message={msg} peerID={props.peerID} />
                   </div>
                 );
               })}

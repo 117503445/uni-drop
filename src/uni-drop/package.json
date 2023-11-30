@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.7",
+    "filesize": "^10.1.0",
     "js-file-download": "^0.4.12",
     "peerjs": "1.4.7",
     "public-ip": "^6.0.1",
