@@ -7,7 +7,7 @@ prerequisites
 - Linux (ArchLinux, Ubuntu, WSL2...
 - Latest version of Docker
 
-use `docker compose` to start the development environment
+use `Docker Compose` to start the development environment
 
 ```sh
 docker compose up -d
@@ -24,9 +24,7 @@ If you use vscode, you can use the [Remote - Containers](https://marketplace.vis
 
 ## operations
 
-### manual build docker images
-
-peer-discovery
+### manual build peer-discovery docker images
 
 ```sh
 cd ./src/peer-discovery
