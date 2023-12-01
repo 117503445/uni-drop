@@ -5,24 +5,17 @@ RUN npm install -g pnpm
 ENV DEBIAN_FRONTEND=noninteractive
 ENV DEBCONF_NONINTERACTIVE_SEEN=true
 
-RUN apt-get update && apt-get install -y \
-    xvfb \
-    fluxbox \
-    x11vnc \
-    supervisor \
-    && apt-get autoclean && \
-    apt-get autoremove && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y xvfb fluxbox ca-certificates wget
+
+# install xpra
+RUN wget -O "/usr/share/keyrings/xpra.asc" https://xpra.org/xpra.asc
+RUN cd /etc/apt/sources.list.d ; wget https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/jammy/xpra.sources
+RUN apt-get update ; apt-get install -y xpra
 
 WORKDIR /workspace/
+COPY entrypoint.sh entrypoint.sh
 
-RUN git clone https://github.com/novnc/noVNC.git
-
-
-EXPOSE 6080
-
-ENV DISPLAY :0
-ENV GEOMETRY 1024x768x24
-
+EXPOSE 5900
+ENV DISPLAY=:99
 WORKDIR /workspace/uni-drop
-ENTRYPOINT [ "/usr/bin/supervisord" ]
+ENTRYPOINT ["/workspace/entrypoint.sh"]

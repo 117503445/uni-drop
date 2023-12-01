@@ -27,8 +27,6 @@ services:
     volumes:
         - './src/uni-drop:/workspace/uni-drop'
         - './dev-data/uni-drop-test/vsc_extensions:/root/.vscode-server/extensions'
-
-        - './src/uni-drop/tests/e2e/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf'
     stdin_open: true
     tty: true
     # visit http://localhost:6080/vnc.html?host=localhost&port=6080, wait 1 minutes(TODO: why?)
