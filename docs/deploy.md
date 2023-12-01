@@ -50,7 +50,7 @@ Run `docker compose up -d` to start the service. Once the service has started, y
 
 ## frontend
 
-Create a new `. /src/uni-drop/.env.production.local` file and configure `VITE_BE_HOST` to be the address of the `peer-discovery` service.
+Create a new `./src/uni-drop/.env.production.local` file and configure `VITE_BE_HOST` to be the address of the `peer-discovery` service.
 
 Build the front-end dist
 

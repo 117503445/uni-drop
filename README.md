@@ -22,7 +22,7 @@ Visit [unidrop.top](https://www.unidrop.top) to use UniDrop.
 
 ### Prerequisites
 
-- Use a mainstream browser (Chrome, Firefox, etc.)
+- Use a latest mainstream browser (Chrome, Firefox, etc.)
 - The device can connect to the public network
 
 ### Node Initialization
